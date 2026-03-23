@@ -2,13 +2,23 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import * as cheerio from 'cheerio'
+import { CAT_TARGET_DATE, CRUCIBLE_START_DATE } from '../src/utils/constants.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const rootDir = path.resolve(__dirname, '..')
 
-const TOTAL_MISSIONS = 300
-const CRUCIBLE_START_DATE = '2026-03-23'
+function getInclusiveDayCount(startDate, endDate) {
+  const [sy, sm, sd] = startDate.split('-').map(Number)
+  const [ey, em, ed] = endDate.split('-').map(Number)
+
+  const start = new Date(sy, sm - 1, sd, 12)
+  const end = new Date(ey, em - 1, ed, 12)
+
+  return Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1
+}
+
+const TOTAL_MISSIONS = getInclusiveDayCount(CRUCIBLE_START_DATE, CAT_TARGET_DATE)
 
 const INPUTS = {
   articles: path.join(rootDir, 'content', 'raw', 'articles.txt'),
@@ -28,6 +38,8 @@ const SOURCE_LABELS = {
   '3quarksdaily.com': '3 Quarks Daily',
   'laphamsquarterly.org': "Lapham's Quarterly",
   'asteriskmag.com': 'Asterisk',
+  'scientificamerican.com': 'Scientific American',
+  'hedgehogreview.com': 'The Hedgehog Review',
   'gmatclub.com': 'GMAT Club',
 }
 
@@ -48,6 +60,7 @@ function fallbackTitleFromUrl(url) {
   try {
     const parsed = new URL(url)
     const last = parsed.pathname.split('/').filter(Boolean).pop() || parsed.hostname
+
     return decodeURIComponent(last)
       .replace(/[-_]+/g, ' ')
       .replace(/\.[a-z0-9]+$/i, '')
@@ -70,11 +83,15 @@ function cleanTitle(title) {
     .replace(/\s+\|\s+Cabinet Magazine.*$/i, '')
     .replace(/\s+\|\s+3 Quarks Daily.*$/i, '')
     .replace(/\s+\|\s+Lapham.*$/i, '')
+    .replace(/\s+\|\s+Scientific American.*$/i, '')
+    .replace(/\s+\|\s+The Hedgehog Review.*$/i, '')
     .replace(/\s+-\s+GMAT Club.*$/i, '')
     .replace(/\s+-\s+Aeon.*$/i, '')
     .replace(/\s+-\s+Psyche.*$/i, '')
     .replace(/\s+-\s+Noema.*$/i, '')
     .replace(/\s+-\s+Places Journal.*$/i, '')
+    .replace(/\s+-\s+Scientific American.*$/i, '')
+    .replace(/\s+-\s+The Hedgehog Review.*$/i, '')
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -117,19 +134,27 @@ async function fetchMeta(url, kind) {
     const ogSite = $('meta[property="og:site_name"]').attr('content')?.trim()
 
     const rawTitle = ogTitle || twitterTitle || titleTag || fallbackTitleFromUrl(url)
+    const blockedTitle =
+      /just a moment|attention required|cloudflare/i.test(rawTitle || '')
+
     const source =
       kind === 'cr' || kind === 'rc'
         ? 'GMAT Club'
         : ogSite || baseSource
 
     return {
-      title: cleanTitle(rawTitle) || fallbackTitleFromUrl(url),
+      title:
+        kind === 'cr'
+          ? ''
+          : blockedTitle
+            ? fallbackTitleFromUrl(url)
+            : cleanTitle(rawTitle) || fallbackTitleFromUrl(url),
       source,
       url,
     }
   } catch {
     return {
-      title: fallbackTitleFromUrl(url),
+      title: kind === 'cr' ? '' : fallbackTitleFromUrl(url),
       source: kind === 'cr' || kind === 'rc' ? 'GMAT Club' : baseSource,
       url,
     }
@@ -152,11 +177,12 @@ function shuffleArray(items) {
 }
 
 function hasAdjacentDuplicateSource(items) {
-  for (let i = 1; i < items.length; i += 1) {
-    if (items[i - 1].source === items[i].source) {
+  for (let index = 1; index < items.length; index += 1) {
+    if (items[index - 1].source === items[index].source) {
       return true
     }
   }
+
   return false
 }
 
@@ -201,15 +227,18 @@ function addDays(dateString, amount) {
 }
 
 function toIsoDate(date) {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 function getWrappedItems(items, startIndex, count) {
   if (!items.length) return []
-  return Array.from({ length: count }, (_, index) => items[(startIndex + index) % items.length])
+
+  return Array.from({ length: count }, (_, index) => {
+    return items[(startIndex + index) % items.length]
+  })
 }
 
 function getSafeArticlePair(items, startIndex) {
@@ -263,6 +292,7 @@ async function build() {
   console.log(`Found ${articleUrls.length} article URLs`)
   console.log(`Found ${crUrls.length} CR URLs`)
   console.log(`Found ${rcUrls.length} RC URLs`)
+  console.log(`Generating ${TOTAL_MISSIONS} daily entries from ${CRUCIBLE_START_DATE} to ${CAT_TARGET_DATE}`)
 
   const articles = dedupeItems(
     await Promise.all(articleUrls.map((url) => fetchMeta(url, 'article')))

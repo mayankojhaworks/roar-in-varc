@@ -1,22 +1,44 @@
-export const tracks = [
-    { title: 'Lo-Fi Night Desk', artist: 'ROAR Beats', file: '/audio/focus-01.mp3', type: 'lofi' },
-    { title: 'Old School Loop 01', artist: 'ROAR Beats', file: '/audio/focus-02.mp3', type: 'old-school-hiphop' },
-    { title: 'Serene Drift', artist: 'ROAR Beats', file: '/audio/focus-03.mp3', type: 'serene' },
-    { title: 'Brown Noise Deep Focus', artist: 'ROAR Beats', file: '/audio/focus-04.mp3', type: 'brown-noise' },
-    { title: 'White Noise Study Shield', artist: 'ROAR Beats', file: '/audio/focus-05.mp3', type: 'white-noise' },
-    { title: 'Rain Window Reading', artist: 'ROAR Beats', file: '/audio/focus-06.mp3', type: 'rain-ambient' },
-    { title: 'Lo-Fi Cold Lamp', artist: 'ROAR Beats', file: '/audio/focus-07.mp3', type: 'lofi' },
-    { title: 'Old School Loop 02', artist: 'ROAR Beats', file: '/audio/focus-08.mp3', type: 'old-school-hiphop' },
-    { title: 'Serene Blue Hour', artist: 'ROAR Beats', file: '/audio/focus-09.mp3', type: 'serene' },
-    { title: 'Brown Noise Long Session', artist: 'ROAR Beats', file: '/audio/focus-10.mp3', type: 'brown-noise' },
-    { title: 'White Noise Quiet Room', artist: 'ROAR Beats', file: '/audio/focus-11.mp3', type: 'white-noise' },
-    { title: 'Library Air', artist: 'ROAR Beats', file: '/audio/focus-12.mp3', type: 'ambient' },
-    { title: 'Lo-Fi Mock Run', artist: 'ROAR Beats', file: '/audio/focus-13.mp3', type: 'lofi' },
-    { title: 'Old School Loop 03', artist: 'ROAR Beats', file: '/audio/focus-14.mp3', type: 'old-school-hiphop' },
-    { title: 'Serene After Midnight', artist: 'ROAR Beats', file: '/audio/focus-15.mp3', type: 'serene' },
-    { title: 'Brown Noise Soft Pressure', artist: 'ROAR Beats', file: '/audio/focus-16.mp3', type: 'brown-noise' },
-    { title: 'White Noise Exam Bubble', artist: 'ROAR Beats', file: '/audio/focus-17.mp3', type: 'white-noise' },
-    { title: 'Cafe Murmur Low', artist: 'ROAR Beats', file: '/audio/focus-18.mp3', type: 'ambient' },
-    { title: 'Lo-Fi Final Revision', artist: 'ROAR Beats', file: '/audio/focus-19.mp3', type: 'lofi' },
-    { title: 'Old School Loop 04', artist: 'ROAR Beats', file: '/audio/focus-20.mp3', type: 'old-school-hiphop' },
+const audioFiles = [
+    'Beats.mp3',
+    'Chill.mp3',
+    'Classic Indian.mp3',
+    'Curious.mp3',
+    'Deep.mp3',
+    'Emo Indian.mp3',
+    'HipHop.mp3',
+    'Indian Flute.mp3',
+    'Indian.mp3',
+    'LOFI1.mp3',
+    'LOFI2.mp3',
+    'Serene.mp3',
+    'Trap.mp3',
+    'Uplifting 2.mp3',
+    'Uplifting.mp3',
+    'Warm.mp3',
+    'Waves 2.mp3',
+    'Waves 3.mp3',
+    'Waves 4.mp3',
+    'Waves.mp3',
   ]
+  
+  function fileNameToTitle(fileName) {
+    return fileName.replace(/\.[^/.]+$/, '').trim()
+  }
+  
+  function inferType(fileName) {
+    const lower = fileName.toLowerCase()
+  
+    if (lower.includes('lofi') || lower.includes('lo-fi')) return 'lofi'
+    if (lower.includes('hiphop') || lower.includes('hip-hop') || lower.includes('trap')) return 'beats'
+    if (lower.includes('serene') || lower.includes('warm') || lower.includes('chill') || lower.includes('deep')) return 'serene'
+    if (lower.includes('waves')) return 'ambient'
+    if (lower.includes('indian') || lower.includes('flute')) return 'indian'
+    return 'focus'
+  }
+  
+  export const tracks = audioFiles.map((fileName) => ({
+    title: fileNameToTitle(fileName),
+    artist: 'ROAR Beats',
+    file: `/audio/${fileName}`,
+    type: inferType(fileName),
+  }))
