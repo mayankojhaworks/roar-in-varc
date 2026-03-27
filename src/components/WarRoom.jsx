@@ -1,368 +1,259 @@
-import { useMemo, useState } from 'react'
-import LineChartCard from './LineChartCard'
-import StatCard from './StatCard'
-import { formatDisplayDate } from '../utils/date'
-
-function createEmptySection() {
-  return {
-    attempted: '',
-    correct: '',
-    incorrect: '',
-    score: '',
-    percentile: '',
-  }
-}
-
-function createEmptyForm() {
-  return {
-    examType: 'Mock',
-    examName: '',
-    examNumberOrSlot: '',
-    attemptDate: '',
-    singleSitting: 'Yes',
-    overallScore: '',
-    overallPercentile: '',
-    sections: {
-      varc: createEmptySection(),
-      lrdi: createEmptySection(),
-      qa: createEmptySection(),
-    },
-  }
-}
-
-function toNumber(value) {
-  return value === '' || value === null || value === undefined ? 0 : Number(value)
-}
-
-function average(values) {
-  if (!values.length) return 0
-  const total = values.reduce((sum, current) => sum + current, 0)
-  return (total / values.length).toFixed(1)
-}
-
-function buildRecordTitle(record) {
-  return [record.examName, record.examNumberOrSlot].filter(Boolean).join(' • ')
-}
-
-export default function WarRoom({ records, onAddRecord, onDeleteRecord }) {
-  const [form, setForm] = useState(createEmptyForm())
-
-  const sortedRecords = useMemo(() => {
-    return [...records].sort((first, second) => {
-      return new Date(first.attemptDate) - new Date(second.attemptDate)
-    })
-  }, [records])
-
-  const mockCount = records.filter((record) => record.examType === 'Mock').length
-  const pyqCount = records.filter((record) => record.examType === 'PYQ').length
-
-  const bestPercentile = records.length
-    ? Math.max(...records.map((record) => toNumber(record.overallPercentile)))
-    : 0
-
-  const averageScore = records.length
-    ? average(records.map((record) => toNumber(record.overallScore)))
-    : 0
-
-  const latestRecord = sortedRecords[sortedRecords.length - 1]
-
-  const scoreSeries = sortedRecords.map((record, index) => ({
-    label: record.attemptDate || `Attempt ${index + 1}`,
-    value: toNumber(record.overallScore),
-  }))
-
-  const percentileSeries = sortedRecords.map((record, index) => ({
-    label: record.attemptDate || `Attempt ${index + 1}`,
-    value: toNumber(record.overallPercentile),
-  }))
-
-  const sectionSummary = ['varc', 'lrdi', 'qa'].map((sectionKey) => {
-    const avgScore = average(sortedRecords.map((record) => toNumber(record.sections?.[sectionKey]?.score)))
-    const avgPercentile = average(
-      sortedRecords.map((record) => toNumber(record.sections?.[sectionKey]?.percentile))
-    )
-
-    return {
-      key: sectionKey,
-      label: sectionKey.toUpperCase(),
-      avgScore,
-      avgPercentile,
-    }
+import React, { useState, useMemo } from 'react'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import SupportFooter from './SupportFooter'
+export default function WarRoom({ records = [], onAddRecord, onDeleteRecord }) {
+  const [formData, setFormData] = useState({
+    type: 'Mock', singleSitting: 'Yes', name: '', slot: '', date: '',
+    varcScore: '', varcPercentile: '',
+    lrdiScore: '', lrdiPercentile: '',
+    qaScore: '', qaPercentile: '',
+    overallScore: '', overallPercentile: ''
   })
 
-  const handleRootChange = (field, value) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value })
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!formData.name || !formData.date || !formData.overallScore) return alert("Please fill at least Name, Date, and Overall Score")
+    
+    onAddRecord({
+      id: Date.now().toString(),
+      ...formData,
+      varcScore: Number(formData.varcScore) || null,
+      varcPercentile: Number(formData.varcPercentile) || null,
+      lrdiScore: Number(formData.lrdiScore) || null,
+      lrdiPercentile: Number(formData.lrdiPercentile) || null,
+      qaScore: Number(formData.qaScore) || null,
+      qaPercentile: Number(formData.qaPercentile) || null,
+      overallScore: Number(formData.overallScore),
+      overallPercentile: Number(formData.overallPercentile)
+    })
+    
+    setFormData({ 
+        type: 'Mock', singleSitting: 'Yes', name: '', slot: '', date: '', 
+        varcScore: '', varcPercentile: '', lrdiScore: '', lrdiPercentile: '', 
+        qaScore: '', qaPercentile: '', overallScore: '', overallPercentile: ''
+    })
   }
 
-  const handleSectionChange = (section, field, value) => {
-    setForm((prev) => ({
-      ...prev,
-      sections: {
-        ...prev.sections,
-        [section]: {
-          ...prev.sections[section],
-          [field]: value,
-        },
-      },
-    }))
-  }
+  // --- STATS CALCULATIONS ---
+  const validRecords = records.filter(r => r && r.type); 
+  const mocksCompleted = validRecords.filter(r => r.type === 'Mock').length
+  const pyqsCompleted = validRecords.filter(r => r.type === 'PYQ').length
+  
+  const bestPercentile = validRecords.length > 0 
+    ? Math.max(...validRecords.map(r => Number(r.overallPercentile) || 0)).toFixed(2) 
+    : 0
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
+  const avgScore = validRecords.length > 0 
+    ? (validRecords.reduce((acc, curr) => acc + (Number(curr.overallScore) || 0), 0) / validRecords.length).toFixed(1)
+    : 0
 
-    const record = {
-      ...form,
-      id:
-        globalThis.crypto?.randomUUID?.() ||
-        `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+  // Sort records by date for the charts
+  const chartData = useMemo(() => {
+    return [...validRecords]
+      .filter(r => r.date) 
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .map(record => {
+        const safeName = record.name || 'Unnamed'
+        return {
+          ...record,
+          displayDate: new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+          shortName: safeName.length > 10 ? safeName.substring(0,10) + '...' : safeName
+        }
+      })
+  }, [validRecords])
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={{ background: 'var(--base-cream)', border: '2px solid var(--main-charcoal)', padding: '10px', borderRadius: '8px', fontFamily: 'var(--font-sketch)', boxShadow: '4px 4px 0px rgba(0,0,0,0.1)', zIndex: 1000 }}>
+          <p style={{ margin: '0 0 5px', fontWeight: 'bold' }}>{label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} style={{ margin: 0, color: entry.color }}>
+              {entry.name}: {entry.value}
+            </p>
+          ))}
+        </div>
+      );
     }
-
-    onAddRecord(record)
-    setForm(createEmptyForm())
-  }
+    return null;
+  };
 
   return (
-    <section className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Mocks Completed" value={`${mockCount}/60`} accent="blue" />
-        <StatCard label="PYQs Completed" value={`${pyqCount}/22`} />
-        <StatCard label="Best Percentile" value={bestPercentile} accent="green" />
-        <StatCard
-          label="Average Overall Score"
-          value={averageScore}
-          subtext={latestRecord ? `Latest: ${buildRecordTitle(latestRecord)}` : 'No entries yet'}
-        />
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      <style>{`
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex-shrink: 0; }
+        .stat-card { background: white; border: 2px solid var(--main-charcoal); border-radius: 12px; padding: 15px; text-align: center; box-shadow: 4px 4px 0px var(--shadow-dark); }
+        .stat-card p { margin: 0; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; opacity: 0.6; letter-spacing: 1px; }
+        .stat-card h3 { margin: 5px 0 0; font-size: 1.8rem; font-family: var(--font-sketch); color: var(--highlight-blue); }
+        
+        .war-room-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; flex: 1; min-height: 0; }
+        
+        /* The container stays fixed, the inner wrapper scrolls */
+        .fixed-island { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
+        .scroll-area { flex: 1; overflow-y: auto; padding-right: 15px; margin-right: -5px; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; color: var(--hover-peach); margin-bottom: 5px; letter-spacing: 0.5px; }
+        .sketch-input { width: 100%; background: transparent; border: none; border-bottom: 2px dashed rgba(0,0,0,0.2); padding: 8px 5px; font-family: var(--font-sketch); font-size: 1rem; color: var(--main-charcoal); outline: none; transition: border-color 0.3s; }
+        .sketch-input:focus { border-bottom-color: var(--highlight-blue); }
+        
+        .chart-wrapper { height: 250px; width: 100%; margin-bottom: 25px; flex-shrink: 0; }
+        .chart-title { font-family: var(--font-sketch); font-size: 1.2rem; margin: 0 0 15px 0; border-bottom: 2px dashed rgba(0,0,0,0.1); padding-bottom: 5px; }
+
+        .submit-btn { width: 100%; background: var(--highlight-blue); color: white; border: 2px solid var(--main-charcoal); padding: 12px; border-radius: 10px; font-family: var(--font-sketch); font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); transition: all 0.2s; margin-top: 15px; margin-bottom: 15px; flex-shrink: 0; }
+        .submit-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px rgba(0,0,0,0.1); }
+        
+        .section-box { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px; margin-bottom: 15px; }
+      `}</style>
+
+      {/* TOP STATS */}
+      <div className="stats-row">
+        <div className="stat-card"><p>Mocks Completed</p><h3>{mocksCompleted}/60</h3></div>
+        <div className="stat-card"><p>PYQs Completed</p><h3>{pyqsCompleted}/22</h3></div>
+        <div className="stat-card"><p>Best Percentile</p><h3 style={{color: 'var(--highlight-green)'}}>{bestPercentile}%</h3></div>
+        <div className="stat-card"><p>Average Score</p><h3 style={{color: 'var(--highlight-lavender)'}}>{avgScore}</h3></div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-[28px] border border-zinc-800 bg-zinc-900/70 p-5"
-        >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            Data Entry
-          </p>
-          <h2 className="mt-2 text-2xl font-black text-zinc-100">War Room Intake</h2>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                Exam Type
-              </label>
-              <select
-                value={form.examType}
-                onChange={(event) => handleRootChange('examType', event.target.value)}
-                className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-sky-400"
-              >
-                <option value="Mock">Mock</option>
-                <option value="PYQ">PYQ</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                Single Sitting
-              </label>
-              <select
-                value={form.singleSitting}
-                onChange={(event) => handleRootChange('singleSitting', event.target.value)}
-                className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-sky-400"
-              >
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                Mock Name / PYQ Year
-              </label>
-              <input
-                value={form.examName}
-                onChange={(event) => handleRootChange('examName', event.target.value)}
-                placeholder="e.g. TIME AIMCAT / 2024"
-                className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-sky-400"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                Mock Number / Slot
-              </label>
-              <input
-                value={form.examNumberOrSlot}
-                onChange={(event) => handleRootChange('examNumberOrSlot', event.target.value)}
-                placeholder="e.g. 12 / Slot 2"
-                className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-sky-400"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                Date of Attempt
-              </label>
-              <input
-                type="date"
-                value={form.attemptDate}
-                onChange={(event) => handleRootChange('attemptDate', event.target.value)}
-                className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-sky-400"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                Overall Score
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                value={form.overallScore}
-                onChange={(event) => handleRootChange('overallScore', event.target.value)}
-                className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-sky-400"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                Overall Percentile
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                value={form.overallPercentile}
-                onChange={(event) => handleRootChange('overallPercentile', event.target.value)}
-                className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-sky-400"
-              />
-            </div>
-          </div>
-
-          <div className="mt-6 space-y-4">
-            {[
-              { key: 'varc', label: 'VARC' },
-              { key: 'lrdi', label: 'LRDI' },
-              { key: 'qa', label: 'QA' },
-            ].map((section) => (
-              <div
-                key={section.key}
-                className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4"
-              >
-                <p className="mb-4 text-sm font-bold text-zinc-100">{section.label}</p>
-
-                <div className="grid gap-3 md:grid-cols-5">
-                  {['attempted', 'correct', 'incorrect', 'score', 'percentile'].map((field) => (
-                    <div key={field}>
-                      <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                        {field}
-                      </label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={form.sections[section.key][field]}
-                        onChange={(event) =>
-                          handleSectionChange(section.key, field, event.target.value)
-                        }
-                        className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-sky-400"
-                      />
-                    </div>
-                  ))}
+      <div className="war-room-grid">
+        
+        {/* LEFT PANEL: DATA ENTRY FORM */}
+        <div className="island sketch-border fixed-island">
+          <h2 style={{ fontFamily: 'var(--font-sketch)', fontSize: '1.4rem', margin: '0 0 15px 0', color: 'var(--main-charcoal)', flexShrink: 0 }}>Enter test details</h2>
+          
+          <div className="scroll-area">
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="form-group">
+                  <label>Exam Type</label>
+                  <select name="type" value={formData.type} onChange={handleChange} className="sketch-input">
+                    <option>Mock</option><option>PYQ</option><option>Sectional</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Single Sitting</label>
+                  <select name="singleSitting" value={formData.singleSitting} onChange={handleChange} className="sketch-input">
+                    <option>Yes</option><option>No</option>
+                  </select>
                 </div>
               </div>
-            ))}
+
+              <div className="form-group">
+                <label>Mock Name / Year</label>
+                <input required name="name" value={formData.name} onChange={handleChange} placeholder="e.g. SIMCAT 1" className="sketch-input" />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="form-group">
+                  <label>Date of Attempt</label>
+                  <input required type="date" name="date" value={formData.date} onChange={handleChange} className="sketch-input" />
+                </div>
+                <div className="form-group">
+                  <label>Slot / Number</label>
+                  <input name="slot" value={formData.slot} onChange={handleChange} placeholder="e.g. Slot 2" className="sketch-input" />
+                </div>
+              </div>
+
+              <div className="section-box">
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>VARC Score</label>
+                  <input type="number" name="varcScore" value={formData.varcScore} onChange={handleChange} className="sketch-input" />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>VARC %ile</label>
+                  <input type="number" step="0.01" name="varcPercentile" value={formData.varcPercentile} onChange={handleChange} className="sketch-input" />
+                </div>
+              </div>
+
+              <div className="section-box">
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>LRDI Score</label>
+                  <input type="number" name="lrdiScore" value={formData.lrdiScore} onChange={handleChange} className="sketch-input" />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>LRDI %ile</label>
+                  <input type="number" step="0.01" name="lrdiPercentile" value={formData.lrdiPercentile} onChange={handleChange} className="sketch-input" />
+                </div>
+              </div>
+
+              <div className="section-box">
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>QA Score</label>
+                  <input type="number" name="qaScore" value={formData.qaScore} onChange={handleChange} className="sketch-input" />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>QA %ile</label>
+                  <input type="number" step="0.01" name="qaPercentile" value={formData.qaPercentile} onChange={handleChange} className="sketch-input" />
+                </div>
+              </div>
+
+              <div className="section-box" style={{ background: 'rgba(0,0,0,0.05)', border: '1px dashed rgba(0,0,0,0.1)' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ color: 'var(--main-charcoal)' }}>Overall Score</label>
+                  <input required type="number" name="overallScore" value={formData.overallScore} onChange={handleChange} className="sketch-input" />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ color: 'var(--main-charcoal)' }}>Overall %ile</label>
+                  <input type="number" step="0.01" name="overallPercentile" value={formData.overallPercentile} onChange={handleChange} className="sketch-input" />
+                </div>
+              </div>
+
+              <button type="submit" className="submit-btn">LOG SCORE IN CLOUD</button>
+            </form>
+            <SupportFooter />
           </div>
-
-          <button
-            type="submit"
-            className="mt-6 w-full rounded-2xl border border-sky-400 bg-sky-400 px-4 py-3 text-sm font-black text-zinc-950 transition hover:opacity-90"
-          >
-            Save War Room Entry
-          </button>
-        </form>
-
-        <div className="space-y-6">
-          <LineChartCard title="Overall Score Trajectory" data={scoreSeries} />
-          <LineChartCard title="Overall Percentile Trajectory" data={percentileSeries} suffix="%" />
         </div>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {sectionSummary.map((section) => (
-          <div
-            key={section.key}
-            className="rounded-[24px] border border-zinc-800 bg-zinc-900/70 p-4"
-          >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-              {section.label}
-            </p>
-            <div className="mt-4 flex items-center justify-between">
-              <span className="text-sm text-zinc-400">Avg Score</span>
-              <span className="text-lg font-bold text-zinc-100">{section.avgScore}</span>
-            </div>
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-sm text-zinc-400">Avg Percentile</span>
-              <span className="text-lg font-bold text-emerald-400">{section.avgPercentile}%</span>
-            </div>
+        {/* RIGHT PANEL: CHARTS */}
+        <div className="island sketch-border fixed-island">
+          
+          <div className="scroll-area" style={{ display: 'flex', flexDirection: 'column' }}>
+            {chartData.length === 0 ? (
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.5, fontFamily: 'var(--font-sketch)', fontSize: '1.2rem', minHeight: '300px' }}>
+                Add records to generate Trajectory Charts
+              </div>
+            ) : (
+              <>
+                <div className="chart-wrapper">
+                  <h3 className="chart-title">Score Trajectory</h3>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" vertical={false} />
+                      <XAxis dataKey="shortName" tick={{fontFamily: 'var(--font-sketch)', fontSize: 12}} stroke="var(--main-charcoal)" />
+                      <YAxis tick={{fontFamily: 'var(--font-sketch)', fontSize: 12}} stroke="var(--main-charcoal)" />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend wrapperStyle={{ fontFamily: 'var(--font-sans)', fontSize: '0.8rem', fontWeight: 'bold' }} />
+                      <Line type="monotone" dataKey="overallScore" name="Overall" stroke="var(--main-charcoal)" strokeWidth={3} activeDot={{ r: 6 }} />
+                      <Line type="monotone" dataKey="varcScore" name="VARC" stroke="var(--highlight-lavender)" strokeWidth={2} />
+                      <Line type="monotone" dataKey="lrdiScore" name="LRDI" stroke="var(--hover-peach)" strokeWidth={2} />
+                      <Line type="monotone" dataKey="qaScore" name="QA" stroke="var(--highlight-blue)" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="chart-wrapper">
+                  <h3 className="chart-title">Percentile Trajectory</h3>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" vertical={false} />
+                      <XAxis dataKey="shortName" tick={{fontFamily: 'var(--font-sketch)', fontSize: 12}} stroke="var(--main-charcoal)" />
+                      <YAxis domain={[0, 100]} tick={{fontFamily: 'var(--font-sketch)', fontSize: 12}} stroke="var(--main-charcoal)" />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend wrapperStyle={{ fontFamily: 'var(--font-sans)', fontSize: '0.8rem', fontWeight: 'bold' }} />
+                      <Line type="monotone" dataKey="overallPercentile" name="Overall" stroke="var(--highlight-green)" strokeWidth={3} />
+                      <Line type="monotone" dataKey="varcPercentile" name="VARC" stroke="var(--highlight-lavender)" strokeWidth={2} />
+                      <Line type="monotone" dataKey="lrdiPercentile" name="LRDI" stroke="var(--hover-peach)" strokeWidth={2} />
+                      <Line type="monotone" dataKey="qaPercentile" name="QA" stroke="var(--highlight-blue)" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </>
+            )}
           </div>
-        ))}
-      </div>
-
-      <div className="rounded-[28px] border border-zinc-800 bg-zinc-900/70 p-5">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            Attempt Log
-          </p>
-          <h3 className="mt-2 text-xl font-black text-zinc-100">Saved Records</h3>
-        </div>
-
-        <div className="mt-5 overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-y-3">
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-[0.18em] text-zinc-500">
-                <th className="px-3">Type</th>
-                <th className="px-3">Name</th>
-                <th className="px-3">Date</th>
-                <th className="px-3">Score</th>
-                <th className="px-3">%ile</th>
-                <th className="px-3">Sitting</th>
-                <th className="px-3">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedRecords.map((record) => (
-                <tr key={record.id} className="rounded-2xl bg-zinc-950/60 text-sm text-zinc-200">
-                  <td className="rounded-l-2xl px-3 py-3">{record.examType}</td>
-                  <td className="px-3 py-3">{buildRecordTitle(record)}</td>
-                  <td className="px-3 py-3">
-                    {record.attemptDate ? formatDisplayDate(record.attemptDate) : '-'}
-                  </td>
-                  <td className="px-3 py-3">{record.overallScore}</td>
-                  <td className="px-3 py-3">{record.overallPercentile}</td>
-                  <td className="px-3 py-3">{record.singleSitting}</td>
-                  <td className="rounded-r-2xl px-3 py-3">
-                    <button
-                      type="button"
-                      onClick={() => onDeleteRecord(record.id)}
-                      className="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-300 transition hover:border-red-800 hover:bg-red-950/20 hover:text-zinc-100"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-
-              {!sortedRecords.length ? (
-                <tr>
-                  <td colSpan="7" className="px-3 py-8 text-center text-sm text-zinc-500">
-                    No entries saved yet
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

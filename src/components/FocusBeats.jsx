@@ -3,14 +3,34 @@ import { tracks } from '../data/tracks'
 
 function getRandomIndex(length, exclude = null) {
   if (length <= 1) return 0
-
   let index = Math.floor(Math.random() * length)
-
   while (index === exclude) {
     index = Math.floor(Math.random() * length)
   }
-
   return index
+}
+
+const Icons = {
+  Play: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 3.5c-.5-.3-1.1-.3-1.6 0-.5.3-.9.9-.9 1.5v14c0 .6.4 1.2.9 1.5.5.3 1.1.3 1.6 0l13-7c.5-.3.8-.8.8-1.5s-.3-1.2-.8-1.5l-13-7z" />
+    </svg>
+  ),
+  Pause: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+    </svg>
+  ),
+  Next: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 4l10 8-10 8M19 4v16" />
+    </svg>
+  ),
+  Prev: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 20L9 12l10-8M5 20V4" />
+    </svg>
+  )
 }
 
 export default function FocusBeats() {
@@ -33,42 +53,24 @@ export default function FocusBeats() {
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
-
     audio.volume = 0.45
     audio.loop = loopTrack
   }, [loopTrack, currentIndex])
 
-  useEffect(() => {
-    return () => {
-      if (fadeIntervalRef.current) {
-        window.clearInterval(fadeIntervalRef.current)
-      }
-    }
-  }, [])
-
   const fadeTo = (targetVolume, duration = 500) => {
     return new Promise((resolve) => {
       const audio = audioRef.current
-      if (!audio) {
-        resolve()
-        return
-      }
-
-      if (fadeIntervalRef.current) {
-        window.clearInterval(fadeIntervalRef.current)
-      }
-
+      if (!audio) { resolve(); return; }
+      if (fadeIntervalRef.current) window.clearInterval(fadeIntervalRef.current)
       const startVolume = audio.volume
       const difference = targetVolume - startVolume
       const steps = 10
       const stepDuration = duration / steps
       let step = 0
-
       fadeIntervalRef.current = window.setInterval(() => {
         step += 1
         const nextVolume = startVolume + (difference * step) / steps
         audio.volume = Math.max(0, Math.min(0.45, nextVolume))
-
         if (step >= steps) {
           window.clearInterval(fadeIntervalRef.current)
           fadeIntervalRef.current = null
@@ -82,21 +84,17 @@ export default function FocusBeats() {
   const startPlayback = async () => {
     const audio = audioRef.current
     if (!audio) return
-
     try {
       audio.volume = 0
       await audio.play()
       await fadeTo(0.45, 500)
       setIsPlaying(true)
-    } catch {
-      setIsPlaying(false)
-    }
+    } catch { setIsPlaying(false) }
   }
 
   const pausePlayback = async () => {
     const audio = audioRef.current
     if (!audio) return
-
     await fadeTo(0, 350)
     audio.pause()
     audio.volume = 0.45
@@ -106,54 +104,34 @@ export default function FocusBeats() {
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
-
-    audio.loop = loopTrack
-
-    if (isPlaying) {
-      startPlayback()
-    } else {
-      audio.pause()
-      audio.volume = 0.45
-    }
+    if (isPlaying) startPlayback()
+    else { audio.pause(); audio.volume = 0.45; }
   }, [currentIndex])
 
   const changeTrack = async (nextIndex) => {
     const audio = audioRef.current
     if (!audio || isTransitioningRef.current) {
-      setCurrentIndex(nextIndex)
-      return
+      setCurrentIndex(nextIndex); return;
     }
-
     const wasPlaying = isPlaying
     isTransitioningRef.current = true
-
     if (wasPlaying) {
       await fadeTo(0, 350)
       audio.pause()
     }
-
     setCurrentIndex(nextIndex)
-
     window.setTimeout(async () => {
       const updatedAudio = audioRef.current
-      if (!updatedAudio) {
-        isTransitioningRef.current = false
-        return
-      }
-
+      if (!updatedAudio) { isTransitioningRef.current = false; return; }
       updatedAudio.currentTime = 0
       updatedAudio.volume = wasPlaying ? 0 : 0.45
-
       if (wasPlaying) {
         try {
           await updatedAudio.play()
           await fadeTo(0.45, 500)
           setIsPlaying(true)
-        } catch {
-          setIsPlaying(false)
-        }
+        } catch { setIsPlaying(false) }
       }
-
       isTransitioningRef.current = false
     }, 80)
   }
@@ -162,7 +140,6 @@ export default function FocusBeats() {
     const nextIndex = shuffle
       ? getRandomIndex(tracks.length, currentIndexRef.current)
       : (currentIndexRef.current + 1) % tracks.length
-
     await changeTrack(nextIndex)
   }
 
@@ -170,139 +147,187 @@ export default function FocusBeats() {
     const nextIndex = shuffle
       ? getRandomIndex(tracks.length, currentIndexRef.current)
       : (currentIndexRef.current - 1 + tracks.length) % tracks.length
-
     await changeTrack(nextIndex)
   }
 
   const handlePlayPause = async () => {
-    if (isPlaying) {
-      await pausePlayback()
-    } else {
-      await startPlayback()
-    }
-  }
-
-  const handleTrackEnd = async () => {
-    if (loopTrack) {
-      const audio = audioRef.current
-      if (!audio) return
-
-      audio.currentTime = 0
-      audio.volume = 0
-      try {
-        await audio.play()
-        await fadeTo(0.45, 500)
-      } catch {
-        setIsPlaying(false)
-      }
-      return
-    }
-
-    await goNext()
+    if (isPlaying) await pausePlayback()
+    else await startPlayback()
   }
 
   return (
-    <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-      <div className="rounded-[28px] border border-zinc-800 bg-zinc-900/70 p-5">
-        <h2 className="text-2xl font-black text-zinc-100">Focus Beats</h2>
+    <section style={{ 
+      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+      overflowY: 'auto', paddingRight: '10px',
+      display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px'
+    }}>
+      <style>{`
+        .player-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--hover-peach); letter-spacing: 0.2em; }
+        
+        .main-control-btn {
+          background: var(--base-cream); 
+          border: 2px solid var(--main-charcoal);
+          padding: 12px;
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          box-shadow: 4px 4px 0px var(--main-charcoal);
+          color: var(--main-charcoal);
+        }
+        
+        .main-control-btn:hover {
+          transform: translate(-1px, -1px);
+          box-shadow: 6px 6px 0px var(--main-charcoal);
+          color: var(--highlight-blue);
+        }
 
-        <div className="mt-6 rounded-[24px] border border-zinc-800 bg-zinc-950 p-5">
-          <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Now Playing</p>
-          <h3 className="mt-3 text-2xl font-black text-sky-300">{currentTrack.title}</h3>
-          <p className="mt-1 text-sm text-zinc-400">{currentTrack.artist}</p>
-          <p className="mt-2 text-xs uppercase tracking-[0.18em] text-zinc-500">
-            {currentTrack.type}
-          </p>
+        .play-pause-btn:hover {
+          color: #FFEB3B !important;
+        }
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={goPrev}
-              className="rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-zinc-700"
-            >
-              Prev
-            </button>
+        .main-control-btn:active {
+          transform: translate(3px, 3px);
+          box-shadow: 1px 1px 0px var(--main-charcoal);
+        }
 
-            <button
-              type="button"
-              onClick={handlePlayPause}
-              className="rounded-full border border-sky-400 bg-sky-400 px-5 py-2 text-sm font-black text-zinc-950 transition hover:opacity-90"
-            >
-              {isPlaying ? 'Pause' : 'Play'}
-            </button>
+        .play-pause-btn {
+          width: 70px; height: 70px;
+          background: var(--highlight-blue);
+          color: white;
+        }
 
-            <button
-              type="button"
-              onClick={goNext}
-              className="rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-zinc-700"
-            >
-              Next
-            </button>
+        .secondary-btn {
+          background: none;
+          border: 1.5px dashed var(--main-charcoal);
+          padding: 6px 14px;
+          border-radius: 12px;
+          font-family: var(--font-sketch);
+          font-size: 0.85rem;
+          transition: all 0.2s;
+          opacity: 0.6;
+        }
 
-            <button
-              type="button"
-              onClick={() => setShuffle((prev) => !prev)}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                shuffle
-                  ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                  : 'border-zinc-800 bg-zinc-900 text-zinc-300'
-              }`}
-            >
-              Shuffle {shuffle ? 'On' : 'Off'}
-            </button>
+        .secondary-btn.active {
+          opacity: 1;
+          border-style: solid;
+          background: var(--hover-peach);
+          color: white;
+          border-color: var(--main-charcoal);
+        }
 
-            <button
-              type="button"
-              onClick={() => setLoopTrack((prev) => !prev)}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                loopTrack
-                  ? 'border-sky-400 bg-sky-400/10 text-sky-300'
-                  : 'border-zinc-800 bg-zinc-900 text-zinc-300'
-              }`}
-            >
-              Loop {loopTrack ? 'On' : 'Off'}
-            </button>
+        .track-list-item {
+          background: none; border: none; padding: 14px 20px; width: 100%; text-align: left;
+          border-bottom: 1px solid rgba(0,0,0,0.05); transition: all 0.3s; cursor: pointer;
+          display: flex; justify-content: space-between; align-items: center;
+          position: relative; z-index: 1;
+        }
+
+        .track-list-item.active::before {
+          content: ''; position: absolute; top: 10%; left: 5%; width: 90%; height: 80%;
+          background: rgba(125, 124, 207, 0.15);
+          transform: skew(-2deg) rotate(-0.5deg);
+          border-radius: 4px;
+          z-index: -1;
+        }
+
+        .tape-element {
+          border: 2px solid var(--main-charcoal);
+          border-radius: 8px;
+          padding: 30px;
+          position: relative;
+          background: white;
+          box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+        }
+
+        .tape-element::after {
+          content: ''; position: absolute; top: 10px; right: 10px; width: 15px; height: 15px;
+          border: 1.5px solid var(--main-charcoal); border-radius: 50%; opacity: 0.2;
+        }
+      `}</style>
+
+      {/* Player Section */}
+      <div className="island sketch-border" style={{ alignSelf: 'start', padding: '30px' }}>
+        
+        {/* THE FIX: Added 'music-player-card' here so Dark Mode CSS can grab it! */}
+        <div className="tape-element music-player-card">
+          <h2 style={{ fontFamily: 'var(--font-sketch)', fontSize: '2.2rem', margin: '0 0 8px 0', color: 'var(--main-charcoal)', lineHeight: 1 }}>
+            {currentTrack.title}
+          </h2>
+          <p style={{ margin: 0, opacity: 0.7, fontSize: '1.2rem', fontFamily: 'var(--font-sketch)' }}>{currentTrack.artist}</p>
+          
+          <div style={{ marginTop: '15px', padding: '5px 12px', border: '1.5px solid var(--main-charcoal)', borderRadius: '4px', display: 'inline-block', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', transform: 'rotate(-1deg)' }}>
+            TYPE: {currentTrack.type}
           </div>
-
-          <audio
-            ref={audioRef}
-            src={currentTrack.file}
-            onEnded={handleTrackEnd}
-            preload="metadata"
-            className="hidden"
-          />
         </div>
+
+        {/* Playback Controls */}
+        <div style={{ marginTop: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '30px' }}>
+          <button type="button" onClick={goPrev} className="main-control-btn" title="Previous">
+            <Icons.Prev />
+          </button>
+          
+          <button type="button" onClick={handlePlayPause} className="main-control-btn play-pause-btn" title={isPlaying ? 'Pause' : 'Play'}>
+            {isPlaying ? <Icons.Pause /> : <Icons.Play />}
+          </button>
+          
+          <button type="button" onClick={goNext} className="main-control-btn" title="Next">
+            <Icons.Next />
+          </button>
+        </div>
+
+        {/* Logic Controls */}
+        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'center', gap: '15px' }}>
+          <button 
+            type="button" 
+            onClick={() => setShuffle(p => !p)} 
+            className={`secondary-btn ${shuffle ? 'active' : ''}`}
+          >
+            {shuffle ? '✓ Shuffle Active' : 'Shuffle Off'}
+          </button>
+          <button 
+            type="button" 
+            onClick={() => setLoopTrack(p => !p)} 
+            className={`secondary-btn ${loopTrack ? 'active' : ''}`}
+          >
+            {loopTrack ? '✓ Loop Active' : 'Loop Off'}
+          </button>
+        </div>
+
+        <audio
+          ref={audioRef}
+          src={currentTrack.file}
+          onEnded={() => !loopTrack && goNext()}
+          preload="metadata"
+          className="hidden"
+        />
       </div>
 
-      <div className="rounded-[28px] border border-zinc-800 bg-zinc-900/70 p-5">
-        <p className="text-sm font-semibold text-zinc-400">Track Stack</p>
-
-        <div className="mt-5 space-y-3">
+      {/* Playlist Section */}
+      <div className="island sketch-border no-hover-lift" style={{ display: 'flex', flexDirection: 'column', padding: '0' }}>
+        <div style={{ padding: '20px 25px 10px' }}>
+            <p className="player-label">Soundtrack Log</p>
+        </div>
+        
+        <div style={{ overflowY: 'auto', flex: 1, paddingBottom: '20px' }}>
           {tracks.map((track, index) => {
             const active = index === currentIndex
-
             return (
               <button
                 key={track.file}
                 type="button"
                 onClick={() => changeTrack(index)}
-                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition ${
-                  active
-                    ? 'border-sky-400 bg-sky-400/10'
-                    : 'border-zinc-800 bg-zinc-950/60 hover:border-zinc-700'
-                }`}
+                className={`track-list-item ${active ? 'active' : ''}`}
               >
                 <div>
-                  <p className={`text-sm font-semibold ${active ? 'text-sky-300' : 'text-zinc-100'}`}>
+                  <p style={{ margin: 0, fontWeight: active ? 800 : 500, fontSize: '1rem', color: active ? 'var(--highlight-lavender)' : 'inherit' }}>
                     {track.title}
                   </p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">
+                  <p style={{ margin: '2px 0 0', fontSize: '0.75rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {track.artist}
                   </p>
                 </div>
-
-                <span className="text-xs text-zinc-500">
-                  {String(index + 1).padStart(2, '0')}
+                <span style={{ fontFamily: 'var(--font-sketch)', opacity: 0.4, fontSize: '0.9rem' }}>
+                    #{String(index + 1).padStart(2, '0')}
                 </span>
               </button>
             )

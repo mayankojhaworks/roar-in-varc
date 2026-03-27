@@ -1,4 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { onAuthStateChanged } from 'firebase/auth'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { auth, db } from './firebase' // Double check your firebase.js path
+
 import AppShell from './components/AppShell'
 import DataBackup from './components/DataBackup'
 import FocusBeats from './components/FocusBeats'
@@ -9,71 +13,113 @@ import { useLocalStorage } from './hooks/useLocalStorage'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('crucible')
+  const [user, setUser] = useState(null)
+  
+  // 1. Existing Local Storage Logic (DO NOT CHANGE)
   const [missionState, setMissionState] = useLocalStorage('roar-in-varc-missions', {})
   const [warRoomRecords, setWarRoomRecords] = useLocalStorage('roar-in-varc-war-room', [])
 
+  // 2. Auth Listener: Detects login/logout
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser)
+      if (currentUser) {
+        // If logged in, check if there's better data in the cloud
+        await fetchFromCloud(currentUser.uid)
+      }
+    })
+    return () => unsubscribe()
+  }, [])
+
+  // 3. Fetch from Cloud: Only runs once on login
+  const fetchFromCloud = async (uid) => {
+    try {
+      const snap = await getDoc(doc(db, "users", uid))
+      if (snap.exists()) {
+        const data = snap.data()
+        // Update local state with cloud data
+        if (data.missionState) setMissionState(data.missionState)
+        if (data.warRoomRecords) setWarRoomRecords(data.warRoomRecords)
+      }
+    } catch (e) { console.error("Sync Error", e) }
+  }
+
+  // 4. Save to Cloud: Helper function
+  const pushToCloud = async (newMissions, newRecords) => {
+    if (!auth.currentUser) return
+    try {
+      await setDoc(doc(db, "users", auth.currentUser.uid), {
+        missionState: newMissions,
+        warRoomRecords: newRecords,
+        lastUpdated: new Date().toISOString()
+      }, { merge: true })
+    } catch (e) { console.error("Save Error", e) }
+  }
+
+  // --- Handlers (Now including silent cloud push) ---
+
   const handleMissionUpdate = (dayNumber, patch) => {
-    setMissionState((prev) => ({
-      ...prev,
-      [dayNumber]: {
-        ...(prev[dayNumber] || {}),
-        ...patch,
-      },
-    }))
+    setMissionState((prev) => {
+      const updated = { ...prev, [dayNumber]: { ...(prev[dayNumber] || {}), ...patch } }
+      pushToCloud(updated, warRoomRecords) // Silent push
+      return updated
+    })
   }
 
   const handleAddRecord = (record) => {
-    setWarRoomRecords((prev) => [...prev, record])
+    setWarRoomRecords((prev) => {
+      const updated = [...prev, record]
+      pushToCloud(missionState, updated)
+      return updated
+    })
   }
 
   const handleDeleteRecord = (recordId) => {
-    setWarRoomRecords((prev) => prev.filter((record) => record.id !== recordId))
+    setWarRoomRecords((prev) => {
+      const updated = prev.filter((r) => r.id !== recordId)
+      pushToCloud(missionState, updated)
+      return updated
+    })
   }
 
   const handleImportBackup = (payload) => {
-    setMissionState(payload.missionState || {})
-    setWarRoomRecords(payload.warRoomRecords || [])
+    const ms = payload.missionState || {}
+    const wr = payload.warRoomRecords || []
+    setMissionState(ms)
+    setWarRoomRecords(wr)
+    pushToCloud(ms, wr)
   }
 
   const handleClearAllProgress = () => {
-    const confirmed = window.confirm(
-      'This will remove your saved mission progress and War Room records from this browser. Continue?'
-    )
-
-    if (!confirmed) return
-
-    setMissionState({})
-    setWarRoomRecords([])
+    if (window.confirm('Wipe local data? Cloud data is safe if you are logged in.')) {
+      setMissionState({})
+      setWarRoomRecords([])
+    }
   }
 
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
-      {activeTab === 'crucible' ? (
-        <MissionGrid
-          missions={missionPlan}
-          missionState={missionState}
-          onMissionUpdate={handleMissionUpdate}
-        />
-      ) : null}
+      <div className={activeTab === 'crucible' ? 'block' : 'hidden'}>
+        <MissionGrid missions={missionPlan} missionState={missionState} onMissionUpdate={handleMissionUpdate} />
+      </div>
 
-      {activeTab === 'war-room' ? (
-        <WarRoom
-          records={warRoomRecords}
-          onAddRecord={handleAddRecord}
-          onDeleteRecord={handleDeleteRecord}
-        />
-      ) : null}
+      <div className={activeTab === 'war-room' ? 'block' : 'hidden'}>
+        <WarRoom records={warRoomRecords} onAddRecord={handleAddRecord} onDeleteRecord={handleDeleteRecord} />
+      </div>
 
-      {activeTab === 'focus-beats' ? <FocusBeats /> : null}
+      <div className={activeTab === 'focus-beats' ? 'block' : 'hidden'}>
+        <FocusBeats />
+      </div>
 
-      {activeTab === 'data-backup' ? (
+      <div className={activeTab === 'data-backup' ? 'block' : 'hidden'}>
         <DataBackup
+          user={user} // Make sure DataBackup expects this prop
           missionState={missionState}
           warRoomRecords={warRoomRecords}
           onImportBackup={handleImportBackup}
           onClearAllProgress={handleClearAllProgress}
         />
-      ) : null}
+      </div>
     </AppShell>
   )
 }

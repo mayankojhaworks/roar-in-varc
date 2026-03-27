@@ -1,144 +1,99 @@
-import { useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
+import SupportFooter from './SupportFooter'
 
-export default function DataBackup({
-  missionState,
-  warRoomRecords,
-  onImportBackup,
-  onClearAllProgress,
-}) {
-  const fileInputRef = useRef(null)
+export default function DataBackup({ user, missionState, warRoomRecords, onImportBackup, onClearAllProgress }) {
   const [message, setMessage] = useState('')
 
-  const completedCount = Object.values(missionState).filter(
-    (item) => item?.completed
-  ).length
-
   const handleExport = () => {
-    const payload = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      missionState,
-      warRoomRecords,
-    }
-
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {
-      type: 'application/json',
-    })
-
-    const url = window.URL.createObjectURL(blob)
-    const anchor = document.createElement('a')
-    const today = new Date().toISOString().slice(0, 10)
-
-    anchor.href = url
-    anchor.download = `roar-in-varc-backup-${today}.json`
-    anchor.click()
-
-    window.URL.revokeObjectURL(url)
-    setMessage('Backup exported successfully.')
-  }
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    try {
-      const text = await file.text()
-      const parsed = JSON.parse(text)
-
-      const nextMissionState =
-        parsed && typeof parsed.missionState === 'object' && parsed.missionState !== null
-          ? parsed.missionState
-          : {}
-
-      const nextWarRoomRecords = Array.isArray(parsed?.warRoomRecords)
-        ? parsed.warRoomRecords
-        : []
-
-      onImportBackup({
-        missionState: nextMissionState,
-        warRoomRecords: nextWarRoomRecords,
-      })
-
-      setMessage('Backup imported successfully.')
-    } catch {
-      setMessage('Import failed. Please choose a valid backup JSON file.')
-    }
-
-    event.target.value = ''
-  }
+    const payload = { missionState, warRoomRecords };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `roar-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    setMessage('Manual backup downloaded successfully!');
+  };
 
   return (
-    <section className="space-y-6">
-      <div className="rounded-[28px] border border-zinc-800 bg-zinc-900/70 p-6">
-        <h2 className="text-2xl font-black text-zinc-100">Data Backup</h2>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">
-          Export or restore your personal progress data. This includes mission completion,
-          remarks, and War Room records stored in your browser.
+    <section style={{ 
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+        overflowY: 'auto', padding: '10px', display: 'flex', 
+        flexDirection: 'column', gap: '25px' 
+    }}>
+      <style>{`
+        .stamp-btn { 
+            background: white; border: 2px solid var(--main-charcoal); 
+            padding: 12px 24px; border-radius: 12px; font-family: var(--font-sketch); 
+            font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px var(--main-charcoal); 
+            transition: all 0.2s; 
+        }
+        .stamp-btn:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0px var(--main-charcoal); }
+        .btn-export { background: var(--highlight-blue) !important; color: white !important; }
+        .sync-badge { 
+            background: #E8F5E9; border: 1.5px solid #2E7D32; color: #2E7D32; 
+            padding: 15px; border-radius: 12px; font-size: 0.95rem; 
+            display: flex; align-items: flex-start; gap: 15px; margin-top: 15px; line-height: 1.5;
+        }
+        .guest-badge {
+            background: #FFF5F5; border: 1.5px dashed var(--highlight-red); color: var(--main-charcoal); 
+            padding: 15px; border-radius: 12px; font-size: 0.95rem; 
+            display: flex; align-items: flex-start; gap: 15px; margin-top: 15px; line-height: 1.5;
+        }
+      `}</style>
+
+      {/* Dynamic Status Island */}
+      <div className="island sketch-border">
+        <h2 style={{ fontFamily: 'var(--font-sketch)', fontSize: '1.8rem', margin: '0 0 5px 0' }}>Data Security</h2>
+        
+        {user ? (
+          <div className="sync-badge">
+            <span style={{ fontSize: '1.5rem' }}>☁️</span>
+            <div>
+                <strong style={{ display: 'block', fontSize: '1.1rem', marginBottom: '5px' }}>Cloud Sync is Active</strong>
+                Your Daily Plan progress and Mock Analytics are continuously backed up to your account (<strong>{user.email}</strong>). 
+                You do not need to worry about losing your data. It will automatically load even if you switch devices!
+            </div>
+          </div>
+        ) : (
+          <div className="guest-badge">
+            <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+            <div>
+                <strong style={{ display: 'block', fontSize: '1.1rem', marginBottom: '5px', color: 'var(--highlight-red)' }}>Guest Mode Active</strong>
+                Your data is currently only saved locally in this browser. If you clear your history, your progress will be lost. <strong>Please sign in using the header above to secure your data in the cloud.</strong>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Manual Actions Island */}
+      <div className="island sketch-border" style={{ padding: '25px' }}>
+        <h3 style={{ fontFamily: 'var(--font-sketch)', fontSize: '1.4rem', margin: '0 0 15px' }}>Manual Overrides</h3>
+        <p style={{ margin: '0 0 20px', fontSize: '0.9rem', opacity: 0.8 }}>
+          Even with Cloud Sync active, you can always download a hard copy of your data for your own personal records.
         </p>
+        
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+          <button onClick={handleExport} className="stamp-btn btn-export">
+            Download JSON Backup
+          </button>
+          
+          <button onClick={onClearAllProgress} className="stamp-btn" style={{ color: 'var(--highlight-red)', borderStyle: 'dashed' }}>
+            Wipe Browser Data
+          </button>
+        </div>
+
+        {message && (
+          <p style={{ fontFamily: 'var(--font-sketch)', color: 'var(--highlight-green)', fontWeight: 'bold', marginTop: '15px' }}>
+              {message}
+          </p>
+        )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-[24px] border border-zinc-800 bg-zinc-900/70 p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            Current Progress
-          </p>
-
-          <div className="mt-4 space-y-3 text-sm text-zinc-300">
-            <p>Completed missions: <span className="font-bold text-zinc-100">{completedCount}</span></p>
-            <p>War Room records: <span className="font-bold text-zinc-100">{warRoomRecords.length}</span></p>
-          </div>
-        </div>
-
-        <div className="rounded-[24px] border border-zinc-800 bg-zinc-900/70 p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            Backup Actions
-          </p>
-
-          <div className="mt-4 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={handleExport}
-              className="rounded-2xl border border-sky-400 bg-sky-400 px-5 py-3 text-sm font-black text-zinc-950 transition hover:opacity-90"
-            >
-              Export Backup
-            </button>
-
-            <button
-              type="button"
-              onClick={handleImportClick}
-              className="rounded-2xl border border-zinc-700 bg-zinc-950 px-5 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500"
-            >
-              Import Backup
-            </button>
-
-            <button
-              type="button"
-              onClick={onClearAllProgress}
-              className="rounded-2xl border border-red-900 bg-red-950/30 px-5 py-3 text-sm font-semibold text-red-200 transition hover:bg-red-950/50"
-            >
-              Clear Progress
-            </button>
-          </div>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/json"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-        </div>
-      </div>
-
-      {message ? (
-        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-          {message}
-        </div>
-      ) : null}
+      {/* The Global Footer */}
+      <SupportFooter />
+      
     </section>
   )
 }

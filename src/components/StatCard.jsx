@@ -1,20 +1,12 @@
-export default function StatCard({ label, value, accent = 'default', subtext }) {
-    const accentClass =
-      accent === 'blue'
-        ? 'text-sky-300'
-        : accent === 'green'
-        ? 'text-emerald-400'
-        : accent === 'red'
-        ? 'text-red-300'
-        : 'text-zinc-100'
-  
-    return (
-      <div className="rounded-[24px] border border-zinc-800 bg-zinc-900/70 p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-          {label}
-        </p>
-        <p className={`mt-3 text-3xl font-black ${accentClass}`}>{value}</p>
-        {subtext ? <p className="mt-2 text-sm text-zinc-400">{subtext}</p> : null}
-      </div>
-    )
-  }
+export default function StatCard({ label, value, color }) {
+  return (
+    <div className="island sketch-border" style={{ padding: '12px 15px', textAlign: 'center' }}>
+      <p style={{ margin: 0, fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', opacity: 0.6, letterSpacing: '0.1em' }}>
+        {label}
+      </p>
+      <p style={{ margin: '5px 0 0', fontSize: '1.6rem', fontWeight: 900, fontFamily: 'var(--font-sketch)', color: color || 'var(--main-charcoal)' }}>
+        {value}
+      </p>
+    </div>
+  )
+}

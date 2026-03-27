@@ -1,1 +1,112 @@
 @import "tailwindcss";
+/* ========================================= */
+/* --- TRUE BLACK DARK MODE OVERRIDES ---    */
+/* ========================================= */
+
+/* 1. THE FIX: We must target :root to forcefully override your original color variables */
+:root[data-theme="dark"] {
+  --base-cream: #000000 !important;      /* True Pitch Black */
+  --main-charcoal: #EDEDED !important;   /* Crisp Light Grey for Text */
+  --shadow-light: rgba(255, 255, 255, 0.05) !important;
+  --shadow-dark: rgba(0, 0, 0, 0.9) !important;
+}
+
+/* 2. Force the absolute background to turn black */
+:root[data-theme="dark"] body, 
+:root[data-theme="dark"] #root,
+:root[data-theme="dark"] html {
+  background-color: var(--base-cream) !important;
+  color: var(--main-charcoal) !important;
+}
+
+/* 3. Darken Islands so they pop off the black background */
+:root[data-theme="dark"] .island,
+:root[data-theme="dark"] .stat-card,
+:root[data-theme="dark"] .day-box,
+:root[data-theme="dark"] .sync-badge,
+:root[data-theme="dark"] .guest-badge {
+  background-color: #0D0D0D !important;
+  border-color: #2A2A2A !important;
+}
+
+/* 4. Force hardcoded white boxes (like the Audio Player) to invert */
+:root[data-theme="dark"] [style*="background: white"],
+:root[data-theme="dark"] [style*="background-color: white"],
+:root[data-theme="dark"] [style*="background: #fff"],
+:root[data-theme="dark"] [style*="background: #FFF"] {
+  background-color: #151515 !important;
+  border-color: #333 !important;
+  color: var(--main-charcoal) !important;
+}
+
+/* 5. Force all generic text to respect the new light-grey variable */
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] h3,
+:root[data-theme="dark"] h4,
+:root[data-theme="dark"] p {
+  color: var(--main-charcoal) !important;
+}
+
+/* 6. Inputs & Textareas */
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea {
+  color: var(--main-charcoal) !important;
+}
+
+/* 7. Practice Cards */
+:root[data-theme="dark"] .task-card { 
+  background-color: #121212 !important; 
+  border-color: #222 !important; 
+}
+
+/* 8. Fix the Notebook lines so you can see where to type */
+:root[data-theme="dark"] .notebook-input {
+  background-image: linear-gradient(transparent, transparent 21px, rgba(255, 255, 255, 0.15) 21px, rgba(255, 255, 255, 0.15) 22px, transparent 22px) !important;
+}
+
+/* 9. Ensure the Done button text flips correctly */
+:root[data-theme="dark"] .done-btn {
+  color: var(--main-charcoal) !important;
+  border-color: var(--main-charcoal) !important;
+}
+:root[data-theme="dark"] .done-btn.completed {
+  background-color: var(--highlight-green) !important;
+  color: #000 !important; /* Keep text dark inside the bright green box */
+  border-color: var(--highlight-green) !important;
+}
+
+/* 10. THE AUDIO PLAYER FIX: Catch React's "rgb" white backgrounds and turn them sleek grey */
+:root[data-theme="dark"] [style*="rgb(255, 255, 255)"],
+:root[data-theme="dark"] [style*="rgba(255, 255, 255"] {
+  background-color: #1A1A1A !important;
+  border-color: #333 !important;
+  color: var(--main-charcoal) !important;
+}
+
+/* 11. THE HEADER TABS FIX: Catch hardcoded black/dark-grey text and force it to glow white */
+:root[data-theme="dark"] [style*="rgb(0, 0, 0)"],
+:root[data-theme="dark"] [style*="rgba(0, 0, 0"] {
+  color: var(--main-charcoal) !important;
+}
+
+/* 12. Ensure top navigation links (unselected tabs) explicitly turn white */
+:root[data-theme="dark"] header span,
+:root[data-theme="dark"] header button,
+:root[data-theme="dark"] .top-nav * {
+  color: var(--main-charcoal);
+}
+
+/* 13. THE ULTIMATE AUDIO PLAYER FIX */
+:root[data-theme="dark"] .music-player-card {
+  background-color: #1A1A1A !important;  /* Sleek dark graphite grey */
+  border-color: #333 !important;
+  color: var(--main-charcoal) !important;
+}
+
+/* Ensure the "TYPE: LOFI" badge inside the player also adapts */
+:root[data-theme="dark"] .music-player-card span,
+:root[data-theme="dark"] .music-player-card div {
+  border-color: #444 !important;
+}
