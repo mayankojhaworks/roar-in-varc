@@ -109,33 +109,41 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
-      {/* TAB: DAILY PLAN - Perfect Responsive Flex Wrapper */}
-      <div className={activeTab === 'crucible' ? 'block' : 'hidden'} style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 80px 10px' }}>
-          <MissionGrid missions={missionPlan} missionState={missionState} onMissionUpdate={handleMissionUpdate} />
+      {/* TAB: DAILY PLAN */}
+      {activeTab === 'crucible' && (
+        <div style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 80px 10px' }}>
+            <MissionGrid missions={missionPlan} missionState={missionState} onMissionUpdate={handleMissionUpdate} />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* TAB: MOCK ANALYTICS */}
-      <div className={activeTab === 'war-room' ? 'block' : 'hidden'}>
-        <WarRoom records={warRoomRecords} onAddRecord={handleAddRecord} onDeleteRecord={handleDeleteRecord} missions={missionPlan} missionState={missionState} />
-      </div>
+      {activeTab === 'war-room' && (
+        <div style={{ position: 'relative', height: 'calc(100vh - 120px)', width: '100%' }}>
+          <WarRoom records={warRoomRecords} onAddRecord={handleAddRecord} onDeleteRecord={handleDeleteRecord} missions={missionPlan} missionState={missionState} />
+        </div>
+      )}
 
       {/* TAB: STUDY AUDIO */}
-      <div className={activeTab === 'focus-beats' ? 'block' : 'hidden'}>
-        <FocusBeats />
-      </div>
+      {activeTab === 'focus-beats' && (
+        <div style={{ position: 'relative', height: 'calc(100vh - 120px)', width: '100%' }}>
+          <FocusBeats />
+        </div>
+      )}
 
       {/* TAB: DATA BACKUP */}
-      <div className={activeTab === 'data-backup' ? 'block' : 'hidden'}>
-        <DataBackup
-          user={user} 
-          missionState={missionState}
-          warRoomRecords={warRoomRecords}
-          onImportBackup={handleImportBackup}
-          onClearAllProgress={handleClearAllProgress}
-        />
-      </div>
+      {activeTab === 'data-backup' && (
+        <div style={{ paddingBottom: '40px' }}>
+          <DataBackup
+            user={user} 
+            missionState={missionState}
+            warRoomRecords={warRoomRecords}
+            onImportBackup={handleImportBackup}
+            onClearAllProgress={handleClearAllProgress}
+          />
+        </div>
+      )}
       
     </AppShell>
   )

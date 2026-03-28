@@ -470,16 +470,16 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         <div className="pyq-modal-overlay" onClick={() => setActivePyq(null)}>
             <div className={`island sketch-border pyq-modal-content ${activePyq.type === 'RC' ? 'rc-mode' : 'va-mode'}`} onClick={(e) => e.stopPropagation()}>
                 
-                {/* Header with Timer */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px dashed var(--main-charcoal)', paddingBottom: '10px' }}>
+                {/* FIX: Absolute positioned close button completely separated from the timer */}
+                <button className="pyq-close-btn" onClick={() => setActivePyq(null)} style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>X</button>
+
+                {/* Header with Timer (added paddingRight: '40px' so timer stays safely away from the X) */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px dashed var(--main-charcoal)', paddingBottom: '10px', paddingRight: '40px' }}>
                     <h2 style={{ margin: 0, color: 'var(--highlight-blue)' }}>
                         {activePyq.type === 'RC' ? `RC Passage (${currentQIndex + 1} of ${questionsCount})` : currentQuestion.id}
                     </h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <div style={{ fontSize: '1.4rem', fontWeight: 'bold', fontFamily: 'var(--font-sketch)', color: timeLeft <= 60 && !isSubmitted ? 'var(--highlight-red)' : 'var(--main-charcoal)', animation: timeLeft <= 60 && !isSubmitted ? 'pulse 1s infinite' : 'none' }}>
-                            {isSubmitted ? '🏁' : '⏱'} {formatTime(timeLeft)}
-                        </div>
-                        <button className="pyq-close-btn" onClick={() => setActivePyq(null)}>X</button>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 'bold', fontFamily: 'var(--font-sketch)', color: timeLeft <= 60 && !isSubmitted ? 'var(--highlight-red)' : 'var(--main-charcoal)', animation: timeLeft <= 60 && !isSubmitted ? 'pulse 1s infinite' : 'none' }}>
+                        {isSubmitted ? '🏁' : '⏱'} {formatTime(timeLeft)}
                     </div>
                 </div>
 
