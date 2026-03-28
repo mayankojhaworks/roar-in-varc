@@ -7,7 +7,7 @@ import DataBackup from './components/DataBackup'
 import FocusBeats from './components/FocusBeats'
 import MissionGrid from './components/MissionGrid'
 import WarRoom from './components/WarRoom'
-import missionPlanRaw from './data/generated/missionPlan.json' // <-- We import it as RAW now
+import missionPlanRaw from './data/generated/missionPlan.json' 
 import { useLocalStorage } from './hooks/useLocalStorage'
 
 export default function App() {
@@ -109,9 +109,9 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
-      {/* TAB: DAILY PLAN - Edge & Scroll Fix */}
-      <div className={activeTab === 'crucible' ? 'block' : 'hidden'} style={{ height: 'calc(100vh - 140px)', overflow: 'auto', padding: '5px' }}>
-        <div style={{ paddingBottom: '20px', minHeight: '100%' }}>
+      {/* TAB: DAILY PLAN - Perfect Responsive Flex Wrapper */}
+      <div className={activeTab === 'crucible' ? 'block' : 'hidden'} style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 80px 10px' }}>
           <MissionGrid missions={missionPlan} missionState={missionState} onMissionUpdate={handleMissionUpdate} />
         </div>
       </div>
