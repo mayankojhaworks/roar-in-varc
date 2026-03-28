@@ -109,9 +109,9 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
-      {/* TAB: DAILY PLAN - Fixed scroll container */}
-      <div className={activeTab === 'crucible' ? 'block' : 'hidden'} style={{ height: 'calc(100vh - 120px)', overflowY: 'auto', overflowX: 'hidden' }}>
-        <div style={{ paddingBottom: '40px', minHeight: '100%' }}>
+      {/* TAB: DAILY PLAN - Edge & Scroll Fix */}
+      <div className={activeTab === 'crucible' ? 'block' : 'hidden'} style={{ height: 'calc(100vh - 140px)', overflow: 'auto', padding: '5px' }}>
+        <div style={{ paddingBottom: '20px', minHeight: '100%' }}>
           <MissionGrid missions={missionPlan} missionState={missionState} onMissionUpdate={handleMissionUpdate} />
         </div>
       </div>
