@@ -138,14 +138,15 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
   const selectedMission = selectedWeek?.slots.find((mission) => mission?.dayNumber === selectedDay) || selectedWeek?.slots.find(Boolean) || enrichedMissions[0]
   const selectedMissionState = missionState[selectedMission?.dayNumber] || { completed: false, crRemarks1: '', crRemarks2: '', vaRemarks1: '', vaRemarks2: '', rcRemarks1: '', rcRemarks2: '', pyqAnswers: {} }
 
+  // --- STATS MATH FIX ---
   const targetDate = new Date(2026, 10, 29); 
-  const planStartDate = new Date(2026, 2, 28); // <-- UPDATED TO MARCH 28 
+  const planStartDate = new Date(2026, 2, 28); // Locked to March 28
   const msPerDay = 1000 * 60 * 60 * 24;
   const totalDays = Math.round((targetDate - planStartDate) / msPerDay);
-  const daysLeft = Math.round((targetDate - today) / msPerDay);
-  const completedCount = enrichedMissions.filter((mission) => mission.status === 'completed').length
-  const missedCount = enrichedMissions.filter((mission) => mission.status === 'missed').length
-  const pendingCount = Math.max(0, daysLeft + missedCount);
+  const daysLeft = Math.max(0, Math.round((targetDate - today) / msPerDay));
+  const completedCount = enrichedMissions.filter((mission) => mission.status === 'completed').length;
+  const missedCount = enrichedMissions.filter((mission) => mission.status === 'missed').length;
+  const pendingCount = totalDays - completedCount; // Flawless pending math
 
   const updateField = (field, value) => {
     if (!selectedMission) return
@@ -262,11 +263,12 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
   return (
     <>
       <style>{`
+        /* CSS MIN-HEIGHT FIX */
         .dashboard-grid {
             display: grid;
             grid-template-areas: "stats calendar" "reading practice";
             grid-template-columns: 1fr 1.8fr; 
-            grid-template-rows: auto minmax(0, 1fr); gap: 15px; height: 100%;
+            grid-template-rows: auto minmax(0, 1fr); gap: 15px; min-height: 100%;
         }
 
         .stats-container { grid-area: stats; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -509,12 +511,11 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                                     let border = '2px solid rgba(0,0,0,0.1)';
                                     
                                     if (isSubmitted) {
-    if (isCorrect) { bg = 'rgba(39, 174, 96, 0.15)'; border = '2px solid var(--highlight-green)'; }
-    else if (isSelected) { bg = 'rgba(231, 76, 60, 0.15)'; border = '2px solid var(--highlight-red)'; }
-} else if (isSelected) {
-    // FIX: Changed to a calming, aesthetic blue for the "selected" state
-    bg = 'rgba(52, 152, 219, 0.15)'; border = '2px solid var(--highlight-blue)';
-}
+                                        if (isCorrect) { bg = 'rgba(39, 174, 96, 0.15)'; border = '2px solid var(--highlight-green)'; }
+                                        else if (isSelected) { bg = 'rgba(231, 76, 60, 0.15)'; border = '2px solid var(--highlight-red)'; }
+                                    } else if (isSelected) {
+                                        bg = 'rgba(52, 152, 219, 0.15)'; border = '2px solid var(--highlight-blue)';
+                                    }
 
                                     return (
                                         <button 
