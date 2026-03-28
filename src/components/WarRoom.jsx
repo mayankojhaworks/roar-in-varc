@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import SupportFooter from './SupportFooter'
-export default function WarRoom({ records = [], onAddRecord, onDeleteRecord }) {
+import PYQTracker from './PYQTracker' 
+
+export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, missions = [], missionState = {} }) {
+  const [showLedger, setShowLedger] = useState(false)
   const [formData, setFormData] = useState({
     type: 'Mock', singleSitting: 'Yes', name: '', slot: '', date: '',
-    varcScore: '', varcPercentile: '',
-    lrdiScore: '', lrdiPercentile: '',
-    qaScore: '', qaPercentile: '',
-    overallScore: '', overallPercentile: ''
+    varcScore: '', varcPercentile: '', lrdiScore: '', lrdiPercentile: '',
+    qaScore: '', qaPercentile: '', overallScore: '', overallPercentile: ''
   })
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -49,6 +50,12 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord }) {
     ? (validRecords.reduce((acc, curr) => acc + (Number(curr.overallScore) || 0), 0) / validRecords.length).toFixed(1)
     : 0
 
+  // --- PYQ ACCURACY CALCULATION ---
+  const allPyqAnswers = Object.values(missionState).flatMap(day => Object.values(day.pyqAnswers || {}));
+  const pyqAttempted = allPyqAnswers.length;
+  const pyqCorrect = allPyqAnswers.filter(a => a.isCorrect).length;
+  const pyqAccuracy = pyqAttempted > 0 ? Math.round((pyqCorrect / pyqAttempted) * 100) : 0;
+
   // Sort records by date for the charts
   const chartData = useMemo(() => {
     return [...validRecords]
@@ -83,14 +90,15 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord }) {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', gap: '15px' }}>
       <style>{`
-        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex-shrink: 0; }
-        .stat-card { background: white; border: 2px solid var(--main-charcoal); border-radius: 12px; padding: 15px; text-align: center; box-shadow: 4px 4px 0px var(--shadow-dark); }
-        .stat-card p { margin: 0; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; opacity: 0.6; letter-spacing: 1px; }
-        .stat-card h3 { margin: 5px 0 0; font-size: 1.8rem; font-family: var(--font-sketch); color: var(--highlight-blue); }
+        /* UPDATED GRID FOR 5 CARDS */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr) 1.2fr; gap: 15px; flex-shrink: 0; }
+        
+        .stat-card { background: white; border: 2px solid var(--main-charcoal); border-radius: 12px; padding: 12px 10px; text-align: center; box-shadow: 4px 4px 0px var(--shadow-dark); }
+        .stat-card p { margin: 0; font-size: 0.65rem; font-weight: bold; text-transform: uppercase; opacity: 0.6; letter-spacing: 0.5px; }
+        .stat-card h3 { margin: 5px 0 0; font-size: 1.6rem; font-family: var(--font-sketch); color: var(--highlight-blue); }
         
         .war-room-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; flex: 1; min-height: 0; }
         
-        /* The container stays fixed, the inner wrapper scrolls */
         .fixed-island { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
         .scroll-area { flex: 1; overflow-y: auto; padding-right: 15px; margin-right: -5px; }
         
@@ -106,6 +114,29 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord }) {
         .submit-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px rgba(0,0,0,0.1); }
         
         .section-box { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px; margin-bottom: 15px; }
+
+        /* --- NEW: MODAL STYLES FOR THE FLOATING SURFACE --- */
+        .pyq-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .pyq-modal-content {
+            background: var(--base-cream); border-radius: 16px; position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease;
+        }
+        .pyq-close-btn {
+            position: absolute; top: 15px; right: 15px; z-index: 100;
+            background: var(--highlight-red); color: white; border: none; border-radius: 50%;
+            width: 30px; height: 30px; font-weight: bold; cursor: pointer; transition: transform 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .pyq-close-btn:hover { transform: scale(1.1); }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
       `}</style>
 
       {/* TOP STATS */}
@@ -114,8 +145,36 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord }) {
         <div className="stat-card"><p>PYQs Completed</p><h3>{pyqsCompleted}/22</h3></div>
         <div className="stat-card"><p>Best Percentile</p><h3 style={{color: 'var(--highlight-green)'}}>{bestPercentile}%</h3></div>
         <div className="stat-card"><p>Average Score</p><h3 style={{color: 'var(--highlight-lavender)'}}>{avgScore}</h3></div>
+        
+        {/* NEW DISTINCT 5TH CARD (Toggles the Floating Modal) */}
+        <div 
+          className="stat-card" 
+          onClick={() => setShowLedger(true)}
+          style={{
+            background: 'var(--main-charcoal)',
+            borderColor: 'var(--main-charcoal)',
+            borderRadius: '24px', // Distinct pill shape
+            color: 'white',
+            cursor: 'pointer',
+            boxShadow: '4px 4px 0px var(--shadow-dark)',
+            transition: 'all 0.2s',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,0.2)'; }}
+          onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '4px 4px 0px var(--shadow-dark)'; }}
+        >
+          <p style={{ color: 'white', opacity: 0.8 }}>PYQ Analytics</p>
+          {/* FIX: Reduced font size so "Accuracy" fits on one line */}
+          <h3 style={{ color: 'white', margin: '2px 0', fontSize: '1.25rem' }}>{pyqAccuracy}% Accuracy</h3>
+          <span style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '2px', fontWeight: 'bold' }}>
+            CLICK TO OPEN LEDGER
+          </span>
+        </div>
       </div>
 
+      {/* THE ORIGINAL WAR ROOM GRID */}
       <div className="war-room-grid">
         
         {/* LEFT PANEL: DATA ENTRY FORM */}
@@ -254,6 +313,24 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord }) {
           </div>
         </div>
       </div>
+
+      {/* THE PYQ LEDGER MODAL ("NEW SURFACE") */}
+      {showLedger && (
+        <div className="pyq-modal-overlay" onClick={() => setShowLedger(false)}>
+          <div className="island sketch-border pyq-modal-content" onClick={(e) => e.stopPropagation()} style={{ width: '95%', maxWidth: '1000px', height: '85vh', display: 'flex', flexDirection: 'column', padding: '30px 20px 20px 20px' }}>
+            
+            <button className="pyq-close-btn" onClick={() => setShowLedger(false)}>X</button>
+            
+            <h2 style={{ margin: '0 0 15px 10px', fontFamily: 'var(--font-sketch)', color: 'var(--highlight-blue)' }}>Detailed PYQ Performance Ledger</h2>
+            
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <PYQTracker missions={missions} missionState={missionState} />
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
