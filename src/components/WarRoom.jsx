@@ -137,6 +137,24 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* --- MOBILE RESPONSIVENESS FOR WAR ROOM --- */
+        @media (max-width: 768px) {
+            .war-room-grid {
+                grid-template-columns: 1fr !important; 
+            }
+            .stats-row {
+                grid-template-columns: 1fr 1fr !important; 
+            }
+            .fixed-island {
+                min-height: 500px; 
+                margin-bottom: 20px;
+            }
+            /* Make the 5th card (PYQ Analytics) span the full width on mobile */
+            .stats-row > div:nth-child(5) {
+                grid-column: span 2;
+            }
+        }
       `}</style>
 
       {/* TOP STATS */}

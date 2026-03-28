@@ -353,6 +353,57 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         }
         .secondary-btn:hover:not(:disabled) { background: var(--hover-peach); color: white; border-style: solid; border-color: transparent; }
         .secondary-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* --- MOBILE RESPONSIVENESS FIXES --- */
+        @media (max-width: 768px) {
+            /* 1. Stack the main dashboard into a single column */
+            .dashboard-grid {
+                grid-template-columns: 1fr !important;
+                grid-template-areas: "stats" "calendar" "reading" "practice" !important;
+                min-height: auto;
+            }
+
+            /* 2. Make the practice cards stack vertically */
+            .practice-cards-wrapper {
+                grid-template-columns: 1fr !important;
+            }
+            .task-card {
+                grid-column: span 1 !important; /* Forces RC card to shrink */
+            }
+
+            /* 3. Fix the Calendar overflow */
+            .days-row {
+                gap: 4px;
+            }
+            .day-box .day-name { font-size: 0.55rem; }
+            .day-box .day-num { font-size: 1rem; }
+
+            /* 4. Mobile Modal Fixes (Stacks the Passage on top of Questions) */
+            .pyq-modal-content {
+                padding: 15px 20px !important;
+                height: 95vh !important;
+                max-height: 95vh !important;
+            }
+            .pyq-body {
+                flex-direction: column !important;
+                overflow-y: auto !important;
+            }
+            .pyq-passage-pane {
+                border-right: none !important;
+                border-bottom: 2px dashed rgba(0,0,0,0.2);
+                padding-right: 0 !important;
+                padding-bottom: 15px;
+                max-height: 35vh; 
+            }
+            .pyq-question-pane {
+                width: 100% !important;
+                padding-top: 15px;
+            }
+            .pyq-close-btn {
+                top: 10px !important;
+                right: 10px !important;
+            }
+        }
       `}</style>
 
       <div className="dashboard-grid">
