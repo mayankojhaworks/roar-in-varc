@@ -117,35 +117,37 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
-      {/* THE FIX: The Strict Picture Frame Layout */}
+      {/* THE MATH FIX: Subtracting more space to pull the frame up into view */}
       <style>{`
-        /* 1. Stop the main body from bouncing or scrolling at all */
-        body, html, #root {
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* 2. The Frame: Always stays visible, crops anything overflowing the bottom */
-        .tab-wrapper, .tab-relative {
-            height: calc(100vh - 140px); /* Desktop: 140px perfectly clears header + margins */
-            width: 100%;
+        .tab-wrapper {
+            /* 220px generously clears your header, title, and all margins */
+            height: calc(100dvh - 220px); 
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Force crops the bottom border into existence */
-            position: relative;
         }
-
-        /* 3. The Canvas: Only the stuff INSIDE the frame scrolls */
         .tab-scroll-area {
             flex: 1;
-            overflow-y: auto; /* Adds internal scrollbar */
-            padding: 0 10px 20px 10px; /* Safe padding so content doesn't hit the bottom border */
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+        .tab-relative {
+            position: relative;
+            /* 220px guarantees it fits on your desktop without creating an outer scrollbar */
+            height: calc(100dvh - 220px); 
+            width: 100%;
         }
 
-        /* 4. Mobile Mode: Adjust frame height for taller stacked header */
+        /* MOBILE SPECIFIC SIZING */
         @media (max-width: 768px) {
             .tab-wrapper, .tab-relative {
-                height: calc(100dvh - 240px); /* Use dvh to ignore mobile address bar jumping */
+                /* Stacked mobile header needs a bit more clearance */
+                height: calc(100dvh - 280px) !important; 
+            }
+            .tab-relative > div {
+                overflow-y: auto !important;
+            }
+            .tab-scroll-area {
+                padding-bottom: 40px !important;
             }
         }
       `}</style>
