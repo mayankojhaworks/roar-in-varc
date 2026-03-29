@@ -117,10 +117,8 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
-      {/* THE MATH FIX: Subtracting more space to pull the frame up into view */}
       <style>{`
         .tab-wrapper {
-            /* 220px generously clears your header, title, and all margins */
             height: calc(100dvh - 220px); 
             display: flex;
             flex-direction: column;
@@ -132,7 +130,6 @@ export default function App() {
         }
         .tab-relative {
             position: relative;
-            /* 220px guarantees it fits on your desktop without creating an outer scrollbar */
             height: calc(100dvh - 220px); 
             width: 100%;
         }
@@ -140,14 +137,14 @@ export default function App() {
         /* MOBILE SPECIFIC SIZING */
         @media (max-width: 768px) {
             .tab-wrapper, .tab-relative {
-                /* Stacked mobile header needs a bit more clearance */
                 height: calc(100dvh - 280px) !important; 
             }
             .tab-relative > div {
                 overflow-y: auto !important;
             }
             .tab-scroll-area {
-                padding-bottom: 40px !important;
+                /* THE FIX: Increased to 100px so you can scroll fully past the coffee widget */
+                padding-bottom: 100px !important; 
             }
         }
       `}</style>
@@ -164,17 +161,16 @@ export default function App() {
       {/* TAB: MOCK ANALYTICS */}
       {activeTab === 'war-room' && (
         <div className="tab-relative">
-          {/* Note: WarRoom handles its own internal scroll areas, so we just lock its outer frame here */}
           <WarRoom records={warRoomRecords} onAddRecord={handleAddRecord} onDeleteRecord={handleDeleteRecord} missions={missionPlan} missionState={missionState} />
         </div>
       )}
 
-      {/* TAB: STUDY AUDIO */}
-      {activeTab === 'focus-beats' && (
-        <div className="tab-relative">
-          <FocusBeats />
-        </div>
-      )}
+      {/* TAB: STUDY AUDIO 
+          THE FIX: We ALWAYS render this div so the audio player never gets destroyed, 
+          we just visually hide it when you click away! */}
+      <div className="tab-relative" style={{ display: activeTab === 'focus-beats' ? 'block' : 'none' }}>
+        <FocusBeats />
+      </div>
 
       {/* TAB: DATA BACKUP */}
       {activeTab === 'data-backup' && (

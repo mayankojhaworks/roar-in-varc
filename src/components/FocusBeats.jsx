@@ -158,7 +158,6 @@ export default function FocusBeats() {
   return (
     <section className="focus-beats-layout">
       <style>{`
-        /* THE FIX: The Strict Grid Architecture */
         .focus-beats-layout {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             display: grid;
@@ -166,32 +165,41 @@ export default function FocusBeats() {
             gap: 25px;
         }
 
-        /* The Frame: Locks the island height, forces inner scrolling */
         .focus-beats-island {
             display: flex;
             flex-direction: column;
             height: 100%;
-            min-height: 0; /* CRITICAL: Kills the stretchy box problem */
-            overflow: hidden; /* Keeps the peach border rigidly in place */
+            min-height: 0; 
+            overflow: hidden; 
         }
 
-        /* The Canvas: Scrolls cleanly inside the playlist island */
         .playlist-scroll-area {
             flex: 1;
             overflow-y: auto;
             padding-bottom: 20px;
         }
 
-        /* Mobile specific layout logic */
+        /* THE FIX: Unlinking the rigid grid on mobile so you can scroll smoothly */
         @media (max-width: 768px) {
             .focus-beats-layout {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto 1fr; /* Player sizes naturally, Playlist takes the rest */
-                gap: 15px;
+                display: flex;
+                flex-direction: column;
+                overflow-y: auto; /* Makes the whole page scrollable */
+                padding-bottom: 40px;
             }
             .player-island {
-                height: auto; /* Let the player shrink on mobile */
+                height: auto; 
+                flex-shrink: 0; /* Prevents the player from crushing */
                 padding: 20px !important;
+                overflow: visible !important;
+            }
+            .focus-beats-island {
+                height: auto;
+                overflow: visible;
+            }
+            .playlist-scroll-area {
+                overflow-y: visible; /* Disables internal scroll, moves it to the parent */
+                padding-bottom: 0;
             }
         }
 
@@ -341,7 +349,6 @@ export default function FocusBeats() {
             <p className="player-label">Soundtrack Log</p>
         </div>
         
-        {/* This is the internal scrolling Canvas! */}
         <div className="playlist-scroll-area">
           {tracks.map((track, index) => {
             const active = index === currentIndex
