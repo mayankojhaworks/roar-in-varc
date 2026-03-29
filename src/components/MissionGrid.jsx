@@ -283,21 +283,33 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .clickable-stat { grid-column: span 2; background-color: #FFF5F5; cursor: pointer; border: 2px dashed rgba(231, 76, 60, 0.4); }
         .clickable-stat:hover { background-color: #FFEBEB; border-style: solid; border-color: var(--highlight-red); }
 
-        /* THE FIX (Issue B): Pulled further inward to clear all mobile screen edges */
+        /* THE FIX (Issue 2): Positioned INSIDE the grid padding so it's never cut */
         .info-toggle-btn {
-            position: absolute; top: -10px; right: 20px; width: 26px; height: 26px;
-            border-radius: 50%; background: var(--main-charcoal); color: white;
-            border: 2px solid var(--base-cream); font-family: var(--font-sketch);
-            font-weight: bold; font-size: 1rem; cursor: pointer; z-index: 100;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            width: 24px; 
+            height: 24px;
+            border-radius: 50%; 
+            background: var(--main-charcoal); 
+            color: white;
+            border: 2px solid var(--base-cream); 
+            font-family: var(--font-sketch);
+            font-weight: bold; 
+            font-size: 0.9rem; 
+            cursor: pointer; 
+            z-index: 100;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: all 0.2s; 
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
         }
         .info-toggle-btn:hover { transform: scale(1.1); background: var(--highlight-blue); }
 
-        /* THE FIX (Issue C): Translucent Overlay logic */
         .info-panel-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 253, 249, 0.96); backdrop-filter: blur(4px);
+            background: rgba(255, 253, 249, 0.97); backdrop-filter: blur(4px);
             z-index: 90; padding: 15px; border-radius: 15px;
             border: 2px solid var(--highlight-blue); display: flex;
             flex-direction: column; justify-content: center;
@@ -352,41 +364,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .task-card label { font-family: var(--font-sans); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; color: var(--hover-peach); }
         .notebook-input { width: 100%; height: 44px; background-color: transparent; border: none; background-image: linear-gradient(transparent, transparent 21px, rgba(0,0,0,0.08) 21px, rgba(0,0,0,0.08) 22px, transparent 22px); background-size: 100% 22px; line-height: 22px; font-family: var(--font-sketch); font-size: 1rem; color: var(--main-charcoal); resize: none; outline: none; }
 
-        /* MODAL STYLES */
-        .pyq-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 9999;
-        }
-        .pyq-modal-content {
-            background: var(--base-cream); border-radius: 16px; padding: 25px 35px; position: relative;
-            display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-        .pyq-modal-content.rc-mode { width: 95%; max-width: 1200px; height: 90vh; }
-        .pyq-modal-content.va-mode { width: 95%; max-width: 800px; max-height: 85vh; }
-        
-        .pyq-body { display: flex; gap: 30px; overflow: hidden; flex: 1; margin-top: 15px; min-height: 0; }
-        .pyq-passage-pane { flex: 1; overflow-y: auto; padding-right: 20px; border-right: 2px dashed rgba(0,0,0,0.2); }
-        .pyq-question-pane { flex: 1; overflow-y: auto; padding-right: 10px; display: flex; flex-direction: column; }
-        
-        .pyq-close-btn {
-            background: var(--highlight-red); color: white; border: none; border-radius: 50%;
-            width: 30px; height: 30px; font-weight: bold; cursor: pointer; transition: transform 0.2s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .pyq-close-btn:hover { transform: scale(1.1); }
-        
-        .pyq-option-btn {
-            display: block; width: 100%; text-align: left; padding: 12px 15px; border-radius: 8px; 
-            transition: all 0.2s; color: var(--main-charcoal); font-size: 0.95rem; line-height: 1.4;
-            white-space: pre-wrap; word-break: break-word; margin-bottom: 10px;
-        }
-        .pyq-option-btn:hover:not(:disabled) { transform: translateX(5px); }
-        .secondary-btn {
-            background: transparent; border: 2px dashed var(--main-charcoal); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: var(--font-sketch); font-weight: bold; transition: all 0.2s;
-        }
-        .secondary-btn:hover:not(:disabled) { background: var(--hover-peach); color: white; border-style: solid; border-color: transparent; }
-        .secondary-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr !important;
@@ -400,12 +377,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             .day-box .day-name { font-size: 0.55rem; margin-top: 4px; }
             .day-box .day-num { font-size: 1.1rem; margin-top: -2px; }
             .day-indicator { font-size: 0.55rem !important; bottom: 4px !important; line-height: 1; }
-
-            .pyq-modal-content { padding: 15px 20px !important; height: 95vh !important; max-height: 95vh !important; }
-            .pyq-body { flex-direction: column !important; overflow-y: auto !important; }
-            .pyq-passage-pane { border-right: none !important; border-bottom: 2px dashed rgba(0,0,0,0.2); padding-right: 0 !important; padding-bottom: 15px; max-height: 35vh; }
-            .pyq-question-pane { width: 100% !important; padding-top: 15px; }
-            .pyq-close-btn { top: 10px !important; right: 10px !important; }
         }
       `}</style>
 
@@ -419,13 +390,12 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                 {showStatsInfo ? 'X' : 'i'}
             </button>
 
-            {/* THE FIX: Absolute Overlay for Info Panel */}
             {showStatsInfo && (
                 <div className="info-panel-overlay" onClick={() => setShowStatsInfo(false)}>
                     <div style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--main-charcoal)', textAlign: 'left', fontFamily: 'var(--font-sans)' }}>
                         <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🗓 Timeline:</strong> Mar 28 - Nov 29, 2026.</div>
-                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>⏳ Days Left:</strong> Actual days until the exam.</div>
-                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🎯 Pending:</strong> 246 days minus your completions.</div>
+                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>⏳ Days Left:</strong> Days until the exam.</div>
+                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🎯 Pending:</strong> 246 days minus completions.</div>
                         <div><strong style={{ color: 'var(--highlight-red)' }}>⚠️ Missed:</strong> Past days not marked ✓ DONE.</div>
                     </div>
                 </div>
