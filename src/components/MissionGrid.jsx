@@ -283,20 +283,20 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .clickable-stat { grid-column: span 2; background-color: #FFF5F5; cursor: pointer; border: 2px dashed rgba(231, 76, 60, 0.4); }
         .clickable-stat:hover { background-color: #FFEBEB; border-style: solid; border-color: var(--highlight-red); }
 
-        /* THE FIX (Issue 2): Positioned INSIDE the grid padding so it's never cut */
+        /* THE FIX: Button perfectly anchored INSIDE the specific card, with Dark Mode variables */
         .info-toggle-btn {
             position: absolute; 
-            top: 10px; 
-            right: 10px; 
-            width: 24px; 
-            height: 24px;
+            top: 6px; 
+            right: 6px; 
+            width: 22px; 
+            height: 22px;
             border-radius: 50%; 
             background: var(--main-charcoal); 
-            color: white;
+            color: var(--base-cream); /* Dynamic color! Light text in light mode, Dark text in dark mode */
             border: 2px solid var(--base-cream); 
             font-family: var(--font-sketch);
             font-weight: bold; 
-            font-size: 0.9rem; 
+            font-size: 0.85rem; 
             cursor: pointer; 
             z-index: 100;
             display: flex; 
@@ -305,15 +305,21 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             transition: all 0.2s; 
             box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
         }
-        .info-toggle-btn:hover { transform: scale(1.1); background: var(--highlight-blue); }
+        .info-toggle-btn:hover { 
+            transform: scale(1.1); 
+            background: var(--highlight-blue); 
+            border-color: var(--highlight-blue); 
+            color: white; 
+        }
 
         .info-panel-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 253, 249, 0.97); backdrop-filter: blur(4px);
+            background: var(--base-cream); /* Uses theme variable instead of hardcoded white rgba */
             z-index: 90; padding: 15px; border-radius: 15px;
             border: 2px solid var(--highlight-blue); display: flex;
             flex-direction: column; justify-content: center;
-            animation: infoFadeIn 0.3s ease forwards;
+            animation: infoFadeIn 0.2s ease forwards;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05); /* Soft inner shadow for depth */
         }
         @keyframes infoFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -382,14 +388,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
 
       <div className="dashboard-grid">
         <div className="stats-container">
-            <button 
-                className="info-toggle-btn" 
-                onClick={(e) => { e.stopPropagation(); setShowStatsInfo(!showStatsInfo); }}
-                title="How is this calculated?"
-            >
-                {showStatsInfo ? 'X' : 'i'}
-            </button>
-
+            {/* THE FIX: Overlay background adapted perfectly for Dark Mode */}
             {showStatsInfo && (
                 <div className="info-panel-overlay" onClick={() => setShowStatsInfo(false)}>
                     <div style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--main-charcoal)', textAlign: 'left', fontFamily: 'var(--font-sans)' }}>
@@ -402,7 +401,20 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             )}
 
             <div className="stat-card island sketch-border"><div className="stat-value" style={{color: '#E74C3C'}}>{daysLeft}</div><div className="stat-label">Days Left</div></div>
-            <div className="stat-card island sketch-border"><div className="stat-value">{totalDays}</div><div className="stat-label">Total Days</div></div>
+            
+            {/* THE FIX: Button is now physically locked INSIDE the Total Days card layout */}
+            <div className="stat-card island sketch-border" style={{ position: 'relative' }}>
+                <button 
+                    className="info-toggle-btn" 
+                    onClick={(e) => { e.stopPropagation(); setShowStatsInfo(!showStatsInfo); }}
+                    title="How is this calculated?"
+                >
+                    {showStatsInfo ? 'X' : 'i'}
+                </button>
+                <div className="stat-value">{totalDays}</div>
+                <div className="stat-label">Total Days</div>
+            </div>
+
             <div className="stat-card island sketch-border"><div className="stat-value" style={{color: '#27AE60'}}>{completedCount}</div><div className="stat-label">Completed</div></div>
             <div className="stat-card island sketch-border"><div className="stat-value" style={{color: '#3498DB'}}>{pendingCount}</div><div className="stat-label">Pending</div></div>
             <div className="stat-card island sketch-border clickable-stat" onClick={handleFindMissed}><div className="stat-value" style={{color: '#E74C3C'}}>{missedCount}</div><div className="stat-label">Days Missed (Click to view)</div></div>

@@ -25,83 +25,70 @@ export default function ThemeToggle() {
   };
 
   return (
-    <button 
-      className={`theme-btn ${isDark ? 'night' : 'day'}`} 
-      onClick={toggleTheme} 
-      aria-label="Toggle Dark Mode"
-    >
+    <button className={`theme-btn ${isDark ? 'night' : 'day'}`} onClick={toggleTheme} aria-label="Toggle Dark Mode">
       <style>{`
         .theme-btn {
-          /* THE FIX: Fixed dimensions and flex-shrink prevent stretching on mobile */
-          width: 58px !important;
-          height: 28px !important;
-          flex-shrink: 0;
-          border-radius: 20px;
+          /* THE MAGIC FIX: Locking dimensions to prevent mobile stretch */
+          width: 64px !important;
+          height: 32px !important;
+          flex-shrink: 0 !important;
+          
+          border-radius: 30px;
           border: 2px solid var(--main-charcoal);
           cursor: pointer;
           position: relative;
           overflow: hidden;
           padding: 0;
-          background: #87CEEB; /* Default Day Sky */
-          box-shadow: 3px 3px 0px var(--main-charcoal);
-          transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+          box-shadow: 2px 2px 0px var(--main-charcoal);
+          transition: all 0.3s ease;
         }
+        .theme-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0px var(--main-charcoal); }
+        .theme-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px var(--main-charcoal); }
 
-        .theme-btn.night {
-          background: #1A1A2E; /* Night Sky */
+        /* The Sky Background */
+        .sky {
+          position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+          transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .day .sky { background: #87CEEB; } /* Day Sky */
+        .night .sky { background: #1A1A2E; } /* Night Sky */
 
-        /* The Knob (Sun/Moon) */
-        .celestial-knob {
+        /* The Celestial Bodies Container */
+        .celestial-container {
           position: absolute;
-          top: 2px;
-          left: 3px;
-          width: 20px;
-          height: 20px;
+          width: 100%; height: 100%;
+          transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .day .celestial-container { transform: translateY(0); }
+        .night .celestial-container { transform: translateY(-100%); }
+
+        /* The Sun (Visible in Day) */
+        .sun {
+          position: absolute; top: 4px; left: 6px;
+          width: 20px; height: 20px;
+          background: #FFD700;
           border-radius: 50%;
-          background: #FFD700; /* Sun */
-          border: 1.5px solid #DAA520;
-          transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          border: 2px solid #DAA520;
           box-sizing: border-box;
         }
 
-        /* Night State for Knob */
-        .night .celestial-knob {
-          transform: translateX(28px);
-          background: #1A1A2E; /* Match sky */
-          border-color: #FFF;
-          box-shadow: inset -6px 0px 0 0 #FFF; /* Becomes a Crescent Moon */
-        }
-
-        /* Stars (only visible in night) */
-        .stars {
-          position: absolute;
-          top: 0; left: 0; width: 100%; height: 100%;
-          opacity: 0;
-          transition: opacity 0.5s;
-        }
-        .night .stars { opacity: 1; }
-        .star {
-          position: absolute; background: white; border-radius: 50%;
-        }
-
-        .theme-btn:hover { transform: scale(1.05); }
-        .theme-btn:active { transform: scale(0.95); }
-
-        @media (max-width: 768px) {
-          .theme-btn {
-             transform: scale(0.9); /* Slightly smaller on mobile to look elegant */
-          }
+        /* The Moon (Visible in Night - pushed down below the sun initially) */
+        .moon {
+          position: absolute; top: 104%; right: 6px; /* 100% pushes it exactly one frame down */
+          width: 20px; height: 20px;
+          background: transparent;
+          border-radius: 50%;
+          box-shadow: inset -6px 0px 0 0 #FFF; /* Creates the crescent shape */
+          box-sizing: border-box;
         }
       `}</style>
       
-      <div className="stars">
-        <div className="star" style={{ top: '5px', left: '10px', width: '2px', height: '2px' }}></div>
-        <div className="star" style={{ top: '15px', left: '15px', width: '1px', height: '1px' }}></div>
-        <div className="star" style={{ top: '8px', left: '30px', width: '2px', height: '2px' }}></div>
+      <div className="sky">
+        <div className="celestial-container">
+          <div className="sun"></div>
+          <div className="moon"></div>
+        </div>
       </div>
-      
-      <div className="celestial-knob"></div>
     </button>
   );
 }
