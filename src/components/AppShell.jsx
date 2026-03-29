@@ -65,43 +65,43 @@ export default function AppShell({ activeTab, onTabChange, children }) {
 
         /* THE FIX: Mobile-Only UI Enhancements */
         @media (max-width: 768px) {
-            /* 1. Target the nav links inside GlobalHeader */
-            .top-nav button {
-                /* Force the sketch font on mobile */
-                font-family: var(--font-sketch) !important;
-                font-size: 0.85rem !important;
-                
-                /* Turn them into buttons */
-                border: 1.5px dashed rgba(0,0,0,0.2) !important;
-                border-radius: 8px !important;
-                padding: 6px 10px !important;
-                background: transparent !important;
-                margin: 0 !important;
-                
-                /* Layout adjustments so they fit in a row */
-                flex: 1 1 40% !important;
-                text-align: center !important;
+            .nav-links-container {
+                display: flex !important;
+                flex-wrap: nowrap !important; /* Forces a single row */
+                gap: 5px !important;
+                width: 100% !important;
+                padding-bottom: 5px !important;
+                border-bottom: 2px dashed rgba(0,0,0,0.1) !important;
+                margin-bottom: 10px !important;
             }
 
-            /* 2. Highlight the active button */
+            .top-nav button {
+                /* Forcing the strict desktop font explicitly */
+                font-family: 'Architects Daughter', cursive, var(--font-sketch) !important;
+                font-size: 0.65rem !important; /* Shrunk slightly to fit beautifully in 1 row */
+                
+                /* Clean, solid pill-shaped buttons instead of dashes */
+                border: 1px solid rgba(0,0,0,0.15) !important;
+                border-radius: 20px !important;
+                padding: 6px 2px !important;
+                background: white !important;
+                
+                /* Layout */
+                flex: 1 1 25% !important; 
+                text-align: center !important;
+                white-space: nowrap !important;
+                color: rgba(51, 51, 51, 0.8) !important;
+                box-shadow: 2px 2px 0px rgba(0,0,0,0.05) !important;
+                transition: all 0.2s !important;
+            }
+
             .top-nav button.active-nav-btn {
                 border: 1.5px solid var(--main-charcoal) !important;
                 background: var(--hover-peach) !important;
                 color: white !important;
                 font-weight: bold !important;
+                box-shadow: 2px 2px 0px var(--main-charcoal) !important;
                 transform: scale(1.02);
-            }
-
-            /* 3. Re-arrange the nav container to wrap nicely */
-            .nav-links-container {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                gap: 8px !important;
-                justify-content: center !important;
-                width: 100% !important;
-                padding-bottom: 5px !important;
-                border-bottom: 2px dashed rgba(0,0,0,0.1) !important;
-                margin-bottom: 10px !important;
             }
         }
       `}</style>

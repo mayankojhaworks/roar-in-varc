@@ -286,14 +286,16 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .clickable-stat { grid-column: span 2; background-color: #FFF5F5; cursor: pointer; border: 2px dashed rgba(231, 76, 60, 0.4); }
         .clickable-stat:hover { background-color: #FFEBEB; border-style: solid; border-color: var(--highlight-red); }
 
-        /* THE FIX: Info Button CSS */
+       /* THE FIX: Info Button CSS pulled inward */
         .info-toggle-btn {
-            position: absolute; top: -8px; right: -8px; width: 24px; height: 24px;
+            position: absolute; top: -8px; right: 8px; /* Changed from -8px to 8px to pull it inside */
+            width: 24px; height: 24px;
             border-radius: 50%; background: var(--main-charcoal); color: white;
             border: 2px solid var(--base-cream); font-family: var(--font-sketch);
             font-weight: bold; font-size: 0.9rem; cursor: pointer; z-index: 10;
             display: flex; align-items: center; justify-content: center;
             transition: all 0.2s; box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+        }
         }
         .info-toggle-btn:hover { transform: scale(1.1); background: var(--highlight-blue); }
         .info-panel {
