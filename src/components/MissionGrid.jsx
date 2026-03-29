@@ -61,7 +61,6 @@ function formatWeekRange(startDate) {
   return `${startDate.getDate()} ${startMonth} ${startDate.getFullYear()} - ${endDate.getDate()} ${endMonth} ${endDate.getFullYear()}`
 }
 
-// THE FIX: "Upcoming" replaces "Locked" so future days in the current week are clickable!
 function getMissionStatus(missionDateStr, completed) {
   if (completed) return 'completed'
   const todayTime = getZeroedTime()
@@ -84,6 +83,9 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
      const weekStart = getWeekStart(new Date());
      return getDateKey(weekStart);
   })
+  
+  // THE FIX: State for the new Info Panel
+  const [showStatsInfo, setShowStatsInfo] = useState(false)
   
   // --- PYQ MODAL STATES ---
   const [activePyq, setActivePyq] = useState(null)
@@ -115,10 +117,9 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
       }))
   }, [enrichedMissions])
 
-  // THE FIX: Finding the "Real World" Current Week
   const currentRealWeekIndex = useMemo(() => {
       const todayTime = getZeroedTime();
-      let idx = 0; // Default to Week 1 if plan hasn't started
+      let idx = 0; 
       weeks.forEach((w, i) => {
           if (getZeroedTime(w.startDate) <= todayTime) idx = i;
       });
@@ -126,7 +127,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
   }, [weeks]);
 
   const validWeekIndex = Math.max(0, weeks.findIndex((w) => w.key === selectedWeekKey));
-  // Force clamp to ensure user can never navigate past the current real-world week
   const activeWeekIndex = Math.min(validWeekIndex, currentRealWeekIndex);
   const selectedWeek = weeks[activeWeekIndex];
 
@@ -137,7 +137,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
       if (activeWeekIndex < currentRealWeekIndex) setSelectedWeekKey(weeks[activeWeekIndex + 1].key);
   }
 
-  // Fallback to auto-select a day if navigating
   useEffect(() => {
     if (!selectedWeek) return
     const availableDayNumbers = selectedWeek.slots.filter(Boolean).map((mission) => mission.dayNumber)
@@ -280,12 +279,28 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             grid-template-rows: auto minmax(0, 1fr); gap: 15px; min-height: 100%;
         }
 
-        .stats-container { grid-area: stats; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stats-container { grid-area: stats; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; position: relative; }
         .stat-card { padding: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .stat-value { font-size: 1.4rem; font-family: var(--font-sketch); font-weight: bold; line-height: 1; margin-bottom: 2px; }
         .stat-label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.7; }
         .clickable-stat { grid-column: span 2; background-color: #FFF5F5; cursor: pointer; border: 2px dashed rgba(231, 76, 60, 0.4); }
         .clickable-stat:hover { background-color: #FFEBEB; border-style: solid; border-color: var(--highlight-red); }
+
+        /* THE FIX: Info Button CSS */
+        .info-toggle-btn {
+            position: absolute; top: -8px; right: -8px; width: 24px; height: 24px;
+            border-radius: 50%; background: var(--main-charcoal); color: white;
+            border: 2px solid var(--base-cream); font-family: var(--font-sketch);
+            font-weight: bold; font-size: 0.9rem; cursor: pointer; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+        }
+        .info-toggle-btn:hover { transform: scale(1.1); background: var(--highlight-blue); }
+        .info-panel {
+            grid-column: span 2; background: #FFFDF9 !important; padding: 12px 15px !important;
+            animation: fadeInDown 0.3s ease forwards; border-color: var(--highlight-blue) !important;
+        }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
         .calendar-container { grid-area: calendar; padding: 10px 15px; display: flex; flex-direction: column; justify-content: space-between; }
         
@@ -422,8 +437,28 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
       `}</style>
 
       <div className="dashboard-grid">
-        {/* Stats */}
+        {/* Stats Section with New Info Button */}
         <div className="stats-container">
+            <button 
+                className="info-toggle-btn" 
+                onClick={() => setShowStatsInfo(!showStatsInfo)}
+                title="How is this calculated?"
+            >
+                i
+            </button>
+
+            {/* THE FIX: The Expandable Info Legend */}
+            {showStatsInfo && (
+                <div className="island sketch-border info-panel">
+                    <div style={{ fontSize: '0.8rem', lineHeight: '1.6', color: 'var(--main-charcoal)', textAlign: 'left', fontFamily: 'var(--font-sans)' }}>
+                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🗓 Timeline:</strong> Mar 28, 2026 to Nov 29, 2026.</div>
+                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>⏳ Days Left:</strong> Real-world calendar days remaining until the exam.</div>
+                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🎯 Pending:</strong> Your total roadmap (246 days) minus your completed days. This is your remaining workload.</div>
+                        <div><strong style={{ color: 'var(--highlight-red)' }}>⚠️ Missed:</strong> Real-world days that have passed without being marked as ✓ DONE.</div>
+                    </div>
+                </div>
+            )}
+
             <div className="stat-card island sketch-border"><div className="stat-value" style={{color: '#E74C3C'}}>{daysLeft}</div><div className="stat-label">Days Left</div></div>
             <div className="stat-card island sketch-border"><div className="stat-value">{totalDays}</div><div className="stat-label">Total Days</div></div>
             <div className="stat-card island sketch-border"><div className="stat-value" style={{color: '#27AE60'}}>{completedCount}</div><div className="stat-label">Completed</div></div>
@@ -492,7 +527,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                     return (
                         <div className="task-card" key={`cr-${index}`}>
                             <label>{q?.url ? <a href={q.url} target="_blank" rel="noreferrer" className="practice-link">CR {index + 1}: {q?.source || 'GMAT CLUB'} &#8599;</a> : `CR ${index + 1}: ${q?.source || 'GMAT CLUB'}`}</label>
-                            {/* THE FIX: Unified placeholder text */}
                             <textarea className="notebook-input" placeholder="Add Remarks..." value={index === 0 ? selectedMissionState.crRemarks1 : selectedMissionState.crRemarks2} onChange={(e) => updateField(index === 0 ? 'crRemarks1' : 'crRemarks2', e.target.value)} />
                         </div>
                     )
@@ -513,7 +547,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                                     <span style={{ fontSize: '0.9rem' }}>{indicator}</span>
                                 </span>
                             </label>
-                            {/* THE FIX: Unified placeholder text */}
                             <textarea className="notebook-input" placeholder="Add Remarks..." value={index === 0 ? selectedMissionState.vaRemarks1 : selectedMissionState.vaRemarks2} onChange={(e) => updateField(index === 0 ? 'vaRemarks1' : 'vaRemarks2', e.target.value)} />
                         </div>
                     )
@@ -535,7 +568,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                                     <span style={{ color: 'var(--highlight-green)', fontSize: '0.85rem' }}>{indicator}</span>
                                 </span>
                             </label>
-                            {/* THE FIX: Unified placeholder text */}
                             <textarea className="notebook-input" placeholder="Add Remarks..." value={index === 0 ? selectedMissionState.rcRemarks1 : selectedMissionState.rcRemarks2} onChange={(e) => updateField(index === 0 ? 'rcRemarks1' : 'rcRemarks2', e.target.value)} />
                         </div>
                     )

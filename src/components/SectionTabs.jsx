@@ -9,6 +9,7 @@ export default function SectionTabs({ activeTab, onChange }) {
   return (
     <nav
       aria-label="Primary"
+      className="nav-links-container" /* THE FIX: Applied mobile container class */
       style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -39,7 +40,8 @@ export default function SectionTabs({ activeTab, onChange }) {
           <button
             key={tab.key}
             type="button"
-            className={`nav-tab-link ${isActive ? 'active' : ''}`}
+            /* THE FIX: Added active-nav-btn for mobile targeting */
+            className={`nav-tab-link ${isActive ? 'active active-nav-btn' : ''}`}
             onClick={() => onChange(tab.key)}
           >
             {tab.label}

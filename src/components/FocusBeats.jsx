@@ -179,27 +179,31 @@ export default function FocusBeats() {
             padding-bottom: 20px;
         }
 
-        /* THE FIX: Unlinking the rigid grid on mobile so you can scroll smoothly */
         @media (max-width: 768px) {
             .focus-beats-layout {
                 display: flex;
                 flex-direction: column;
-                overflow-y: auto; /* Makes the whole page scrollable */
+                overflow-y: auto;
                 padding-bottom: 40px;
             }
             .player-island {
                 height: auto; 
-                flex-shrink: 0; /* Prevents the player from crushing */
+                flex-shrink: 0; 
                 padding: 20px !important;
-                overflow: visible !important;
             }
+            
+            /* THE FIX: Forcing block layout on mobile bypassing buggy flexbox calculations */
             .focus-beats-island {
-                height: auto;
-                overflow: visible;
+                height: auto !important;
+                display: block !important;
+                overflow: visible !important;
+                flex: none !important;
             }
             .playlist-scroll-area {
-                overflow-y: visible; /* Disables internal scroll, moves it to the parent */
-                padding-bottom: 0;
+                height: auto !important;
+                display: block !important;
+                overflow: visible !important;
+                padding-bottom: 10px;
             }
         }
 
@@ -345,8 +349,9 @@ export default function FocusBeats() {
 
       {/* Playlist Section */}
       <div className="island sketch-border no-hover-lift focus-beats-island" style={{ padding: '0' }}>
-        <div style={{ padding: '20px 25px 10px' }}>
-            <p className="player-label">Soundtrack Log</p>
+        <div style={{ padding: '20px 25px 10px', flexShrink: 0 }}>
+            {/* Added margin: 0 to guarantee paragraph margins don't collapse the layout */}
+            <p className="player-label" style={{ margin: 0 }}>Soundtrack Log</p>
         </div>
         
         <div className="playlist-scroll-area">

@@ -62,6 +62,48 @@ export default function AppShell({ activeTab, onTabChange, children }) {
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--hover-peach); }
+
+        /* THE FIX: Mobile-Only UI Enhancements */
+        @media (max-width: 768px) {
+            /* 1. Target the nav links inside GlobalHeader */
+            .top-nav button {
+                /* Force the sketch font on mobile */
+                font-family: var(--font-sketch) !important;
+                font-size: 0.85rem !important;
+                
+                /* Turn them into buttons */
+                border: 1.5px dashed rgba(0,0,0,0.2) !important;
+                border-radius: 8px !important;
+                padding: 6px 10px !important;
+                background: transparent !important;
+                margin: 0 !important;
+                
+                /* Layout adjustments so they fit in a row */
+                flex: 1 1 40% !important;
+                text-align: center !important;
+            }
+
+            /* 2. Highlight the active button */
+            .top-nav button.active-nav-btn {
+                border: 1.5px solid var(--main-charcoal) !important;
+                background: var(--hover-peach) !important;
+                color: white !important;
+                font-weight: bold !important;
+                transform: scale(1.02);
+            }
+
+            /* 3. Re-arrange the nav container to wrap nicely */
+            .nav-links-container {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+                justify-content: center !important;
+                width: 100% !important;
+                padding-bottom: 5px !important;
+                border-bottom: 2px dashed rgba(0,0,0,0.1) !important;
+                margin-bottom: 10px !important;
+            }
+        }
       `}</style>
 
       <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', padding: '15px', boxSizing: 'border-box' }}>
@@ -69,7 +111,6 @@ export default function AppShell({ activeTab, onTabChange, children }) {
           
           <GlobalHeader activeTab={activeTab} onTabChange={onTabChange} />
 
-          {/* This main wrapper is now locked in place */}
           <main style={{ flex: 1, minHeight: 0, overflow: 'hidden', position: 'relative' }}>
             {children}
           </main>
