@@ -7,7 +7,6 @@ const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const vaQuestions = pyqData.filter(q => q.type === 'VA')
 const rawRcQuestions = pyqData.filter(q => q.type === 'RC')
 
-// Group RC questions by their passage so they appear as a set
 const rcSets = []
 const passageMap = new Map()
 rawRcQuestions.forEach(q => {
@@ -84,7 +83,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
      return getDateKey(weekStart);
   })
   
-  // THE FIX: State for the new Info Panel
   const [showStatsInfo, setShowStatsInfo] = useState(false)
   
   // --- PYQ MODAL STATES ---
@@ -173,7 +171,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
     }
   }
 
-  // --- PYQ TIMER LOGIC ---
   useEffect(() => {
     if (!activePyq || timeLeft <= 0 || isSubmitted) return;
     const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
@@ -286,26 +283,29 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .clickable-stat { grid-column: span 2; background-color: #FFF5F5; cursor: pointer; border: 2px dashed rgba(231, 76, 60, 0.4); }
         .clickable-stat:hover { background-color: #FFEBEB; border-style: solid; border-color: var(--highlight-red); }
 
-       /* THE FIX: Info Button CSS pulled inward */
+        /* THE FIX (Issue B): Pulled further inward to clear all mobile screen edges */
         .info-toggle-btn {
-            position: absolute; top: -8px; right: 8px; /* Changed from -8px to 8px to pull it inside */
-            width: 24px; height: 24px;
+            position: absolute; top: -10px; right: 20px; width: 26px; height: 26px;
             border-radius: 50%; background: var(--main-charcoal); color: white;
             border: 2px solid var(--base-cream); font-family: var(--font-sketch);
-            font-weight: bold; font-size: 0.9rem; cursor: pointer; z-index: 10;
+            font-weight: bold; font-size: 1rem; cursor: pointer; z-index: 100;
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s; box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
-        }
+            transition: all 0.2s; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
         }
         .info-toggle-btn:hover { transform: scale(1.1); background: var(--highlight-blue); }
-        .info-panel {
-            grid-column: span 2; background: #FFFDF9 !important; padding: 12px 15px !important;
-            animation: fadeInDown 0.3s ease forwards; border-color: var(--highlight-blue) !important;
+
+        /* THE FIX (Issue C): Translucent Overlay logic */
+        .info-panel-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 253, 249, 0.96); backdrop-filter: blur(4px);
+            z-index: 90; padding: 15px; border-radius: 15px;
+            border: 2px solid var(--highlight-blue); display: flex;
+            flex-direction: column; justify-content: center;
+            animation: infoFadeIn 0.3s ease forwards;
         }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes infoFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .calendar-container { grid-area: calendar; padding: 10px 15px; display: flex; flex-direction: column; justify-content: space-between; }
-        
         .week-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
         .week-nav-btn { background: none; border: none; font-family: var(--font-sketch); font-size: 0.9rem; color: var(--highlight-blue); cursor: pointer; font-weight: bold; padding: 5px; transition: opacity 0.2s;}
         .week-nav-btn:hover:not(:disabled) { opacity: 0.7; }
@@ -387,76 +387,46 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .secondary-btn:hover:not(:disabled) { background: var(--hover-peach); color: white; border-style: solid; border-color: transparent; }
         .secondary-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* --- MOBILE RESPONSIVENESS FIXES --- */
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr !important;
                 grid-template-areas: "stats" "calendar" "reading" "practice" !important;
                 min-height: auto;
             }
-            .practice-cards-wrapper {
-                grid-template-columns: 1fr !important;
-            }
-            .task-card {
-                grid-column: span 1 !important; 
-            }
-            .days-row {
-                gap: 4px;
-            }
-            .day-box {
-                min-height: 70px !important; 
-                padding-bottom: 18px !important; 
-            }
+            .practice-cards-wrapper { grid-template-columns: 1fr !important; }
+            .task-card { grid-column: span 1 !important; }
+            .days-row { gap: 4px; }
+            .day-box { min-height: 70px !important; padding-bottom: 18px !important; }
             .day-box .day-name { font-size: 0.55rem; margin-top: 4px; }
             .day-box .day-num { font-size: 1.1rem; margin-top: -2px; }
             .day-indicator { font-size: 0.55rem !important; bottom: 4px !important; line-height: 1; }
 
-            .pyq-modal-content {
-                padding: 15px 20px !important;
-                height: 95vh !important;
-                max-height: 95vh !important;
-            }
-            .pyq-body {
-                flex-direction: column !important;
-                overflow-y: auto !important;
-            }
-            .pyq-passage-pane {
-                border-right: none !important;
-                border-bottom: 2px dashed rgba(0,0,0,0.2);
-                padding-right: 0 !important;
-                padding-bottom: 15px;
-                max-height: 35vh; 
-            }
-            .pyq-question-pane {
-                width: 100% !important;
-                padding-top: 15px;
-            }
-            .pyq-close-btn {
-                top: 10px !important;
-                right: 10px !important;
-            }
+            .pyq-modal-content { padding: 15px 20px !important; height: 95vh !important; max-height: 95vh !important; }
+            .pyq-body { flex-direction: column !important; overflow-y: auto !important; }
+            .pyq-passage-pane { border-right: none !important; border-bottom: 2px dashed rgba(0,0,0,0.2); padding-right: 0 !important; padding-bottom: 15px; max-height: 35vh; }
+            .pyq-question-pane { width: 100% !important; padding-top: 15px; }
+            .pyq-close-btn { top: 10px !important; right: 10px !important; }
         }
       `}</style>
 
       <div className="dashboard-grid">
-        {/* Stats Section with New Info Button */}
         <div className="stats-container">
             <button 
                 className="info-toggle-btn" 
-                onClick={() => setShowStatsInfo(!showStatsInfo)}
+                onClick={(e) => { e.stopPropagation(); setShowStatsInfo(!showStatsInfo); }}
                 title="How is this calculated?"
             >
-                i
+                {showStatsInfo ? 'X' : 'i'}
             </button>
 
-            {/* THE FIX: The Expandable Info Legend */}
+            {/* THE FIX: Absolute Overlay for Info Panel */}
             {showStatsInfo && (
-                <div className="island sketch-border info-panel">
-                    <div style={{ fontSize: '0.8rem', lineHeight: '1.6', color: 'var(--main-charcoal)', textAlign: 'left', fontFamily: 'var(--font-sans)' }}>
-                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🗓 Timeline:</strong> Mar 28, 2026 to Nov 29, 2026.</div>
-                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>⏳ Days Left:</strong> Real-world calendar days remaining until the exam.</div>
-                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🎯 Pending:</strong> Your total roadmap (246 days) minus your completed days. This is your remaining workload.</div>
-                        <div><strong style={{ color: 'var(--highlight-red)' }}>⚠️ Missed:</strong> Real-world days that have passed without being marked as ✓ DONE.</div>
+                <div className="info-panel-overlay" onClick={() => setShowStatsInfo(false)}>
+                    <div style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--main-charcoal)', textAlign: 'left', fontFamily: 'var(--font-sans)' }}>
+                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🗓 Timeline:</strong> Mar 28 - Nov 29, 2026.</div>
+                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>⏳ Days Left:</strong> Actual days until the exam.</div>
+                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🎯 Pending:</strong> 246 days minus your completions.</div>
+                        <div><strong style={{ color: 'var(--highlight-red)' }}>⚠️ Missed:</strong> Past days not marked ✓ DONE.</div>
                     </div>
                 </div>
             )}
@@ -468,28 +438,21 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             <div className="stat-card island sketch-border clickable-stat" onClick={handleFindMissed}><div className="stat-value" style={{color: '#E74C3C'}}>{missedCount}</div><div className="stat-label">Days Missed (Click to view)</div></div>
         </div>
 
-        {/* Calendar */}
         <div className="calendar-container island sketch-border">
             <div className="week-header">
                 <button onClick={goToPrevWeek} disabled={activeWeekIndex === 0} className="week-nav-btn">&larr; Prev Week</button>
                 <span style={{fontFamily: 'var(--font-sketch)', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                     <span>Week {activeWeekIndex + 1} // {selectedWeek?.label}</span>
                 </span>
-                
                 <button onClick={goToNextWeek} style={{ visibility: activeWeekIndex >= currentRealWeekIndex ? 'hidden' : 'visible' }} className="week-nav-btn">Next Week &rarr;</button>
             </div>
             
             <div className="days-row">
                 {selectedWeek?.slots.map((mission, index) => {
                     if (!mission) return <div key={`empty-${index}`} className="day-box pending" style={{border: '1px dashed rgba(0,0,0,0.1)'}}><div className="day-name">{WEEKDAY_LABELS[index]}</div><div className="day-num">{addDays(selectedWeek.startDate, index).getDate()}</div><div className="day-indicator" style={{ opacity: 0.4 }}>-</div></div>
-                    
                     const isSelected = selectedDay === mission.dayNumber
                     let statusClass = isSelected ? 'active' : (mission.status === 'completed' ? 'completed' : (mission.status === 'missed' ? 'missed-alert' : (mission.status === 'upcoming' ? 'upcoming' : 'pending')))
-                    
-                    let indicatorLabel = (mission.status === 'active' || isSameDayInline(mission.date, new Date())) 
-                        ? 'Today' 
-                        : (mission.status === 'upcoming' ? 'Upcoming' : mission.status)
-                    
+                    let indicatorLabel = (mission.status === 'active' || isSameDayInline(mission.date, new Date())) ? 'Today' : (mission.status === 'upcoming' ? 'Upcoming' : mission.status)
                     return (
                         <div key={mission.dayNumber} className={`day-box ${statusClass}`} onClick={() => setSelectedDay(mission.dayNumber)}>
                             <div className="day-name">{WEEKDAY_LABELS[index]}</div>
@@ -501,7 +464,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             </div>
         </div>
 
-        {/* Reading Area */}
         <div className="reading-container island sketch-border">
             <h2 className="panel-title">
                 <span>Reading <span style={{opacity: 0.6, fontSize: '0.85rem'}}>Day {selectedMission.dayNumber}</span></span>
@@ -518,12 +480,9 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             {(!selectedMission.articles || selectedMission.articles.length === 0) && <p style={{opacity: 0.6, fontStyle: 'italic', fontSize: '0.9rem'}}>No reading assigned for today.</p>}
         </div>
 
-        {/* Practice Area */}
         <div className="practice-container island sketch-border">
             <h2 className="panel-title">Practice Workspace <span>CR / VA / RC</span></h2>
             <div className="practice-cards-wrapper">
-                
-                {/* CR Cards */}
                 {[0, 1].map((index) => {
                     const q = selectedMission.crQuestions?.[index];
                     return (
@@ -533,43 +492,27 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                         </div>
                     )
                 })}
-
-                {/* VA Cards (WITH PROGRESS INDICATORS) */}
                 {[0, 1].map((index) => {
                     const globalIndex = ((selectedMission.dayNumber - 1) * 2 + index) % vaQuestions.length;
                     const q = vaQuestions[globalIndex];
                     const saved = (selectedMissionState.pyqAnswers || {})[q.id];
                     const indicator = saved ? (saved.isCorrect ? '✅' : '❌') : '';
-
                     return (
                         <div className="task-card" key={`va-${index}`}>
-                            <label>
-                                <span className="practice-link" onClick={() => openPyqModal('VA', index)}>
-                                    <span>VA {index + 1}: CAT PYQ &#8599;</span>
-                                    <span style={{ fontSize: '0.9rem' }}>{indicator}</span>
-                                </span>
-                            </label>
+                            <label><span className="practice-link" onClick={() => openPyqModal('VA', index)}><span>VA {index + 1}: CAT PYQ &#8599;</span><span style={{ fontSize: '0.9rem' }}>{indicator}</span></span></label>
                             <textarea className="notebook-input" placeholder="Add Remarks..." value={index === 0 ? selectedMissionState.vaRemarks1 : selectedMissionState.vaRemarks2} onChange={(e) => updateField(index === 0 ? 'vaRemarks1' : 'vaRemarks2', e.target.value)} />
                         </div>
                     )
                 })}
-
-                {/* RC Card (1 PER DAY, WITH SCORE TRACKING) */}
                 {[0].map((index) => {
                     const globalIndex = ((selectedMission.dayNumber - 1) * 1 + index) % rcSets.length;
                     const set = rcSets[globalIndex];
                     const attempts = set.questions.map(q => (selectedMissionState.pyqAnswers || {})[q.id]).filter(Boolean);
                     const score = attempts.filter(a => a.isCorrect).length;
                     const indicator = attempts.length > 0 ? `<Score: ${score}/${set.questions.length}>` : '';
-
                     return (
                         <div className="task-card" key={`rc-${index}`} style={{ gridColumn: 'span 2' }}>
-                            <label>
-                                <span className="practice-link" onClick={() => openPyqModal('RC', index)}>
-                                    <span>RC PASSAGE: {set.questions[0].id.split('-')[0]} {set.questions[0].id.split('-')[1]} &#8599;</span>
-                                    <span style={{ color: 'var(--highlight-green)', fontSize: '0.85rem' }}>{indicator}</span>
-                                </span>
-                            </label>
+                            <label><span className="practice-link" onClick={() => openPyqModal('RC', index)}><span>RC PASSAGE: {set.questions[0].id.split('-')[0]} {set.questions[0].id.split('-')[1]} &#8599;</span><span style={{ color: 'var(--highlight-green)', fontSize: '0.85rem' }}>{indicator}</span></span></label>
                             <textarea className="notebook-input" placeholder="Add Remarks..." value={index === 0 ? selectedMissionState.rcRemarks1 : selectedMissionState.rcRemarks2} onChange={(e) => updateField(index === 0 ? 'rcRemarks1' : 'rcRemarks2', e.target.value)} />
                         </div>
                     )
@@ -578,107 +521,39 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         </div>
       </div>
 
-      {/* --- THE ENHANCED PYQ SOLVING MODAL --- */}
       {activePyq && (
         <div className="pyq-modal-overlay" onClick={() => setActivePyq(null)}>
             <div className={`island sketch-border pyq-modal-content ${activePyq.type === 'RC' ? 'rc-mode' : 'va-mode'}`} onClick={(e) => e.stopPropagation()}>
-                
                 <button className="pyq-close-btn" onClick={() => setActivePyq(null)} style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>X</button>
-
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px dashed var(--main-charcoal)', paddingBottom: '10px', paddingRight: '40px' }}>
-                    <h2 style={{ margin: 0, color: 'var(--highlight-blue)' }}>
-                        {activePyq.type === 'RC' ? `RC Passage (${currentQIndex + 1} of ${questionsCount})` : currentQuestion.id}
-                    </h2>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 'bold', fontFamily: 'var(--font-sketch)', color: timeLeft <= 60 && !isSubmitted ? 'var(--highlight-red)' : 'var(--main-charcoal)', animation: timeLeft <= 60 && !isSubmitted ? 'pulse 1s infinite' : 'none' }}>
-                        {isSubmitted ? '🏁' : '⏱'} {formatTime(timeLeft)}
-                    </div>
+                    <h2 style={{ margin: 0, color: 'var(--highlight-blue)' }}>{activePyq.type === 'RC' ? `RC Passage (${currentQIndex + 1} of ${questionsCount})` : currentQuestion.id}</h2>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 'bold', fontFamily: 'var(--font-sketch)', color: timeLeft <= 60 && !isSubmitted ? 'var(--highlight-red)' : 'var(--main-charcoal)', animation: timeLeft <= 60 && !isSubmitted ? 'pulse 1s infinite' : 'none' }}>{isSubmitted ? '🏁' : '⏱'} {formatTime(timeLeft)}</div>
                 </div>
-
                 <div className="pyq-body" style={{ flexDirection: activePyq.type === 'RC' ? 'row' : 'column' }}>
-                    
-                    {activePyq.type === 'RC' && (
-                        <div className="pyq-passage-pane">
-                            <div style={{ lineHeight: '1.8', fontSize: '0.95rem', whiteSpace: 'pre-wrap', color: 'var(--main-charcoal)' }}>
-                                {activePyq.data.passage}
-                            </div>
-                        </div>
-                    )}
-
+                    {activePyq.type === 'RC' && (<div className="pyq-passage-pane"><div style={{ lineHeight: '1.8', fontSize: '0.95rem', whiteSpace: 'pre-wrap', color: 'var(--main-charcoal)' }}>{activePyq.data.passage}</div></div>)}
                     <div className="pyq-question-pane" style={{ width: activePyq.type === 'RC' ? '50%' : '100%' }}>
-                        <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '20px' }}>
-                            {currentQuestion.question}
-                        </p>
-
+                        <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '20px' }}>{currentQuestion.question}</p>
                         {currentQuestion.options && currentQuestion.options.length > 0 ? (
                             <div style={{ display: 'block', marginBottom: '20px' }}>
                                 {currentQuestion.options.map((opt, i) => {
                                     const isSelected = userAnswers[currentQIndex] === i;
                                     const isCorrect = checkIsCorrect(currentQuestion, i);
-                                    let bg = 'transparent';
-                                    let border = '2px solid rgba(0,0,0,0.1)';
-                                    
-                                    if (isSubmitted) {
-                                        if (isCorrect) { bg = 'rgba(39, 174, 96, 0.15)'; border = '2px solid var(--highlight-green)'; }
-                                        else if (isSelected) { bg = 'rgba(231, 76, 60, 0.15)'; border = '2px solid var(--highlight-red)'; }
-                                    } else if (isSelected) {
-                                        bg = 'rgba(52, 152, 219, 0.15)'; border = '2px solid var(--highlight-blue)';
-                                    }
-
-                                    return (
-                                        <button 
-                                            key={i} 
-                                            onClick={() => handleOptionSelect(i)}
-                                            className="pyq-option-btn"
-                                            style={{ border, background: bg, cursor: isSubmitted ? 'default' : 'pointer' }}
-                                            disabled={isSubmitted}
-                                        >
-                                            <strong>Option {i + 1}:</strong> {opt}
-                                        </button>
-                                    )
+                                    let bg = 'transparent'; let border = '2px solid rgba(0,0,0,0.1)';
+                                    if (isSubmitted) { if (isCorrect) { bg = 'rgba(39, 174, 96, 0.15)'; border = '2px solid var(--highlight-green)'; } else if (isSelected) { bg = 'rgba(231, 76, 60, 0.15)'; border = '2px solid var(--highlight-red)'; } } else if (isSelected) { bg = 'rgba(52, 152, 219, 0.15)'; border = '2px solid var(--highlight-blue)'; }
+                                    return ( <button key={i} onClick={() => handleOptionSelect(i)} className="pyq-option-btn" style={{ border, background: bg, cursor: isSubmitted ? 'default' : 'pointer' }} disabled={isSubmitted}><strong>Option {i + 1}:</strong> {opt}</button> )
                                 })}
                             </div>
                         ) : (
                             <div style={{ marginBottom: '20px' }}>
-                                <input 
-                                    type="text" 
-                                    className="notebook-input" 
-                                    placeholder="Type your answer (e.g., 2143)..."
-                                    value={userAnswers[currentQIndex] || ''}
-                                    onChange={(e) => handleOptionSelect(e.target.value)}
-                                    disabled={isSubmitted}
-                                    style={{ borderBottom: '2px solid var(--main-charcoal)', padding: '10px' }}
-                                />
-                                {isSubmitted && (
-                                    <p style={{ color: checkIsCorrect(currentQuestion, userAnswers[currentQIndex]) ? 'var(--highlight-green)' : 'var(--highlight-red)', fontWeight: 'bold', marginTop: '10px' }}>
-                                        Correct Answer: {currentQuestion.correctAnswer}
-                                    </p>
-                                )}
+                                <input type="text" className="notebook-input" placeholder="Type your answer (e.g., 2143)..." value={userAnswers[currentQIndex] || ''} onChange={(e) => handleOptionSelect(e.target.value)} disabled={isSubmitted} style={{ borderBottom: '2px solid var(--main-charcoal)', padding: '10px' }} />
+                                {isSubmitted && ( <p style={{ color: checkIsCorrect(currentQuestion, userAnswers[currentQIndex]) ? 'var(--highlight-green)' : 'var(--highlight-red)', fontWeight: 'bold', marginTop: '10px' }}>Correct Answer: {currentQuestion.correctAnswer}</p> )}
                             </div>
                         )}
-
                         <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', paddingTop: '20px', borderTop: '2px dashed rgba(0,0,0,0.1)' }}>
-                            {activePyq.type === 'RC' && (
-                                <>
-                                    <button className="secondary-btn" onClick={() => setCurrentQIndex(p => p - 1)} disabled={currentQIndex === 0}>&larr; Prev</button>
-                                    <button className="secondary-btn" onClick={() => setCurrentQIndex(p => p + 1)} disabled={currentQIndex === questionsCount - 1}>Next &rarr;</button>
-                                </>
-                            )}
-                            <button 
-                                className={`done-btn ${isSubmitted ? 'completed' : ''}`} 
-                                style={{ flex: 1, padding: '12px', fontSize: '1rem', borderStyle: isSubmitted ? 'solid' : 'dashed' }}
-                                onClick={handlePyqSubmit}
-                                disabled={isSubmitted}
-                            >
-                                {isSubmitted ? 'TEST COMPLETED' : (activePyq.type === 'RC' ? 'SUBMIT FULL SET' : 'SUBMIT ANSWER')}
-                            </button>
+                            {activePyq.type === 'RC' && ( <> <button className="secondary-btn" onClick={() => setCurrentQIndex(p => p - 1)} disabled={currentQIndex === 0}>&larr; Prev</button> <button className="secondary-btn" onClick={() => setCurrentQIndex(p => p + 1)} disabled={currentQIndex === questionsCount - 1}>Next &rarr;</button> </> )}
+                            <button className={`done-btn ${isSubmitted ? 'completed' : ''}`} style={{ flex: 1, padding: '12px', fontSize: '1rem', borderStyle: isSubmitted ? 'solid' : 'dashed' }} onClick={handlePyqSubmit} disabled={isSubmitted} > {isSubmitted ? 'TEST COMPLETED' : (activePyq.type === 'RC' ? 'SUBMIT FULL SET' : 'SUBMIT ANSWER')} </button>
                         </div>
-
-                        {isSubmitted && (
-                            <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(0,0,0,0.03)', borderRadius: '12px' }}>
-                                <p style={{ margin: '0 0 10px 0', color: 'var(--highlight-blue)', fontWeight: 'bold' }}>Explanation:</p>
-                                <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: '1.6', color: 'var(--main-charcoal)', whiteSpace: 'pre-wrap' }}>{currentQuestion.explanation}</p>
-                            </div>
-                        )}
+                        {isSubmitted && ( <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(0,0,0,0.03)', borderRadius: '12px' }}> <p style={{ margin: '0 0 10px 0', color: 'var(--highlight-blue)', fontWeight: 'bold' }}>Explanation:</p> <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: '1.6', color: 'var(--main-charcoal)', whiteSpace: 'pre-wrap' }}>{currentQuestion.explanation}</p> </div> )}
                     </div>
                 </div>
             </div>
