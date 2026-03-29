@@ -283,7 +283,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .clickable-stat { grid-column: span 2; background-color: #FFF5F5; cursor: pointer; border: 2px dashed rgba(231, 76, 60, 0.4); }
         .clickable-stat:hover { background-color: #FFEBEB; border-style: solid; border-color: var(--highlight-red); }
 
-        /* THE FIX: Button perfectly anchored INSIDE the specific card, with Dark Mode variables */
+   /* THE FIX: Button perfectly anchored with GPU hardware acceleration to prevent flickering */
         .info-toggle-btn {
             position: absolute; 
             top: 6px; 
@@ -292,7 +292,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             height: 22px;
             border-radius: 50%; 
             background: var(--main-charcoal); 
-            color: var(--base-cream); /* Dynamic color! Light text in light mode, Dark text in dark mode */
+            color: var(--base-cream); 
             border: 2px solid var(--base-cream); 
             font-family: var(--font-sketch);
             font-weight: bold; 
@@ -302,14 +302,21 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             display: flex; 
             align-items: center; 
             justify-content: center;
-            transition: all 0.2s; 
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); 
             box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+
+            /* Stops the Chromium background-blur flickering bug */
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: translateZ(0);
         }
         .info-toggle-btn:hover { 
-            transform: scale(1.1); 
+            /* Swapped scale() for translateY() to safely bypass the GPU glitch */
+            transform: translateY(-2px) translateZ(0); 
             background: var(--highlight-blue); 
             border-color: var(--highlight-blue); 
             color: white; 
+            box-shadow: 2px 4px 6px rgba(0,0,0,0.3);
         }
 
         .info-panel-overlay {
