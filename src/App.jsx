@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, getRedirectResult } from 'firebase/auth' // <-- ADDED getRedirectResult
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { auth, db } from './firebase' 
 import AppShell from './components/AppShell'
@@ -35,6 +35,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // --- THE CATCHER'S MITT: Catches the user returning from Google ---
+    getRedirectResult(auth).then(async (result) => {
+        if (result && result.user) {
+            setUser(result.user);
+            await fetchFromCloud(result.user.uid);
+        }
+    }).catch((error) => {
+        console.error("Redirect catch error:", error);
+    });
+
+    // --- The Normal Listener ---
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser)
       if (currentUser) {
@@ -108,7 +119,6 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
-      {/* SCROLL RESCUE: Putting the internal scrollbars back! */}
       <style>{`
         .tab-wrapper {
             height: calc(100vh - 120px);
@@ -128,18 +138,13 @@ export default function App() {
 
         /* Mobile specific heights to account for the stacked header */
         @media (max-width: 768px) {
-            /* 1. Make the containers shorter so they fit entirely on the screen */
             .tab-wrapper, .tab-relative {
                 height: calc(100vh - 240px) !important;
             }
-            
-            /* 2. Ensure War Room and Audio tabs are forced to scroll internally */
             .tab-relative > div {
                 overflow-y: auto !important;
                 padding-bottom: 50px !important;
             }
-            
-            /* 3. Give the Daily Plan extra padding so the bottom RC card is reachable */
             .tab-scroll-area {
                 padding-bottom: 150px !important;
             }
