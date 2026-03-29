@@ -108,7 +108,7 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
-      {/* THE FIX: Controlled mobile heights so tabs stop vanishing */}
+      {/* SCROLL RESCUE: Putting the internal scrollbars back! */}
       <style>{`
         .tab-wrapper {
             height: calc(100vh - 120px);
@@ -126,22 +126,22 @@ export default function App() {
             width: 100%;
         }
 
-        /* MOBILE SPECIFIC RULES */
+        /* Mobile specific heights to account for the stacked header */
         @media (max-width: 768px) {
-            /* 1. Let the Daily Plan grow and scroll naturally */
-            .tab-wrapper {
-                height: auto !important;
-                min-height: 100vh;
+            /* 1. Make the containers shorter so they fit entirely on the screen */
+            .tab-wrapper, .tab-relative {
+                height: calc(100vh - 240px) !important;
             }
-            .tab-scroll-area {
-                overflow: visible !important;
+            
+            /* 2. Ensure War Room and Audio tabs are forced to scroll internally */
+            .tab-relative > div {
+                overflow-y: auto !important;
                 padding-bottom: 50px !important;
             }
             
-            /* 2. Force the War Room & Audio containers to be physically tall 
-                  so their absolute-positioned contents don't collapse to 0px! */
-            .tab-relative {
-                height: 1500px !important; 
+            /* 3. Give the Daily Plan extra padding so the bottom RC card is reachable */
+            .tab-scroll-area {
+                padding-bottom: 150px !important;
             }
         }
       `}</style>
@@ -171,7 +171,7 @@ export default function App() {
 
       {/* TAB: DATA BACKUP */}
       {activeTab === 'data-backup' && (
-        <div style={{ paddingBottom: '80px' }}>
+        <div style={{ paddingBottom: '80px', height: '100%', overflowY: 'auto' }}>
           <DataBackup
             user={user} 
             missionState={missionState}
