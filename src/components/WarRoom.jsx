@@ -88,7 +88,8 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
   };
 
   return (
-    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', gap: '15px' }}>
+    {/* THE FIX: Added paddingBottom: '20px' to pull the bottom borders into view */}
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', gap: '15px', paddingBottom: '20px' }}>
       <style>{`
         /* UPDATED GRID FOR 5 CARDS */
         .stats-row { display: grid; grid-template-columns: repeat(4, 1fr) 1.2fr; gap: 15px; flex-shrink: 0; }
@@ -100,7 +101,9 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
         .war-room-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; flex: 1; min-height: 0; }
         
         .fixed-island { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
-        .scroll-area { flex: 1; overflow-y: auto; padding-right: 15px; margin-right: -5px; }
+        
+        /* THE FIX: Added padding-bottom: 40px to ensure you can scroll past the coffee widget */
+        .scroll-area { flex: 1; overflow-y: auto; padding-right: 15px; margin-right: -5px; padding-bottom: 40px; }
         
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; color: var(--hover-peach); margin-bottom: 5px; letter-spacing: 0.5px; }
@@ -184,7 +187,6 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
           onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '4px 4px 0px var(--shadow-dark)'; }}
         >
           <p style={{ color: 'white', opacity: 0.8 }}>PYQ Analytics</p>
-          {/* FIX: Reduced font size so "Accuracy" fits on one line */}
           <h3 style={{ color: 'white', margin: '2px 0', fontSize: '1.25rem' }}>{pyqAccuracy}% Accuracy</h3>
           <span style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '2px', fontWeight: 'bold' }}>
             CLICK TO OPEN LEDGER

@@ -13,6 +13,10 @@ export default function GlobalHeader({ activeTab, onTabChange }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser)
+      // THE BULLETPROOF FIX: If a user is detected, forcefully close the modal!
+      if (currentUser) {
+          setIsAuthModalOpen(false)
+      }
     })
     return () => unsubscribe()
   }, [])
