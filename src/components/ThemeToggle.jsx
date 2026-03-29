@@ -24,15 +24,20 @@ export default function ThemeToggle() {
     }
   };
 
+  // We are using a <div> instead of a <button> to escape mobile CSS stretch overrides
   return (
-    <button className={`theme-btn ${isDark ? 'night' : 'day'}`} onClick={toggleTheme} aria-label="Toggle Dark Mode">
+    <div 
+      className={`theme-btn ${isDark ? 'night' : 'day'}`} 
+      onClick={toggleTheme} 
+      role="button" 
+      tabIndex={0} 
+      aria-label="Toggle Dark Mode"
+    >
       <style>{`
         .theme-btn {
-          /* THE MAGIC FIX: Locking dimensions to prevent mobile stretch */
           width: 64px !important;
+          min-width: 64px !important;
           height: 32px !important;
-          flex-shrink: 0 !important;
-          
           border-radius: 30px;
           border: 2px solid var(--main-charcoal);
           cursor: pointer;
@@ -41,6 +46,7 @@ export default function ThemeToggle() {
           padding: 0;
           box-shadow: 2px 2px 0px var(--main-charcoal);
           transition: all 0.3s ease;
+          flex-shrink: 0 !important;
         }
         .theme-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0px var(--main-charcoal); }
         .theme-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px var(--main-charcoal); }
@@ -89,6 +95,6 @@ export default function ThemeToggle() {
           <div className="moon"></div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
