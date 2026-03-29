@@ -88,8 +88,8 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
   };
 
   return (
-    {/* THE FIX: Added paddingBottom: '20px' to pull the bottom borders into view */}
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', gap: '15px', paddingBottom: '20px' }}>
+      {/* THE FIX: Safely nested the style tag and comments inside the root div */}
       <style>{`
         /* UPDATED GRID FOR 5 CARDS */
         .stats-row { display: grid; grid-template-columns: repeat(4, 1fr) 1.2fr; gap: 15px; flex-shrink: 0; }
