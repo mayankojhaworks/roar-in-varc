@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { onAuthStateChanged, getRedirectResult } from 'firebase/auth'
+import { onAuthStateChanged, getRedirectResult } from 'firebase/auth' // <-- ADDED getRedirectResult
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { auth, db } from './firebase' 
 import AppShell from './components/AppShell'
@@ -35,13 +35,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // --- THE CATCHER'S MITT: Catches the user returning from Google ---
     getRedirectResult(auth).then(async (result) => {
         if (result && result.user) {
             setUser(result.user);
             await fetchFromCloud(result.user.uid);
         }
-    }).catch((error) => console.error("Redirect catch error:", error));
+    }).catch((error) => {
+        console.error("Redirect catch error:", error);
+    });
 
+    // --- The Normal Listener ---
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser)
       if (currentUser) {
@@ -115,82 +119,71 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
-      {/* THE FIX: The "Picture Frame" Architecture */}
       <style>{`
-        /* 1. Lock the outer browser window so it CANNOT scroll or bounce */
-        body, html, #root {
-            height: 100%;
-            height: 100dvh;
-            overflow: hidden !important;
-            overscroll-behavior: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* 2. The "Picture Frame" - Fixed size, never stretches, crops overflows */
-        .tab-frame {
-            height: calc(100dvh - 130px); /* Subtracts Desktop Header */
-            width: 100%;
+        .tab-wrapper {
+            height: calc(100vh - 120px);
             display: flex;
             flex-direction: column;
-            position: relative;
-            overflow: hidden; 
         }
-
-        /* 3. The "Canvas" - Scrolls purely inside the frame */
-        .tab-scroll-inside {
+        .tab-scroll-area {
             flex: 1;
             overflow-y: auto;
-            overflow-x: hidden;
-            padding-bottom: 30px;
+            padding: 10px 10px 80px 10px;
+        }
+        .tab-relative {
+            position: relative;
+            height: calc(100vh - 120px);
+            width: 100%;
         }
 
-        /* 4. Mobile specific frame sizing (taller stacked header) */
+        /* Mobile specific heights to account for the stacked header */
         @media (max-width: 768px) {
-            .tab-frame {
-                height: calc(100dvh - 240px); /* Subtracts Mobile Header */
+            .tab-wrapper, .tab-relative {
+                height: calc(100vh - 240px) !important;
             }
-            .tab-scroll-inside {
-                padding-bottom: 50px;
+            .tab-relative > div {
+                overflow-y: auto !important;
+                padding-bottom: 50px !important;
+            }
+            .tab-scroll-area {
+                padding-bottom: 150px !important;
             }
         }
       `}</style>
 
-      {/* TAB: DAILY PLAN (Scrolling Canvas) */}
+      {/* TAB: DAILY PLAN */}
       {activeTab === 'crucible' && (
-        <div className="tab-frame">
-          <div className="tab-scroll-inside">
+        <div className="tab-wrapper">
+          <div className="tab-scroll-area">
             <MissionGrid missions={missionPlan} missionState={missionState} onMissionUpdate={handleMissionUpdate} />
           </div>
         </div>
       )}
 
-      {/* TAB: MOCK ANALYTICS (Internal scroll handled inside WarRoom) */}
+      {/* TAB: MOCK ANALYTICS */}
       {activeTab === 'war-room' && (
-        <div className="tab-frame">
+        <div className="tab-relative">
           <WarRoom records={warRoomRecords} onAddRecord={handleAddRecord} onDeleteRecord={handleDeleteRecord} missions={missionPlan} missionState={missionState} />
         </div>
       )}
 
-      {/* TAB: STUDY AUDIO (Internal scroll handled inside FocusBeats) */}
+      {/* TAB: STUDY AUDIO */}
       {activeTab === 'focus-beats' && (
-        <div className="tab-frame">
+        <div className="tab-relative">
           <FocusBeats />
         </div>
       )}
 
-      {/* TAB: DATA BACKUP (Scrolling Canvas) */}
+      {/* TAB: DATA BACKUP */}
       {activeTab === 'data-backup' && (
-        <div className="tab-frame">
-          <div className="tab-scroll-inside">
-            <DataBackup
-              user={user} 
-              missionState={missionState}
-              warRoomRecords={warRoomRecords}
-              onImportBackup={handleImportBackup}
-              onClearAllProgress={handleClearAllProgress}
-            />
-          </div>
+        <div style={{ paddingBottom: '80px', height: '100%', overflowY: 'auto' }}>
+          <DataBackup
+            user={user} 
+            missionState={missionState}
+            warRoomRecords={warRoomRecords}
+            onImportBackup={handleImportBackup}
+            onClearAllProgress={handleClearAllProgress}
+          />
         </div>
       )}
       
