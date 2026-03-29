@@ -108,7 +108,7 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
-      {/* THE FIX: Unlocking global scrolling on mobile devices */}
+      {/* THE FIX: Controlled mobile heights so tabs stop vanishing */}
       <style>{`
         .tab-wrapper {
             height: calc(100vh - 120px);
@@ -126,24 +126,22 @@ export default function App() {
             width: 100%;
         }
 
-        /* Completely liberates the mobile view from fixed heights */
+        /* MOBILE SPECIFIC RULES */
         @media (max-width: 768px) {
-            body, html, #root {
+            /* 1. Let the Daily Plan grow and scroll naturally */
+            .tab-wrapper {
                 height: auto !important;
                 min-height: 100vh;
-                overflow: visible !important;
-            }
-            div[style*="100vh"] {
-                height: auto !important;
-                min-height: 100vh !important;
-            }
-            .tab-wrapper, .tab-relative {
-                height: auto !important;
-                overflow: visible !important;
             }
             .tab-scroll-area {
                 overflow: visible !important;
                 padding-bottom: 50px !important;
+            }
+            
+            /* 2. Force the War Room & Audio containers to be physically tall 
+                  so their absolute-positioned contents don't collapse to 0px! */
+            .tab-relative {
+                height: 1500px !important; 
             }
         }
       `}</style>
