@@ -18,7 +18,7 @@ rawRcQuestions.forEach(q => {
   passageMap.get(q.passage).questions.push(q)
 })
 
-// --- FOOLPROOF TIME MATH (Bypassing external utils to prevent timezone bugs) ---
+// --- FOOLPROOF TIME MATH ---
 const getZeroedTime = (dateParam) => {
   const d = dateParam ? new Date(dateParam) : new Date();
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
@@ -61,15 +61,15 @@ function formatWeekRange(startDate) {
   return `${startDate.getDate()} ${startMonth} ${startDate.getFullYear()} - ${endDate.getDate()} ${endMonth} ${endDate.getFullYear()}`
 }
 
-// THE FIX: Strict, zeroed-out timestamp comparisons
+// THE FIX: "Upcoming" replaces "Locked" so future days in the current week are clickable!
 function getMissionStatus(missionDateStr, completed) {
   if (completed) return 'completed'
   const todayTime = getZeroedTime()
   const missionTime = getZeroedTime(missionDateStr)
 
   if (missionTime < todayTime) return 'missed'
-  if (missionTime > todayTime) return 'locked' // Future days
-  return 'active' // Today
+  if (missionTime > todayTime) return 'upcoming' 
+  return 'active' 
 }
 
 function getDefaultSelectedDay(missions) {
@@ -80,8 +80,6 @@ function getDefaultSelectedDay(missions) {
 
 export default function MissionGrid({ missions, missionState, onMissionUpdate }) {
   const [selectedDay, setSelectedDay] = useState(() => getDefaultSelectedDay(missions))
-  
-  // Set initial week strictly to "Today's" week
   const [selectedWeekKey, setSelectedWeekKey] = useState(() => {
      const weekStart = getWeekStart(new Date());
      return getDateKey(weekStart);
@@ -117,24 +115,34 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
       }))
   }, [enrichedMissions])
 
-  // THE FIX: Week Navigation Logic
+  // THE FIX: Finding the "Real World" Current Week
+  const currentRealWeekIndex = useMemo(() => {
+      const todayTime = getZeroedTime();
+      let idx = 0; // Default to Week 1 if plan hasn't started
+      weeks.forEach((w, i) => {
+          if (getZeroedTime(w.startDate) <= todayTime) idx = i;
+      });
+      return idx;
+  }, [weeks]);
+
   const validWeekIndex = Math.max(0, weeks.findIndex((w) => w.key === selectedWeekKey));
-  const selectedWeek = weeks[validWeekIndex];
+  // Force clamp to ensure user can never navigate past the current real-world week
+  const activeWeekIndex = Math.min(validWeekIndex, currentRealWeekIndex);
+  const selectedWeek = weeks[activeWeekIndex];
 
   const goToPrevWeek = () => {
-      if (validWeekIndex > 0) setSelectedWeekKey(weeks[validWeekIndex - 1].key);
+      if (activeWeekIndex > 0) setSelectedWeekKey(weeks[activeWeekIndex - 1].key);
   }
   const goToNextWeek = () => {
-      if (validWeekIndex < weeks.length - 1) setSelectedWeekKey(weeks[validWeekIndex + 1].key);
+      if (activeWeekIndex < currentRealWeekIndex) setSelectedWeekKey(weeks[activeWeekIndex + 1].key);
   }
 
-  // Fallback to auto-select a day if the current selectedDay isn't in this week
+  // Fallback to auto-select a day if navigating
   useEffect(() => {
     if (!selectedWeek) return
     const availableDayNumbers = selectedWeek.slots.filter(Boolean).map((mission) => mission.dayNumber)
     if (availableDayNumbers.includes(selectedDay)) return
     
-    // Pick today if we navigated to the current week, otherwise pick the first valid day of that week
     const fallbackMission = selectedWeek.slots.find((mission) => mission && isSameDayInline(mission.date, new Date())) || selectedWeek.slots.find(Boolean)
     if (fallbackMission) setSelectedDay(fallbackMission.dayNumber)
   }, [selectedWeek, selectedDay])
@@ -142,7 +150,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
   const selectedMission = selectedWeek?.slots.find((mission) => mission?.dayNumber === selectedDay) || selectedWeek?.slots.find(Boolean) || enrichedMissions[0]
   const selectedMissionState = missionState[selectedMission?.dayNumber] || { completed: false, crRemarks1: '', crRemarks2: '', vaRemarks1: '', vaRemarks2: '', rcRemarks1: '', rcRemarks2: '', pyqAnswers: {} }
 
-  // --- STATS MATH FIX ---
+  // --- STATS MATH ---
   const today = new Date();
   const targetDate = new Date(2026, 10, 29); 
   const planStartDate = new Date(2026, 2, 28); 
@@ -189,8 +197,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
   }
 
   const openPyqModal = (type, index) => {
-    if (selectedMission.status === 'locked') return; 
-    
     let preloadedAnswers = {};
     let allSubmitted = false;
     const savedAnswers = selectedMissionState.pyqAnswers || {};
@@ -267,7 +273,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
   return (
     <>
       <style>{`
-        /* CSS MIN-HEIGHT FIX */
         .dashboard-grid {
             display: grid;
             grid-template-areas: "stats calendar" "reading practice";
@@ -284,7 +289,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
 
         .calendar-container { grid-area: calendar; padding: 10px 15px; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* NEW WEEK HEADER STYLES */
         .week-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
         .week-nav-btn { background: none; border: none; font-family: var(--font-sketch); font-size: 0.9rem; color: var(--highlight-blue); cursor: pointer; font-weight: bold; padding: 5px; transition: opacity 0.2s;}
         .week-nav-btn:hover:not(:disabled) { opacity: 0.7; }
@@ -294,12 +298,12 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .day-box {
             background: var(--base-cream); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
             box-shadow: inset 2px 2px 5px var(--shadow-light), inset -2px -2px 5px var(--shadow-dark); border: 2px solid transparent; position: relative; padding: 5px 0;
-            transition: all 0.2s;
+            transition: all 0.2s; cursor: pointer;
         }
-        .day-box:hover:not(.locked) { transform: translateY(-1px); box-shadow: inset 1px 1px 3px var(--shadow-light), inset -1px -1px 3px var(--shadow-dark); }
+        .day-box:hover { transform: translateY(-1px); box-shadow: inset 1px 1px 3px var(--shadow-light), inset -1px -1px 3px var(--shadow-dark); }
         .day-box.active { background: var(--highlight-lavender); color: #fff; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); transform: translateY(-2px); }
         .day-box.missed-alert { border-color: var(--highlight-red); background: #FFF5F5; }
-        .day-box.locked { opacity: 0.6; }
+        .day-box.upcoming { border: 1px dashed rgba(0,0,0,0.2); opacity: 0.8; }
         .day-box .day-name { font-size: 0.65rem; text-transform: uppercase; }
         .day-box .day-num { font-size: 1.2rem; font-weight: 600; margin: -2px 0;}
         .day-indicator { font-size: 0.7rem; font-weight: 600; font-family: var(--font-sketch); position: absolute; bottom: 4px; }
@@ -330,7 +334,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .task-card::after { content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 30px; height: 10px; background: rgba(255, 154, 139, 0.4); border: 1px solid rgba(0,0,0,0.05); }
         .task-card label { font-family: var(--font-sans); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; color: var(--hover-peach); }
         .notebook-input { width: 100%; height: 44px; background-color: transparent; border: none; background-image: linear-gradient(transparent, transparent 21px, rgba(0,0,0,0.08) 21px, rgba(0,0,0,0.08) 22px, transparent 22px); background-size: 100% 22px; line-height: 22px; font-family: var(--font-sketch); font-size: 1rem; color: var(--main-charcoal); resize: none; outline: none; }
-        .notebook-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* MODAL STYLES */
         .pyq-modal-overlay {
@@ -431,11 +434,12 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         {/* Calendar */}
         <div className="calendar-container island sketch-border">
             <div className="week-header">
-                <button onClick={goToPrevWeek} disabled={validWeekIndex === 0} className="week-nav-btn">&larr; Prev Week</button>
+                <button onClick={goToPrevWeek} disabled={activeWeekIndex === 0} className="week-nav-btn">&larr; Prev Week</button>
                 <span style={{fontFamily: 'var(--font-sketch)', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                    <span>Week {validWeekIndex + 1} // {selectedWeek?.label}</span>
+                    <span>Week {activeWeekIndex + 1} // {selectedWeek?.label}</span>
                 </span>
-                <button onClick={goToNextWeek} disabled={validWeekIndex === weeks.length - 1} className="week-nav-btn">Next Week &rarr;</button>
+                
+                <button onClick={goToNextWeek} style={{ visibility: activeWeekIndex >= currentRealWeekIndex ? 'hidden' : 'visible' }} className="week-nav-btn">Next Week &rarr;</button>
             </div>
             
             <div className="days-row">
@@ -443,15 +447,14 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                     if (!mission) return <div key={`empty-${index}`} className="day-box pending" style={{border: '1px dashed rgba(0,0,0,0.1)'}}><div className="day-name">{WEEKDAY_LABELS[index]}</div><div className="day-num">{addDays(selectedWeek.startDate, index).getDate()}</div><div className="day-indicator" style={{ opacity: 0.4 }}>-</div></div>
                     
                     const isSelected = selectedDay === mission.dayNumber
-                    let statusClass = isSelected ? 'active' : (mission.status === 'completed' ? 'completed' : (mission.status === 'missed' ? 'missed-alert' : (mission.status === 'locked' ? 'locked' : 'pending')))
+                    let statusClass = isSelected ? 'active' : (mission.status === 'completed' ? 'completed' : (mission.status === 'missed' ? 'missed-alert' : (mission.status === 'upcoming' ? 'upcoming' : 'pending')))
                     
-                    // Display text logic under the box number
                     let indicatorLabel = (mission.status === 'active' || isSameDayInline(mission.date, new Date())) 
                         ? 'Today' 
-                        : (mission.status === 'locked' ? 'Upcoming' : mission.status)
+                        : (mission.status === 'upcoming' ? 'Upcoming' : mission.status)
                     
                     return (
-                        <div key={mission.dayNumber} className={`day-box ${statusClass}`} onClick={() => { if(mission.status !== 'locked') setSelectedDay(mission.dayNumber) }} style={{cursor: mission.status === 'locked' ? 'not-allowed' : 'pointer'}}>
+                        <div key={mission.dayNumber} className={`day-box ${statusClass}`} onClick={() => setSelectedDay(mission.dayNumber)}>
                             <div className="day-name">{WEEKDAY_LABELS[index]}</div>
                             <div className="day-num">{new Date(mission.date).getDate()}</div>
                             <div className="day-indicator" style={{color: mission.status === 'missed' && !isSelected ? '#E74C3C' : 'inherit'}}>{indicatorLabel}</div>
@@ -465,13 +468,13 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         <div className="reading-container island sketch-border">
             <h2 className="panel-title">
                 <span>Reading <span style={{opacity: 0.6, fontSize: '0.85rem'}}>Day {selectedMission.dayNumber}</span></span>
-                <button onClick={() => updateField('completed', !selectedMissionState.completed)} className={`done-btn ${selectedMissionState.completed ? 'completed' : ''}`} disabled={selectedMission.status === 'locked'}>
+                <button onClick={() => updateField('completed', !selectedMissionState.completed)} className={`done-btn ${selectedMissionState.completed ? 'completed' : ''}`}>
                     {selectedMissionState.completed ? '✓ DONE' : 'MARK AS DONE'}
                 </button>
             </h2>
             {selectedMission.articles?.map((article, index) => (
                 <div className="reading-item" key={index}>
-                    <h4 style={{ margin: '0 0 2px 0', fontSize: '1rem' }}><a href={article.url} target="_blank" rel="noreferrer" className="hover-title" style={{ color: 'var(--main-charcoal)', textDecoration: 'none', opacity: selectedMission.status === 'locked' ? 0.5 : 1 }}>{index + 1}. {article.title}</a></h4>
+                    <h4 style={{ margin: '0 0 2px 0', fontSize: '1rem' }}><a href={article.url} target="_blank" rel="noreferrer" className="hover-title" style={{ color: 'var(--main-charcoal)', textDecoration: 'none' }}>{index + 1}. {article.title}</a></h4>
                     <span style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{article.source || 'Reading Assignment'}</span>
                 </div>
             ))}
@@ -489,7 +492,8 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                     return (
                         <div className="task-card" key={`cr-${index}`}>
                             <label>{q?.url ? <a href={q.url} target="_blank" rel="noreferrer" className="practice-link">CR {index + 1}: {q?.source || 'GMAT CLUB'} &#8599;</a> : `CR ${index + 1}: ${q?.source || 'GMAT CLUB'}`}</label>
-                            <textarea className="notebook-input" placeholder="Draft reasoning..." value={index === 0 ? selectedMissionState.crRemarks1 : selectedMissionState.crRemarks2} onChange={(e) => updateField(index === 0 ? 'crRemarks1' : 'crRemarks2', e.target.value)} disabled={selectedMission.status === 'locked'} />
+                            {/* THE FIX: Unified placeholder text */}
+                            <textarea className="notebook-input" placeholder="Add Remarks..." value={index === 0 ? selectedMissionState.crRemarks1 : selectedMissionState.crRemarks2} onChange={(e) => updateField(index === 0 ? 'crRemarks1' : 'crRemarks2', e.target.value)} />
                         </div>
                     )
                 })}
@@ -504,12 +508,13 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                     return (
                         <div className="task-card" key={`va-${index}`}>
                             <label>
-                                <span className="practice-link" onClick={() => openPyqModal('VA', index)} style={{ opacity: selectedMission.status === 'locked' ? 0.5 : 1, cursor: selectedMission.status === 'locked' ? 'not-allowed' : 'pointer' }}>
+                                <span className="practice-link" onClick={() => openPyqModal('VA', index)}>
                                     <span>VA {index + 1}: CAT PYQ &#8599;</span>
                                     <span style={{ fontSize: '0.9rem' }}>{indicator}</span>
                                 </span>
                             </label>
-                            <textarea className="notebook-input" placeholder={index === 0 ? "Draft sequence..." : "Draft summary..."} value={index === 0 ? selectedMissionState.vaRemarks1 : selectedMissionState.vaRemarks2} onChange={(e) => updateField(index === 0 ? 'vaRemarks1' : 'vaRemarks2', e.target.value)} disabled={selectedMission.status === 'locked'} />
+                            {/* THE FIX: Unified placeholder text */}
+                            <textarea className="notebook-input" placeholder="Add Remarks..." value={index === 0 ? selectedMissionState.vaRemarks1 : selectedMissionState.vaRemarks2} onChange={(e) => updateField(index === 0 ? 'vaRemarks1' : 'vaRemarks2', e.target.value)} />
                         </div>
                     )
                 })}
@@ -525,12 +530,13 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                     return (
                         <div className="task-card" key={`rc-${index}`} style={{ gridColumn: 'span 2' }}>
                             <label>
-                                <span className="practice-link" onClick={() => openPyqModal('RC', index)} style={{ opacity: selectedMission.status === 'locked' ? 0.5 : 1, cursor: selectedMission.status === 'locked' ? 'not-allowed' : 'pointer' }}>
+                                <span className="practice-link" onClick={() => openPyqModal('RC', index)}>
                                     <span>RC PASSAGE: {set.questions[0].id.split('-')[0]} {set.questions[0].id.split('-')[1]} &#8599;</span>
                                     <span style={{ color: 'var(--highlight-green)', fontSize: '0.85rem' }}>{indicator}</span>
                                 </span>
                             </label>
-                            <textarea className="notebook-input" placeholder={`Summarize passage thoughts...`} value={index === 0 ? selectedMissionState.rcRemarks1 : selectedMissionState.rcRemarks2} onChange={(e) => updateField(index === 0 ? 'rcRemarks1' : 'rcRemarks2', e.target.value)} disabled={selectedMission.status === 'locked'} />
+                            {/* THE FIX: Unified placeholder text */}
+                            <textarea className="notebook-input" placeholder="Add Remarks..." value={index === 0 ? selectedMissionState.rcRemarks1 : selectedMissionState.rcRemarks2} onChange={(e) => updateField(index === 0 ? 'rcRemarks1' : 'rcRemarks2', e.target.value)} />
                         </div>
                     )
                 })}
