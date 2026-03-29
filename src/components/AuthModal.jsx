@@ -44,17 +44,8 @@ export default function AuthModal({ isOpen, onClose }) {
             To ensure your <strong>mock scores</strong> and <strong>daily progress</strong> are saved forever (even if you switch devices), please sign in with your Google account.
         </p>
 
-        <button 
-            onClick={async () => {
-                try {
-                    await loginWithGoogle();
-                    onClose();
-                } catch (err) {
-                    console.error("Login failed", err);
-                }
-            }}
-            className="google-signin-btn"
-        >
+        {/* FIX: Cleanly wired up to the redirect function */}
+        <button onClick={loginWithGoogle} className="google-signin-btn">
             Sign in with Google
         </button>
 

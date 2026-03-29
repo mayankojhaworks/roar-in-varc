@@ -371,12 +371,17 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                 grid-column: span 1 !important; /* Forces RC card to shrink */
             }
 
-            /* 3. Fix the Calendar overflow */
+            /* 3. Fix the Calendar overflow & Text Overlap */
             .days-row {
                 gap: 4px;
             }
-            .day-box .day-name { font-size: 0.55rem; }
-            .day-box .day-num { font-size: 1rem; }
+            .day-box {
+                min-height: 70px !important; /* Forces the box to be tall enough */
+                padding-bottom: 18px !important; /* Creates safe space at the bottom */
+            }
+            .day-box .day-name { font-size: 0.55rem; margin-top: 4px; }
+            .day-box .day-num { font-size: 1.1rem; margin-top: -2px; }
+            .day-indicator { font-size: 0.55rem !important; bottom: 4px !important; line-height: 1; }
 
             /* 4. Mobile Modal Fixes (Stacks the Passage on top of Questions) */
             .pyq-modal-content {

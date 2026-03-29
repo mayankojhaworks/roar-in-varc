@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithRedirect, signOut } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA4CbunSEJT7CuiZ54iqkPYt56BV3ZT3cs",
@@ -21,7 +21,14 @@ export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 
 // Auth Helpers
-export const loginWithGoogle = () => signInWithRedirect(auth, googleProvider);
+export const loginWithGoogle = async () => {
+  try {
+    await signInWithRedirect(auth, googleProvider);
+  } catch (error) {
+    alert("Login Error: " + error.message);
+  }
+};
+
 export const logout = () => signOut(auth);
 
 // Database Helpers
