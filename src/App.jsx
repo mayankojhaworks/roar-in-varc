@@ -119,34 +119,37 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
+     {/* THE SAFE FIX: Dynamic Viewport Heights (dvh) to pull the bottom borders up into view */}
       <style>{`
         .tab-wrapper {
-            height: calc(100vh - 120px);
+            /* 150px perfectly clears your desktop header + margins */
+            height: calc(100dvh - 150px); 
             display: flex;
             flex-direction: column;
         }
         .tab-scroll-area {
             flex: 1;
             overflow-y: auto;
-            padding: 10px 10px 80px 10px;
+            padding-bottom: 20px;
         }
         .tab-relative {
             position: relative;
-            height: calc(100vh - 120px);
+            /* Pulls the bottom of the War Room/Audio frames up into view */
+            height: calc(100dvh - 150px); 
             width: 100%;
         }
 
-        /* Mobile specific heights to account for the stacked header */
+        /* MOBILE SPECIFIC SIZING */
         @media (max-width: 768px) {
             .tab-wrapper, .tab-relative {
-                height: calc(100vh - 240px) !important;
+                /* 260px safely clears the taller, stacked mobile header */
+                height: calc(100dvh - 260px) !important; 
             }
             .tab-relative > div {
                 overflow-y: auto !important;
-                padding-bottom: 50px !important;
             }
             .tab-scroll-area {
-                padding-bottom: 150px !important;
+                padding-bottom: 40px !important;
             }
         }
       `}</style>
