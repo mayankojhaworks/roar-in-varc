@@ -330,7 +330,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .pyq-modal-content.rc-mode { width: 95%; max-width: 1200px; height: 90vh; }
         .pyq-modal-content.va-mode { width: 95%; max-width: 800px; max-height: 85vh; }
         
-        .pyq-body { display: flex; gap: 30px; overflow: hidden; flex: 1; margin-top: 15px; }
+        .pyq-body { display: flex; gap: 30px; overflow: hidden; flex: 1; margin-top: 15px; min-height: 0; }
         .pyq-passage-pane { flex: 1; overflow-y: auto; padding-right: 20px; border-right: 2px dashed rgba(0,0,0,0.2); }
         .pyq-question-pane { flex: 1; overflow-y: auto; padding-right: 10px; display: flex; flex-direction: column; }
         

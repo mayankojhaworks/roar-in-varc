@@ -17,9 +17,8 @@ export default function App() {
   const [missionState, setMissionState] = useLocalStorage('roar-in-varc-missions', {})
   const [warRoomRecords, setWarRoomRecords] = useLocalStorage('roar-in-varc-war-room', [])
 
-  // --- THE TIME SHIFTER: FORCES THE PLAN TO START ON MARCH 28, 2026 ---
   const missionPlan = useMemo(() => {
-    const START_DATE = new Date(2026, 2, 28); // Month is 0-indexed (2 = March)
+    const START_DATE = new Date(2026, 2, 28); 
     return missionPlanRaw.map(mission => {
       const d = new Date(START_DATE);
       d.setDate(d.getDate() + (mission.dayNumber - 1));
@@ -30,7 +29,7 @@ export default function App() {
       
       return {
         ...mission,
-        date: `${year}-${month}-${day}T00:00:00` // Clean, browser-safe format
+        date: `${year}-${month}-${day}T00:00:00` 
       };
     });
   }, []);
@@ -109,10 +108,50 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
+      {/* THE FIX: Unlocking global scrolling on mobile devices */}
+      <style>{`
+        .tab-wrapper {
+            height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+        }
+        .tab-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 10px 80px 10px;
+        }
+        .tab-relative {
+            position: relative;
+            height: calc(100vh - 120px);
+            width: 100%;
+        }
+
+        /* Completely liberates the mobile view from fixed heights */
+        @media (max-width: 768px) {
+            body, html, #root {
+                height: auto !important;
+                min-height: 100vh;
+                overflow: visible !important;
+            }
+            div[style*="100vh"] {
+                height: auto !important;
+                min-height: 100vh !important;
+            }
+            .tab-wrapper, .tab-relative {
+                height: auto !important;
+                overflow: visible !important;
+            }
+            .tab-scroll-area {
+                overflow: visible !important;
+                padding-bottom: 50px !important;
+            }
+        }
+      `}</style>
+
       {/* TAB: DAILY PLAN */}
       {activeTab === 'crucible' && (
-        <div style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 80px 10px' }}>
+        <div className="tab-wrapper">
+          <div className="tab-scroll-area">
             <MissionGrid missions={missionPlan} missionState={missionState} onMissionUpdate={handleMissionUpdate} />
           </div>
         </div>
@@ -120,21 +159,21 @@ export default function App() {
 
       {/* TAB: MOCK ANALYTICS */}
       {activeTab === 'war-room' && (
-        <div style={{ position: 'relative', height: 'calc(100vh - 120px)', width: '100%' }}>
+        <div className="tab-relative">
           <WarRoom records={warRoomRecords} onAddRecord={handleAddRecord} onDeleteRecord={handleDeleteRecord} missions={missionPlan} missionState={missionState} />
         </div>
       )}
 
       {/* TAB: STUDY AUDIO */}
       {activeTab === 'focus-beats' && (
-        <div style={{ position: 'relative', height: 'calc(100vh - 120px)', width: '100%' }}>
+        <div className="tab-relative">
           <FocusBeats />
         </div>
       )}
 
       {/* TAB: DATA BACKUP */}
       {activeTab === 'data-backup' && (
-        <div style={{ paddingBottom: '40px' }}>
+        <div style={{ paddingBottom: '80px' }}>
           <DataBackup
             user={user} 
             missionState={missionState}
