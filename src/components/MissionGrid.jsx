@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { compareDay, getTodayDateOnly, isSameDay } from '../utils/date'
-import pyqData from '../data/pyqDataV4.json' // Keeps the cache-busting file!
+import pyqData from '../data/pyqDataV4.json' 
 
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -19,7 +18,16 @@ rawRcQuestions.forEach(q => {
   passageMap.get(q.passage).questions.push(q)
 })
 
-// --- HELPER FUNCTIONS ---
+// --- FOOLPROOF TIME MATH (Bypassing external utils to prevent timezone bugs) ---
+const getZeroedTime = (dateParam) => {
+  const d = dateParam ? new Date(dateParam) : new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+};
+
+const isSameDayInline = (d1, d2) => {
+  return getZeroedTime(d1) === getZeroedTime(d2);
+};
+
 function toDateOnly(dateValue) {
   const date = new Date(dateValue)
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
@@ -53,26 +61,31 @@ function formatWeekRange(startDate) {
   return `${startDate.getDate()} ${startMonth} ${startDate.getFullYear()} - ${endDate.getDate()} ${endMonth} ${endDate.getFullYear()}`
 }
 
-function getMissionStatus(missionDate, completed) {
-  const today = getTodayDateOnly()
-  const comparison = compareDay(missionDate, today)
+// THE FIX: Strict, zeroed-out timestamp comparisons
+function getMissionStatus(missionDateStr, completed) {
   if (completed) return 'completed'
-  const weekStartOfMission = getDateKey(getWeekStart(missionDate));
-  const weekStartOfToday = getDateKey(getWeekStart(today));
-  if (comparison < 0) return 'missed'
-  if (comparison > 0) return (weekStartOfMission === weekStartOfToday) ? 'upcoming' : 'locked'
-  return 'active'
+  const todayTime = getZeroedTime()
+  const missionTime = getZeroedTime(missionDateStr)
+
+  if (missionTime < todayTime) return 'missed'
+  if (missionTime > todayTime) return 'locked' // Future days
+  return 'active' // Today
 }
 
 function getDefaultSelectedDay(missions) {
-  const today = getTodayDateOnly()
-  const found = missions.find((mission) => isSameDay(mission.date, today))
+  const todayTime = getZeroedTime()
+  const found = missions.find((m) => getZeroedTime(m.date) === todayTime)
   return found ? found.dayNumber : missions[0]?.dayNumber ?? 1
 }
 
 export default function MissionGrid({ missions, missionState, onMissionUpdate }) {
-  const [selectedDay, setSelectedDay] = useState(getDefaultSelectedDay(missions))
-  const [selectedWeekKey, setSelectedWeekKey] = useState('')
+  const [selectedDay, setSelectedDay] = useState(() => getDefaultSelectedDay(missions))
+  
+  // Set initial week strictly to "Today's" week
+  const [selectedWeekKey, setSelectedWeekKey] = useState(() => {
+     const weekStart = getWeekStart(new Date());
+     return getDateKey(weekStart);
+  })
   
   // --- PYQ MODAL STATES ---
   const [activePyq, setActivePyq] = useState(null)
@@ -80,8 +93,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
   const [userAnswers, setUserAnswers] = useState({})
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
-
-  useEffect(() => setSelectedDay(getDefaultSelectedDay(missions)), [missions])
 
   const enrichedMissions = useMemo(() => {
     return missions.map((mission) => {
@@ -106,47 +117,41 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
       }))
   }, [enrichedMissions])
 
-  const today = getTodayDateOnly()
-  const currentWeekStartKey = getDateKey(getWeekStart(today))
+  // THE FIX: Week Navigation Logic
+  const validWeekIndex = Math.max(0, weeks.findIndex((w) => w.key === selectedWeekKey));
+  const selectedWeek = weeks[validWeekIndex];
 
-  const latestAccessibleWeekIndex = useMemo(() => {
-    const exactCurrentWeekIndex = weeks.findIndex((week) => week.key === currentWeekStartKey)
-    if (exactCurrentWeekIndex !== -1) return exactCurrentWeekIndex
-    let lastPastWeekIndex = 0
-    weeks.forEach((week, index) => { if (week.startDate <= today) lastPastWeekIndex = index })
-    return lastPastWeekIndex
-  }, [weeks, currentWeekStartKey, today])
+  const goToPrevWeek = () => {
+      if (validWeekIndex > 0) setSelectedWeekKey(weeks[validWeekIndex - 1].key);
+  }
+  const goToNextWeek = () => {
+      if (validWeekIndex < weeks.length - 1) setSelectedWeekKey(weeks[validWeekIndex + 1].key);
+  }
 
-  const accessibleWeeks = weeks.slice(0, latestAccessibleWeekIndex + 1)
-  const currentWeek = accessibleWeeks[accessibleWeeks.length - 1] || weeks[0]
-
-  useEffect(() => {
-    if (!currentWeek) return
-    setSelectedWeekKey((previous) => accessibleWeeks.some((week) => week.key === previous) ? previous : currentWeek.key)
-  }, [accessibleWeeks, currentWeek])
-
-  const selectedWeek = accessibleWeeks.find((week) => week.key === selectedWeekKey) || currentWeek
-
+  // Fallback to auto-select a day if the current selectedDay isn't in this week
   useEffect(() => {
     if (!selectedWeek) return
     const availableDayNumbers = selectedWeek.slots.filter(Boolean).map((mission) => mission.dayNumber)
     if (availableDayNumbers.includes(selectedDay)) return
-    const fallbackMission = selectedWeek.slots.find((mission) => mission && isSameDay(mission.date, today)) || selectedWeek.slots.find(Boolean)
+    
+    // Pick today if we navigated to the current week, otherwise pick the first valid day of that week
+    const fallbackMission = selectedWeek.slots.find((mission) => mission && isSameDayInline(mission.date, new Date())) || selectedWeek.slots.find(Boolean)
     if (fallbackMission) setSelectedDay(fallbackMission.dayNumber)
-  }, [selectedWeek, selectedDay, today])
+  }, [selectedWeek, selectedDay])
 
   const selectedMission = selectedWeek?.slots.find((mission) => mission?.dayNumber === selectedDay) || selectedWeek?.slots.find(Boolean) || enrichedMissions[0]
   const selectedMissionState = missionState[selectedMission?.dayNumber] || { completed: false, crRemarks1: '', crRemarks2: '', vaRemarks1: '', vaRemarks2: '', rcRemarks1: '', rcRemarks2: '', pyqAnswers: {} }
 
   // --- STATS MATH FIX ---
+  const today = new Date();
   const targetDate = new Date(2026, 10, 29); 
-  const planStartDate = new Date(2026, 2, 28); // Locked to March 28
+  const planStartDate = new Date(2026, 2, 28); 
   const msPerDay = 1000 * 60 * 60 * 24;
   const totalDays = Math.round((targetDate - planStartDate) / msPerDay);
   const daysLeft = Math.max(0, Math.round((targetDate - today) / msPerDay));
   const completedCount = enrichedMissions.filter((mission) => mission.status === 'completed').length;
   const missedCount = enrichedMissions.filter((mission) => mission.status === 'missed').length;
-  const pendingCount = totalDays - completedCount; // Flawless pending math
+  const pendingCount = totalDays - completedCount; 
 
   const updateField = (field, value) => {
     if (!selectedMission) return
@@ -184,7 +189,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
   }
 
   const openPyqModal = (type, index) => {
-    if (selectedMission.status === 'locked') return; // Prevents opening future days. Past/Missed days are allowed!
+    if (selectedMission.status === 'locked') return; 
     
     let preloadedAnswers = {};
     let allSubmitted = false;
@@ -201,7 +206,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
           allSubmitted = true;
       }
     } else {
-      const globalIndex = ((selectedMission.dayNumber - 1) * 1 + index) % rcSets.length; // Now strictly 1 RC per day
+      const globalIndex = ((selectedMission.dayNumber - 1) * 1 + index) % rcSets.length; 
       const set = rcSets[globalIndex];
       setActivePyq({ type: 'RC', data: set });
       setTimeLeft(10 * 60);
@@ -249,7 +254,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
 
   if (!selectedMission) return null
 
-  // Resolve current active question
   let currentQuestion = null;
   let questionsCount = 1;
   if (activePyq) {
@@ -279,14 +283,23 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .clickable-stat:hover { background-color: #FFEBEB; border-style: solid; border-color: var(--highlight-red); }
 
         .calendar-container { grid-area: calendar; padding: 10px 15px; display: flex; flex-direction: column; justify-content: space-between; }
-        .week-header { display: flex; justify-content: space-between; font-family: var(--font-sketch); font-size: 0.9rem; margin-bottom: 8px;}
+        
+        /* NEW WEEK HEADER STYLES */
+        .week-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
+        .week-nav-btn { background: none; border: none; font-family: var(--font-sketch); font-size: 0.9rem; color: var(--highlight-blue); cursor: pointer; font-weight: bold; padding: 5px; transition: opacity 0.2s;}
+        .week-nav-btn:hover:not(:disabled) { opacity: 0.7; }
+        .week-nav-btn:disabled { opacity: 0.2; cursor: not-allowed; color: var(--main-charcoal); }
+
         .days-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; flex-grow: 1;}
         .day-box {
             background: var(--base-cream); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
             box-shadow: inset 2px 2px 5px var(--shadow-light), inset -2px -2px 5px var(--shadow-dark); border: 2px solid transparent; position: relative; padding: 5px 0;
+            transition: all 0.2s;
         }
+        .day-box:hover:not(.locked) { transform: translateY(-1px); box-shadow: inset 1px 1px 3px var(--shadow-light), inset -1px -1px 3px var(--shadow-dark); }
         .day-box.active { background: var(--highlight-lavender); color: #fff; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); transform: translateY(-2px); }
         .day-box.missed-alert { border-color: var(--highlight-red); background: #FFF5F5; }
+        .day-box.locked { opacity: 0.6; }
         .day-box .day-name { font-size: 0.65rem; text-transform: uppercase; }
         .day-box .day-num { font-size: 1.2rem; font-weight: 600; margin: -2px 0;}
         .day-indicator { font-size: 0.7rem; font-weight: 600; font-family: var(--font-sketch); position: absolute; bottom: 4px; }
@@ -299,7 +312,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         }
         .done-btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 3px 3px 0px var(--main-charcoal); }
         .done-btn.completed { background: var(--highlight-green); color: white; border-color: var(--highlight-green); box-shadow: none; transform: none; }
-        .done-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .done-btn:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; border-style: dashed; }
 
         .reading-item { margin-bottom: 15px; }
         .reading-item h4 { margin: 0 0 2px 0; font-size: 1rem; }
@@ -317,8 +330,9 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .task-card::after { content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 30px; height: 10px; background: rgba(255, 154, 139, 0.4); border: 1px solid rgba(0,0,0,0.05); }
         .task-card label { font-family: var(--font-sans); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; color: var(--hover-peach); }
         .notebook-input { width: 100%; height: 44px; background-color: transparent; border: none; background-image: linear-gradient(transparent, transparent 21px, rgba(0,0,0,0.08) 21px, rgba(0,0,0,0.08) 22px, transparent 22px); background-size: 100% 22px; line-height: 22px; font-family: var(--font-sketch); font-size: 1rem; color: var(--main-charcoal); resize: none; outline: none; }
+        .notebook-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* NEW MODAL STYLES */
+        /* MODAL STYLES */
         .pyq-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
@@ -341,7 +355,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         }
         .pyq-close-btn:hover { transform: scale(1.1); }
         
-        /* FIX 1: OPTIONS FORMATTING FIX */
         .pyq-option-btn {
             display: block; width: 100%; text-align: left; padding: 12px 15px; border-radius: 8px; 
             transition: all 0.2s; color: var(--main-charcoal); font-size: 0.95rem; line-height: 1.4;
@@ -356,34 +369,28 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
 
         /* --- MOBILE RESPONSIVENESS FIXES --- */
         @media (max-width: 768px) {
-            /* 1. Stack the main dashboard into a single column */
             .dashboard-grid {
                 grid-template-columns: 1fr !important;
                 grid-template-areas: "stats" "calendar" "reading" "practice" !important;
                 min-height: auto;
             }
-
-            /* 2. Make the practice cards stack vertically */
             .practice-cards-wrapper {
                 grid-template-columns: 1fr !important;
             }
             .task-card {
-                grid-column: span 1 !important; /* Forces RC card to shrink */
+                grid-column: span 1 !important; 
             }
-
-            /* 3. Fix the Calendar overflow & Text Overlap */
             .days-row {
                 gap: 4px;
             }
             .day-box {
-                min-height: 70px !important; /* Forces the box to be tall enough */
-                padding-bottom: 18px !important; /* Creates safe space at the bottom */
+                min-height: 70px !important; 
+                padding-bottom: 18px !important; 
             }
             .day-box .day-name { font-size: 0.55rem; margin-top: 4px; }
             .day-box .day-num { font-size: 1.1rem; margin-top: -2px; }
             .day-indicator { font-size: 0.55rem !important; bottom: 4px !important; line-height: 1; }
 
-            /* 4. Mobile Modal Fixes (Stacks the Passage on top of Questions) */
             .pyq-modal-content {
                 padding: 15px 20px !important;
                 height: 95vh !important;
@@ -424,15 +431,25 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         {/* Calendar */}
         <div className="calendar-container island sketch-border">
             <div className="week-header">
-                <span style={{fontFamily: 'var(--font-sketch)'}}>Week {weeks.findIndex(w => w.key === selectedWeekKey) + 1} // {selectedWeek?.label}</span>
-                <span style={{opacity: 0.6, fontSize: '0.75rem'}}>Mon - Sun</span>
+                <button onClick={goToPrevWeek} disabled={validWeekIndex === 0} className="week-nav-btn">&larr; Prev Week</button>
+                <span style={{fontFamily: 'var(--font-sketch)', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                    <span>Week {validWeekIndex + 1} // {selectedWeek?.label}</span>
+                </span>
+                <button onClick={goToNextWeek} disabled={validWeekIndex === weeks.length - 1} className="week-nav-btn">Next Week &rarr;</button>
             </div>
+            
             <div className="days-row">
                 {selectedWeek?.slots.map((mission, index) => {
                     if (!mission) return <div key={`empty-${index}`} className="day-box pending" style={{border: '1px dashed rgba(0,0,0,0.1)'}}><div className="day-name">{WEEKDAY_LABELS[index]}</div><div className="day-num">{addDays(selectedWeek.startDate, index).getDate()}</div><div className="day-indicator" style={{ opacity: 0.4 }}>-</div></div>
+                    
                     const isSelected = selectedDay === mission.dayNumber
-                    let statusClass = isSelected ? 'active' : (mission.status === 'completed' ? 'completed' : (mission.status === 'missed' ? 'missed' : 'pending'))
-                    let indicatorLabel = (mission.status === 'active' || isSameDay(mission.date, today)) ? 'Today' : mission.status
+                    let statusClass = isSelected ? 'active' : (mission.status === 'completed' ? 'completed' : (mission.status === 'missed' ? 'missed-alert' : (mission.status === 'locked' ? 'locked' : 'pending')))
+                    
+                    // Display text logic under the box number
+                    let indicatorLabel = (mission.status === 'active' || isSameDayInline(mission.date, new Date())) 
+                        ? 'Today' 
+                        : (mission.status === 'locked' ? 'Upcoming' : mission.status)
+                    
                     return (
                         <div key={mission.dayNumber} className={`day-box ${statusClass}`} onClick={() => { if(mission.status !== 'locked') setSelectedDay(mission.dayNumber) }} style={{cursor: mission.status === 'locked' ? 'not-allowed' : 'pointer'}}>
                             <div className="day-name">{WEEKDAY_LABELS[index]}</div>
@@ -454,7 +471,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             </h2>
             {selectedMission.articles?.map((article, index) => (
                 <div className="reading-item" key={index}>
-                    <h4 style={{ margin: '0 0 2px 0', fontSize: '1rem' }}><a href={article.url} target="_blank" rel="noreferrer" className="hover-title" style={{ color: 'var(--main-charcoal)', textDecoration: 'none' }}>{index + 1}. {article.title}</a></h4>
+                    <h4 style={{ margin: '0 0 2px 0', fontSize: '1rem' }}><a href={article.url} target="_blank" rel="noreferrer" className="hover-title" style={{ color: 'var(--main-charcoal)', textDecoration: 'none', opacity: selectedMission.status === 'locked' ? 0.5 : 1 }}>{index + 1}. {article.title}</a></h4>
                     <span style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{article.source || 'Reading Assignment'}</span>
                 </div>
             ))}
@@ -487,7 +504,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                     return (
                         <div className="task-card" key={`va-${index}`}>
                             <label>
-                                <span className="practice-link" onClick={() => openPyqModal('VA', index)}>
+                                <span className="practice-link" onClick={() => openPyqModal('VA', index)} style={{ opacity: selectedMission.status === 'locked' ? 0.5 : 1, cursor: selectedMission.status === 'locked' ? 'not-allowed' : 'pointer' }}>
                                     <span>VA {index + 1}: CAT PYQ &#8599;</span>
                                     <span style={{ fontSize: '0.9rem' }}>{indicator}</span>
                                 </span>
@@ -508,7 +525,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                     return (
                         <div className="task-card" key={`rc-${index}`} style={{ gridColumn: 'span 2' }}>
                             <label>
-                                <span className="practice-link" onClick={() => openPyqModal('RC', index)}>
+                                <span className="practice-link" onClick={() => openPyqModal('RC', index)} style={{ opacity: selectedMission.status === 'locked' ? 0.5 : 1, cursor: selectedMission.status === 'locked' ? 'not-allowed' : 'pointer' }}>
                                     <span>RC PASSAGE: {set.questions[0].id.split('-')[0]} {set.questions[0].id.split('-')[1]} &#8599;</span>
                                     <span style={{ color: 'var(--highlight-green)', fontSize: '0.85rem' }}>{indicator}</span>
                                 </span>
@@ -526,10 +543,8 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         <div className="pyq-modal-overlay" onClick={() => setActivePyq(null)}>
             <div className={`island sketch-border pyq-modal-content ${activePyq.type === 'RC' ? 'rc-mode' : 'va-mode'}`} onClick={(e) => e.stopPropagation()}>
                 
-                {/* FIX: Absolute positioned close button completely separated from the timer */}
                 <button className="pyq-close-btn" onClick={() => setActivePyq(null)} style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>X</button>
 
-                {/* Header with Timer (added paddingRight: '40px' so timer stays safely away from the X) */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px dashed var(--main-charcoal)', paddingBottom: '10px', paddingRight: '40px' }}>
                     <h2 style={{ margin: 0, color: 'var(--highlight-blue)' }}>
                         {activePyq.type === 'RC' ? `RC Passage (${currentQIndex + 1} of ${questionsCount})` : currentQuestion.id}
@@ -539,10 +554,8 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                     </div>
                 </div>
 
-                {/* Body (Split Screen for RC, Single Column for VA) */}
                 <div className="pyq-body" style={{ flexDirection: activePyq.type === 'RC' ? 'row' : 'column' }}>
                     
-                    {/* Left Pane: Passage (RC Only) */}
                     {activePyq.type === 'RC' && (
                         <div className="pyq-passage-pane">
                             <div style={{ lineHeight: '1.8', fontSize: '0.95rem', whiteSpace: 'pre-wrap', color: 'var(--main-charcoal)' }}>
@@ -551,13 +564,11 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                         </div>
                     )}
 
-                    {/* Right Pane: Question & Options */}
                     <div className="pyq-question-pane" style={{ width: activePyq.type === 'RC' ? '50%' : '100%' }}>
                         <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '20px' }}>
                             {currentQuestion.question}
                         </p>
 
-                        {/* Options Rendering */}
                         {currentQuestion.options && currentQuestion.options.length > 0 ? (
                             <div style={{ display: 'block', marginBottom: '20px' }}>
                                 {currentQuestion.options.map((opt, i) => {
@@ -605,7 +616,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                             </div>
                         )}
 
-                        {/* Controls Bottom Bar */}
                         <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', paddingTop: '20px', borderTop: '2px dashed rgba(0,0,0,0.1)' }}>
                             {activePyq.type === 'RC' && (
                                 <>
@@ -623,7 +633,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                             </button>
                         </div>
 
-                        {/* Explanation Area */}
                         {isSubmitted && (
                             <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(0,0,0,0.03)', borderRadius: '12px' }}>
                                 <p style={{ margin: '0 0 10px 0', color: 'var(--highlight-blue)', fontWeight: 'bold' }}>Explanation:</p>
