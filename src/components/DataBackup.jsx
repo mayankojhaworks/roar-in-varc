@@ -94,6 +94,9 @@ export default function DataBackup({ user, missionState, warRoomRecords, onImpor
       {/* The Global Footer */}
       <SupportFooter />
       
+      {/* THE FIX: The invisible spacer placed INSIDE the scrolling container */}
+      <div style={{ height: '100px', width: '100%', flexShrink: 0 }} />
+      
     </section>
   )
 }
