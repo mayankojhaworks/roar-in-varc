@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { onAuthStateChanged, getRedirectResult } from 'firebase/auth' // <-- ADDED getRedirectResult
+import { onAuthStateChanged, getRedirectResult } from 'firebase/auth'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { auth, db } from './firebase' 
 import AppShell from './components/AppShell'
@@ -35,7 +35,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    // --- THE CATCHER'S MITT: Catches the user returning from Google ---
     getRedirectResult(auth).then(async (result) => {
         if (result && result.user) {
             setUser(result.user);
@@ -45,7 +44,6 @@ export default function App() {
         console.error("Redirect catch error:", error);
     });
 
-    // --- The Normal Listener ---
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser)
       if (currentUser) {
@@ -119,37 +117,35 @@ export default function App() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
-     {/* THE SAFE FIX: Dynamic Viewport Heights (dvh) to pull the bottom borders up into view */}
+      {/* THE FIX: The Strict Picture Frame Layout */}
       <style>{`
-        .tab-wrapper {
-            /* 150px perfectly clears your desktop header + margins */
-            height: calc(100dvh - 150px); 
-            display: flex;
-            flex-direction: column;
-        }
-        .tab-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            padding-bottom: 20px;
-        }
-        .tab-relative {
-            position: relative;
-            /* Pulls the bottom of the War Room/Audio frames up into view */
-            height: calc(100dvh - 150px); 
-            width: 100%;
+        /* 1. Stop the main body from bouncing or scrolling at all */
+        body, html, #root {
+            height: 100vh;
+            overflow: hidden;
         }
 
-        /* MOBILE SPECIFIC SIZING */
+        /* 2. The Frame: Always stays visible, crops anything overflowing the bottom */
+        .tab-wrapper, .tab-relative {
+            height: calc(100vh - 140px); /* Desktop: 140px perfectly clears header + margins */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Force crops the bottom border into existence */
+            position: relative;
+        }
+
+        /* 3. The Canvas: Only the stuff INSIDE the frame scrolls */
+        .tab-scroll-area {
+            flex: 1;
+            overflow-y: auto; /* Adds internal scrollbar */
+            padding: 0 10px 20px 10px; /* Safe padding so content doesn't hit the bottom border */
+        }
+
+        /* 4. Mobile Mode: Adjust frame height for taller stacked header */
         @media (max-width: 768px) {
             .tab-wrapper, .tab-relative {
-                /* 260px safely clears the taller, stacked mobile header */
-                height: calc(100dvh - 260px) !important; 
-            }
-            .tab-relative > div {
-                overflow-y: auto !important;
-            }
-            .tab-scroll-area {
-                padding-bottom: 40px !important;
+                height: calc(100dvh - 240px); /* Use dvh to ignore mobile address bar jumping */
             }
         }
       `}</style>
@@ -166,6 +162,7 @@ export default function App() {
       {/* TAB: MOCK ANALYTICS */}
       {activeTab === 'war-room' && (
         <div className="tab-relative">
+          {/* Note: WarRoom handles its own internal scroll areas, so we just lock its outer frame here */}
           <WarRoom records={warRoomRecords} onAddRecord={handleAddRecord} onDeleteRecord={handleDeleteRecord} missions={missionPlan} missionState={missionState} />
         </div>
       )}
@@ -179,14 +176,16 @@ export default function App() {
 
       {/* TAB: DATA BACKUP */}
       {activeTab === 'data-backup' && (
-        <div style={{ paddingBottom: '80px', height: '100%', overflowY: 'auto' }}>
-          <DataBackup
-            user={user} 
-            missionState={missionState}
-            warRoomRecords={warRoomRecords}
-            onImportBackup={handleImportBackup}
-            onClearAllProgress={handleClearAllProgress}
-          />
+        <div className="tab-wrapper">
+          <div className="tab-scroll-area">
+            <DataBackup
+              user={user} 
+              missionState={missionState}
+              warRoomRecords={warRoomRecords}
+              onImportBackup={handleImportBackup}
+              onClearAllProgress={handleClearAllProgress}
+            />
+          </div>
         </div>
       )}
       

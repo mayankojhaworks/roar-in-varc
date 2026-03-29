@@ -156,12 +156,46 @@ export default function FocusBeats() {
   }
 
   return (
-    <section style={{ 
-      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-      overflowY: 'auto', paddingRight: '10px',
-      display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px'
-    }}>
+    <section className="focus-beats-layout">
       <style>{`
+        /* THE FIX: The Strict Grid Architecture */
+        .focus-beats-layout {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        /* The Frame: Locks the island height, forces inner scrolling */
+        .focus-beats-island {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 0; /* CRITICAL: Kills the stretchy box problem */
+            overflow: hidden; /* Keeps the peach border rigidly in place */
+        }
+
+        /* The Canvas: Scrolls cleanly inside the playlist island */
+        .playlist-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        /* Mobile specific layout logic */
+        @media (max-width: 768px) {
+            .focus-beats-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr; /* Player sizes naturally, Playlist takes the rest */
+                gap: 15px;
+            }
+            .player-island {
+                height: auto; /* Let the player shrink on mobile */
+                padding: 20px !important;
+            }
+        }
+
+        /* Existing Styles */
         .player-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--hover-peach); letter-spacing: 0.2em; }
         
         .main-control-btn {
@@ -246,9 +280,8 @@ export default function FocusBeats() {
       `}</style>
 
       {/* Player Section */}
-      <div className="island sketch-border" style={{ alignSelf: 'start', padding: '30px' }}>
+      <div className="island sketch-border focus-beats-island player-island" style={{ padding: '30px', justifyContent: 'center' }}>
         
-        {/* THE FIX: Added 'music-player-card' here so Dark Mode CSS can grab it! */}
         <div className="tape-element music-player-card">
           <h2 style={{ fontFamily: 'var(--font-sketch)', fontSize: '2.2rem', margin: '0 0 8px 0', color: 'var(--main-charcoal)', lineHeight: 1 }}>
             {currentTrack.title}
@@ -303,12 +336,13 @@ export default function FocusBeats() {
       </div>
 
       {/* Playlist Section */}
-      <div className="island sketch-border no-hover-lift" style={{ display: 'flex', flexDirection: 'column', padding: '0' }}>
+      <div className="island sketch-border no-hover-lift focus-beats-island" style={{ padding: '0' }}>
         <div style={{ padding: '20px 25px 10px' }}>
             <p className="player-label">Soundtrack Log</p>
         </div>
         
-        <div style={{ overflowY: 'auto', flex: 1, paddingBottom: '20px' }}>
+        {/* This is the internal scrolling Canvas! */}
+        <div className="playlist-scroll-area">
           {tracks.map((track, index) => {
             const active = index === currentIndex
             return (
