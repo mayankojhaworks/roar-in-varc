@@ -143,8 +143,7 @@ export default function App() {
                 overflow-y: auto !important;
             }
             .tab-scroll-area {
-                /* THE FIX: Increased to 100px so you can scroll fully past the coffee widget */
-                padding-bottom: 100px !important; 
+                padding-bottom: 40px !important; 
             }
         }
       `}</style>
@@ -165,9 +164,7 @@ export default function App() {
         </div>
       )}
 
-      {/* TAB: STUDY AUDIO 
-          THE FIX: We ALWAYS render this div so the audio player never gets destroyed, 
-          we just visually hide it when you click away! */}
+      {/* TAB: STUDY AUDIO */}
       <div className="tab-relative" style={{ display: activeTab === 'focus-beats' ? 'block' : 'none' }}>
         <FocusBeats />
       </div>
@@ -183,6 +180,10 @@ export default function App() {
               onImportBackup={handleImportBackup}
               onClearAllProgress={handleClearAllProgress}
             />
+            
+            {/* THE INVISIBLE SPACER: Forces the mobile browser to let you scroll past the coffee widget */}
+            <div style={{ height: '150px', width: '100%', flexShrink: 0 }} />
+            
           </div>
         </div>
       )}
