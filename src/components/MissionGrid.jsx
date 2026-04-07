@@ -76,7 +76,6 @@ function getDefaultSelectedDay(missions) {
   return found ? found.dayNumber : missions[0]?.dayNumber ?? 1
 }
 
-// THE FIX: Automatically strips out clunky instructions from the question text
 const cleanQuestionText = (text) => {
   if (!text) return '';
   return text
@@ -85,7 +84,7 @@ const cleanQuestionText = (text) => {
     .trim();
 };
 
-export default function MissionGrid({ missions, missionState, onMissionUpdate }) {
+export default function MissionGrid({ missions, missionState, onMissionUpdate, pendingTestLaunch, setPendingTestLaunch }) {
   const [selectedDay, setSelectedDay] = useState(() => getDefaultSelectedDay(missions))
   const [selectedWeekKey, setSelectedWeekKey] = useState(() => {
      const weekStart = getWeekStart(new Date());
@@ -100,6 +99,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
   const [userAnswers, setUserAnswers] = useState({})
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
+  const [launchQueue, setLaunchQueue] = useState(null)
 
   const enrichedMissions = useMemo(() => {
     return missions.map((mission) => {
@@ -154,7 +154,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
   }, [selectedWeek, selectedDay])
 
   const selectedMission = selectedWeek?.slots.find((mission) => mission?.dayNumber === selectedDay) || selectedWeek?.slots.find(Boolean) || enrichedMissions[0]
-  const selectedMissionState = missionState[selectedMission?.dayNumber] || { completed: false, crRemarks1: '', crRemarks2: '', vaRemarks1: '', vaRemarks2: '', rcRemarks1: '', rcRemarks2: '', pyqAnswers: {} }
+  const selectedMissionState = missionState[selectedMission?.dayNumber] || { completed: false, crRemarks1: '', crRemarks2: '', vaRemarks1: '', vaRemarks2: '', rcRemarks1: '', rcRemarks2: '', pyqAnswers: {}, pyqTimers: {} }
 
   // --- STATS MATH ---
   const today = new Date();
@@ -205,22 +205,23 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
     let preloadedAnswers = {};
     let allSubmitted = false;
     const savedAnswers = selectedMissionState.pyqAnswers || {};
+    const savedTimers = selectedMissionState.pyqTimers || {}; 
 
     if (type === 'VA') {
       const globalIndex = ((selectedMission.dayNumber - 1) * 2 + index) % vaQuestions.length;
       const q = vaQuestions[globalIndex];
       setActivePyq({ type: 'VA', data: q });
-      setTimeLeft(3 * 60);
 
       if (savedAnswers[q.id]) {
           preloadedAnswers[0] = savedAnswers[q.id].selected;
           allSubmitted = true;
       }
+      setTimeLeft(savedTimers[q.id] !== undefined ? savedTimers[q.id] : 3 * 60);
+
     } else {
       const globalIndex = ((selectedMission.dayNumber - 1) * 1 + index) % rcSets.length; 
       const set = rcSets[globalIndex];
       setActivePyq({ type: 'RC', data: set });
-      setTimeLeft(10 * 60);
 
       let anySaved = false;
       set.questions.forEach((q, i) => {
@@ -230,11 +231,21 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
           }
       });
       if (anySaved) allSubmitted = true;
+      
+      setTimeLeft(savedTimers[set.passage] !== undefined ? savedTimers[set.passage] : 10 * 60);
     }
     
     setCurrentQIndex(0);
     setUserAnswers(preloadedAnswers);
     setIsSubmitted(allSubmitted);
+  }
+
+  const closePyqModal = () => {
+    if (activePyq && !isSubmitted) {
+      const testKey = activePyq.type === 'VA' ? activePyq.data.id : activePyq.data.passage;
+      updateField('pyqTimers', { ...(selectedMissionState.pyqTimers || {}), [testKey]: timeLeft });
+    }
+    setActivePyq(null);
   }
 
   const handleOptionSelect = (val) => {
@@ -262,6 +273,23 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
       updateField('pyqAnswers', { ...(selectedMissionState.pyqAnswers || {}), ...newAnswers });
       setIsSubmitted(true);
   }
+
+  useEffect(() => {
+    if (pendingTestLaunch) {
+      const mission = missions.find(m => m.dayNumber === pendingTestLaunch.dayNum)
+      if (mission) setSelectedWeekKey(getDateKey(getWeekStart(mission.date)))
+      setSelectedDay(pendingTestLaunch.dayNum)
+      setLaunchQueue({ type: pendingTestLaunch.type, index: pendingTestLaunch.index })
+      if (setPendingTestLaunch) setPendingTestLaunch(null)
+    }
+  }, [pendingTestLaunch, missions, setPendingTestLaunch])
+
+  useEffect(() => {
+    if (launchQueue && selectedMission && selectedMission.dayNumber === selectedDay) {
+       openPyqModal(launchQueue.type, launchQueue.index)
+       setLaunchQueue(null)
+    }
+  }, [selectedMission, selectedDay, launchQueue])
 
   if (!selectedMission) return null
 
@@ -376,7 +404,7 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         .task-card label { font-family: var(--font-sans); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; color: var(--hover-peach); }
         .notebook-input { width: 100%; height: 44px; background-color: transparent; border: none; background-image: linear-gradient(transparent, transparent 21px, rgba(0,0,0,0.08) 21px, rgba(0,0,0,0.08) 22px, transparent 22px); background-size: 100% 22px; line-height: 22px; font-family: var(--font-sketch); font-size: 1rem; color: var(--main-charcoal); resize: none; outline: none; }
 
-        /* THE FIX: RESTORED MODAL STYLES */
+        /* MODAL STYLES */
         .pyq-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
@@ -399,7 +427,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
         }
         .pyq-close-btn:hover { transform: scale(1.1); }
         
-        /* This fixes the side-by-side options! */
         .pyq-option-btn {
             display: block; width: 100%; text-align: left; padding: 12px 15px; border-radius: 8px; 
             transition: all 0.2s; color: var(--main-charcoal); font-size: 0.95rem; line-height: 1.4;
@@ -427,7 +454,6 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
             .day-box .day-num { font-size: 1.1rem; margin-top: -2px; }
             .day-indicator { font-size: 0.55rem !important; bottom: 4px !important; line-height: 1; }
             
-            /* RESTORED MOBILE MODAL STYLES */
             .pyq-modal-content { padding: 15px 20px !important; height: 95vh !important; max-height: 95vh !important; }
             .pyq-body { flex-direction: column !important; overflow-y: auto !important; }
             .pyq-passage-pane { border-right: none !important; border-bottom: 2px dashed rgba(0,0,0,0.2); padding-right: 0 !important; padding-bottom: 15px; max-height: 35vh; }
@@ -552,9 +578,9 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
       </div>
 
       {activePyq && (
-        <div className="pyq-modal-overlay" onClick={() => setActivePyq(null)}>
+        <div className="pyq-modal-overlay" onClick={closePyqModal}>
             <div className={`island sketch-border pyq-modal-content ${activePyq.type === 'RC' ? 'rc-mode' : 'va-mode'}`} onClick={(e) => e.stopPropagation()}>
-                <button className="pyq-close-btn" onClick={() => setActivePyq(null)} style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>X</button>
+                <button className="pyq-close-btn" onClick={closePyqModal} style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>X</button>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px dashed var(--main-charcoal)', paddingBottom: '10px', paddingRight: '40px' }}>
                     <h2 style={{ margin: 0, color: 'var(--highlight-blue)' }}>{activePyq.type === 'RC' ? `RC Passage (${currentQIndex + 1} of ${questionsCount})` : currentQuestion.id}</h2>
                     <div style={{ fontSize: '1.4rem', fontWeight: 'bold', fontFamily: 'var(--font-sketch)', color: timeLeft <= 60 && !isSubmitted ? 'var(--highlight-red)' : 'var(--main-charcoal)', animation: timeLeft <= 60 && !isSubmitted ? 'pulse 1s infinite' : 'none' }}>{isSubmitted ? '🏁' : '⏱'} {formatTime(timeLeft)}</div>
@@ -563,10 +589,13 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate })
                     {activePyq.type === 'RC' && (<div className="pyq-passage-pane"><div style={{ lineHeight: '1.8', fontSize: '0.95rem', whiteSpace: 'pre-wrap', color: 'var(--main-charcoal)' }}>{activePyq.data.passage}</div></div>)}
                     <div className="pyq-question-pane" style={{ width: activePyq.type === 'RC' ? '50%' : '100%' }}>
                         
-                        {/* THE FIX: Cleaned up question text rendering */}
-                        <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '20px' }}>
-                            {cleanQuestionText(currentQuestion.question)}
-                        </p>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '20px' }}>
+                            {cleanQuestionText(currentQuestion.question).split(/(?=\b[1-9]\.\s)/).map((sentence, index) => (
+                                <p key={index} style={{ margin: '0 0 10px 0', lineHeight: '1.6' }}>
+                                    {sentence}
+                                </p>
+                            ))}
+                        </div>
                         
                         {currentQuestion.options && currentQuestion.options.length > 0 ? (
                             <div style={{ display: 'block', marginBottom: '20px' }}>

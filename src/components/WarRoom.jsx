@@ -3,7 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import SupportFooter from './SupportFooter'
 import PYQTracker from './PYQTracker' 
 
-export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, missions = [], missionState = {} }) {
+export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, missions = [], missionState = {}, onOpenTest }) {
   const [showLedger, setShowLedger] = useState(false)
   const [formData, setFormData] = useState({
     type: 'Mock', singleSitting: 'Yes', name: '', slot: '', date: '',
@@ -89,7 +89,6 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
 
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', gap: '15px', paddingBottom: '20px' }}>
-      {/* THE FIX: Safely nested the style tag and comments inside the root div */}
       <style>{`
         /* UPDATED GRID FOR 5 CARDS */
         .stats-row { display: grid; grid-template-columns: repeat(4, 1fr) 1.2fr; gap: 15px; flex-shrink: 0; }
@@ -102,7 +101,6 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
         
         .fixed-island { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
         
-        /* THE FIX: Added padding-bottom: 40px to ensure you can scroll past the coffee widget */
         .scroll-area { flex: 1; overflow-y: auto; padding-right: 15px; margin-right: -5px; padding-bottom: 40px; }
         
         .form-group { margin-bottom: 15px; }
@@ -118,7 +116,7 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
         
         .section-box { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px; margin-bottom: 15px; }
 
-        /* --- NEW: MODAL STYLES FOR THE FLOATING SURFACE --- */
+        /* MODAL STYLES FOR THE FLOATING SURFACE */
         .pyq-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
@@ -141,7 +139,7 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- MOBILE RESPONSIVENESS FOR WAR ROOM --- */
+        /* MOBILE RESPONSIVENESS FOR WAR ROOM */
         @media (max-width: 768px) {
             .war-room-grid {
                 grid-template-columns: 1fr !important; 
@@ -167,14 +165,14 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
         <div className="stat-card"><p>Best Percentile</p><h3 style={{color: 'var(--highlight-green)'}}>{bestPercentile}%</h3></div>
         <div className="stat-card"><p>Average Score</p><h3 style={{color: 'var(--highlight-lavender)'}}>{avgScore}</h3></div>
         
-        {/* NEW DISTINCT 5TH CARD (Toggles the Floating Modal) */}
+        {/* PYQ Analytics Card */}
         <div 
           className="stat-card" 
           onClick={() => setShowLedger(true)}
           style={{
             background: 'var(--main-charcoal)',
             borderColor: 'var(--main-charcoal)',
-            borderRadius: '24px', // Distinct pill shape
+            borderRadius: '24px', 
             color: 'white',
             cursor: 'pointer',
             boxShadow: '4px 4px 0px var(--shadow-dark)',
@@ -194,7 +192,6 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
         </div>
       </div>
 
-      {/* THE ORIGINAL WAR ROOM GRID */}
       <div className="war-room-grid">
         
         {/* LEFT PANEL: DATA ENTRY FORM */}
@@ -344,7 +341,7 @@ export default function WarRoom({ records = [], onAddRecord, onDeleteRecord, mis
             <h2 style={{ margin: '0 0 15px 10px', fontFamily: 'var(--font-sketch)', color: 'var(--highlight-blue)' }}>Detailed PYQ Performance Ledger</h2>
             
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <PYQTracker missions={missions} missionState={missionState} />
+              <PYQTracker missions={missions} missionState={missionState} onOpenTest={onOpenTest} />
             </div>
 
           </div>

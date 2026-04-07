@@ -14,11 +14,15 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('crucible')
   const [user, setUser] = useState(null)
   
+  // THE SWITCHBOARD: Controls the Test Launcher
+  const [pendingTestLaunch, setPendingTestLaunch] = useState(null)
+  
   const [missionState, setMissionState] = useLocalStorage('roar-in-varc-missions', {})
   const [warRoomRecords, setWarRoomRecords] = useLocalStorage('roar-in-varc-war-room', [])
 
   const missionPlan = useMemo(() => {
-    const START_DATE = new Date(2026, 2, 28); 
+    // UPDATED START DATE: April 7, 2026
+    const START_DATE = new Date(2026, 3, 7); 
     return missionPlanRaw.map(mission => {
       const d = new Date(START_DATE);
       d.setDate(d.getDate() + (mission.dayNumber - 1));
@@ -114,37 +118,23 @@ export default function App() {
     }
   }
 
+  const handleOpenTest = (dayNum, type, index) => {
+    setPendingTestLaunch({ dayNum, type, index })
+    setActiveTab('crucible') 
+  }
+
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       
       <style>{`
-        .tab-wrapper {
-            height: calc(100dvh - 220px); 
-            display: flex;
-            flex-direction: column;
-        }
-        .tab-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            padding-bottom: 20px;
-        }
-        .tab-relative {
-            position: relative;
-            height: calc(100dvh - 220px); 
-            width: 100%;
-        }
+        .tab-wrapper { height: calc(100dvh - 220px); display: flex; flex-direction: column; }
+        .tab-scroll-area { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+        .tab-relative { position: relative; height: calc(100dvh - 220px); width: 100%; }
 
-        /* MOBILE SPECIFIC SIZING */
         @media (max-width: 768px) {
-            .tab-wrapper, .tab-relative {
-                height: calc(100dvh - 280px) !important; 
-            }
-            .tab-relative > div {
-                overflow-y: auto !important;
-            }
-            .tab-scroll-area {
-                padding-bottom: 40px !important; 
-            }
+            .tab-wrapper, .tab-relative { height: calc(100dvh - 280px) !important; }
+            .tab-relative > div { overflow-y: auto !important; }
+            .tab-scroll-area { padding-bottom: 40px !important; }
         }
       `}</style>
 
@@ -152,7 +142,13 @@ export default function App() {
       {activeTab === 'crucible' && (
         <div className="tab-wrapper">
           <div className="tab-scroll-area">
-            <MissionGrid missions={missionPlan} missionState={missionState} onMissionUpdate={handleMissionUpdate} />
+            <MissionGrid 
+                missions={missionPlan} 
+                missionState={missionState} 
+                onMissionUpdate={handleMissionUpdate} 
+                pendingTestLaunch={pendingTestLaunch}
+                setPendingTestLaunch={setPendingTestLaunch}
+            />
           </div>
         </div>
       )}
@@ -160,7 +156,14 @@ export default function App() {
       {/* TAB: MOCK ANALYTICS */}
       {activeTab === 'war-room' && (
         <div className="tab-relative">
-          <WarRoom records={warRoomRecords} onAddRecord={handleAddRecord} onDeleteRecord={handleDeleteRecord} missions={missionPlan} missionState={missionState} />
+          <WarRoom 
+              records={warRoomRecords} 
+              onAddRecord={handleAddRecord} 
+              onDeleteRecord={handleDeleteRecord} 
+              missions={missionPlan} 
+              missionState={missionState} 
+              onOpenTest={handleOpenTest}
+          />
         </div>
       )}
 
@@ -173,17 +176,14 @@ export default function App() {
       {activeTab === 'data-backup' && (
         <div className="tab-wrapper">
           <div className="tab-scroll-area">
-            <DataBackup
-              user={user} 
-              missionState={missionState}
-              warRoomRecords={warRoomRecords}
-              onImportBackup={handleImportBackup}
-              onClearAllProgress={handleClearAllProgress}
+            <DataBackup 
+                user={user} 
+                missionState={missionState} 
+                warRoomRecords={warRoomRecords} 
+                onImportBackup={handleImportBackup} 
+                onClearAllProgress={handleClearAllProgress} 
             />
-            
-            {/* THE INVISIBLE SPACER: Forces the mobile browser to let you scroll past the coffee widget */}
             <div style={{ height: '150px', width: '100%', flexShrink: 0 }} />
-            
           </div>
         </div>
       )}

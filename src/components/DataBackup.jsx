@@ -29,7 +29,7 @@ export default function DataBackup({ user, missionState, warRoomRecords, onImpor
             font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px var(--main-charcoal); 
             transition: all 0.2s; 
         }
-        .stamp-btn:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0px var(--main-charcoal); }
+        .stamp-btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 6px 6px 0px var(--main-charcoal); }
         .btn-export { background: var(--highlight-blue) !important; color: white !important; }
         .sync-badge { 
             background: #E8F5E9; border: 1.5px solid #2E7D32; color: #2E7D32; 
@@ -40,6 +40,11 @@ export default function DataBackup({ user, missionState, warRoomRecords, onImpor
             background: #FFF5F5; border: 1.5px dashed var(--highlight-red); color: var(--main-charcoal); 
             padding: 15px; border-radius: 12px; font-size: 0.95rem; 
             display: flex; align-items: flex-start; gap: 15px; margin-top: 15px; line-height: 1.5;
+        }
+        .info-note {
+            font-size: 0.85rem; padding: 12px; background: rgba(0,0,0,0.03); 
+            border-radius: 8px; border-left: 4px solid var(--highlight-blue);
+            color: var(--main-charcoal); font-style: italic;
         }
       `}</style>
 
@@ -74,14 +79,21 @@ export default function DataBackup({ user, missionState, warRoomRecords, onImpor
           Even with Cloud Sync active, you can always download a hard copy of your data for your own personal records.
         </p>
         
-        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
           <button onClick={handleExport} className="stamp-btn btn-export">
             Download JSON Backup
           </button>
           
-          <button onClick={onClearAllProgress} className="stamp-btn" style={{ color: 'var(--highlight-red)', borderStyle: 'dashed' }}>
-            Wipe Browser Data
-          </button>
+          {/* THE FIX: Button is hidden for logged-in users to prevent accidental cloud overwrites */}
+          {!user ? (
+            <button onClick={onClearAllProgress} className="stamp-btn" style={{ color: 'var(--highlight-red)', borderStyle: 'dashed' }}>
+              Wipe Browser Data
+            </button>
+          ) : (
+            <div className="info-note">
+                Manual wiping is disabled while Logged In to protect your Cloud records.
+            </div>
+          )}
         </div>
 
         {message && (
