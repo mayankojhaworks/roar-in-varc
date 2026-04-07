@@ -156,10 +156,10 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate, p
   const selectedMission = selectedWeek?.slots.find((mission) => mission?.dayNumber === selectedDay) || selectedWeek?.slots.find(Boolean) || enrichedMissions[0]
   const selectedMissionState = missionState[selectedMission?.dayNumber] || { completed: false, crRemarks1: '', crRemarks2: '', vaRemarks1: '', vaRemarks2: '', rcRemarks1: '', rcRemarks2: '', pyqAnswers: {}, pyqTimers: {} }
 
-  // --- STATS MATH ---
+  // --- THE FIX: STATS MATH UPDATED TO APRIL 7 ---
   const today = new Date();
-  const targetDate = new Date(2026, 10, 29); 
-  const planStartDate = new Date(2026, 2, 28); 
+  const targetDate = new Date(2026, 10, 29); // November 29, 2026
+  const planStartDate = new Date(2026, 3, 7); // April 7, 2026
   const msPerDay = 1000 * 60 * 60 * 24;
   const totalDays = Math.round((targetDate - planStartDate) / msPerDay);
   const daysLeft = Math.max(0, Math.round((targetDate - today) / msPerDay));
@@ -464,12 +464,13 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate, p
 
       <div className="dashboard-grid">
         <div className="stats-container">
+            {/* THE FIX: Info Button Text is now fully dynamic and accurate! */}
             {showStatsInfo && (
                 <div className="info-panel-overlay" onClick={() => setShowStatsInfo(false)}>
                     <div style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--main-charcoal)', textAlign: 'left', fontFamily: 'var(--font-sans)' }}>
-                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🗓 Timeline:</strong> Mar 28 - Nov 29, 2026.</div>
+                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🗓 Timeline:</strong> Apr 7 - Nov 29, 2026.</div>
                         <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>⏳ Days Left:</strong> Days until the exam.</div>
-                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🎯 Pending:</strong> 246 days minus completions.</div>
+                        <div style={{ marginBottom: '6px' }}><strong style={{ color: 'var(--highlight-blue)' }}>🎯 Pending:</strong> {totalDays} days minus completions.</div>
                         <div><strong style={{ color: 'var(--highlight-red)' }}>⚠️ Missed:</strong> Past days not marked ✓ DONE.</div>
                     </div>
                 </div>
