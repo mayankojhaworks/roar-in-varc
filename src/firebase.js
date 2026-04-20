@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // <-- ADDED FOR IMAGE UPLOADS
 
 const firebaseConfig = {
   apiKey: "AIzaSyA4CbunSEJT7CuiZ54iqkPYt56BV3ZT3cs",
@@ -18,6 +19,7 @@ const app = initializeApp(firebaseConfig);
 // Initialize Services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app); // <-- ADDED FOR IMAGE UPLOADS
 export const googleProvider = new GoogleAuthProvider();
 
 // Auth Helpers: Switched BACK to Popup now that the domain is authorized!

@@ -1,5 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import pyqData from '../data/pyqDataV4.json' 
+import { auth, db, storage } from '../firebase'
+
+
+import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { onAuthStateChanged } from 'firebase/auth'
+import pyqData from '../data/pyqDataV4.json'
 
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -100,6 +105,75 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate, p
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
   const [launchQueue, setLaunchQueue] = useState(null)
+  const [fullScreenImage, setFullScreenImage] = useState(null); // Tracks the URL of the image to zoom
+
+  // --- ADMIN & SOLUTION STATES ---
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [globalSolutions, setGlobalSolutions] = useState({}) // Stores { 'cr-0': url, 'cr-1': url }
+  const [openSolution, setOpenSolution] = useState(null) // Tracks which accordion is open
+
+// Verify Admin Status globally
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && (user.email === 'ojhamayank9@gmail.com' || user.email === 'mayankojhahere1@gmail.com')) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+
+// Handle the Admin Image Upload via Cloudinary (STABLE & CLEAN)
+  const handleImageUpload = async (e, crIndex) => {
+    const file = e.target.files[0];
+    const currentDay = selectedMission?.dayNumber;
+    
+    if (!file || !currentDay) {
+      alert("Error: No file selected or Day not found.");
+      return;
+    }
+    
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'PRESERRIV'); 
+
+    try {
+      // 1. Send to Cloudinary
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/dpvodcwvu/image/upload`, 
+        { method: 'POST', body: formData }
+      );
+      
+      const data = await response.json();
+      if (!data.secure_url) throw new Error(data.error?.message || "Cloudinary failed");
+
+      const downloadURL = data.secure_url;
+
+      // 2. Prepare the update for both Firebase and UI
+      const docRef = doc(db, "global_solutions", `day_${currentDay}`);
+      const updatedData = { ...globalSolutions, [`cr-${crIndex}`]: downloadURL };
+      
+      // 3. Save to Firebase
+      await setDoc(docRef, updatedData, { merge: true });
+      
+      // 4. Update the local screen memory
+      setGlobalSolutions(updatedData);
+      
+      window.alert(`✅ Solution for CR ${crIndex + 1} (Day ${currentDay}) saved successfully!`);
+      
+    } catch (error) {
+      console.error("Upload failed:", error);
+      window.alert(`❌ Upload Error: ${error.message}`);
+    } finally {
+      setIsUploading(false);
+      e.target.value = ""; 
+    }
+  };
 
   const enrichedMissions = useMemo(() => {
     return missions.map((mission) => {
@@ -153,13 +227,30 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate, p
     if (fallbackMission) setSelectedDay(fallbackMission.dayNumber)
   }, [selectedWeek, selectedDay])
 
+  // --- INITIALIZE MISSION FIRST ---
   const selectedMission = selectedWeek?.slots.find((mission) => mission?.dayNumber === selectedDay) || selectedWeek?.slots.find(Boolean) || enrichedMissions[0]
   const selectedMissionState = missionState[selectedMission?.dayNumber] || { completed: false, crRemarks1: '', crRemarks2: '', vaRemarks1: '', vaRemarks2: '', rcRemarks1: '', rcRemarks2: '', pyqAnswers: {}, pyqTimers: {} }
 
-  // --- THE FIX: STATS MATH UPDATED TO APRIL 7 ---
+  // --- THEN FETCH SOLUTIONS ---
+  useEffect(() => {
+    if (!selectedMission) return;
+    const fetchSolutions = async () => {
+      const docRef = doc(db, "global_solutions", `day_${selectedMission.dayNumber}`);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        setGlobalSolutions(snap.data());
+      } else {
+        setGlobalSolutions({});
+      }
+      setOpenSolution(null); 
+    };
+    fetchSolutions();
+  }, [selectedMission?.dayNumber]);
+
+  // --- STATS LOGIC ---
   const today = new Date();
-  const targetDate = new Date(2026, 10, 29); // November 29, 2026
-  const planStartDate = new Date(2026, 3, 7); // April 7, 2026
+  const targetDate = new Date(2026, 10, 29); 
+  const planStartDate = new Date(2026, 3, 7); 
   const msPerDay = 1000 * 60 * 60 * 24;
   const totalDays = Math.round((targetDate - planStartDate) / msPerDay);
   const daysLeft = Math.max(0, Math.round((targetDate - today) / msPerDay));
@@ -394,6 +485,15 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate, p
         .practice-link { color: var(--hover-peach); text-decoration: none; transition: color 0.2s; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between;}
         .practice-link:hover { color: var(--highlight-blue) !important; text-decoration: underline !important; }
 
+        /* CR SOLUTION ACCORDION STYLES */
+        .solution-upload-label { font-size: 0.65rem; background: var(--main-charcoal); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; float: right; margin-top: -3px; transition: background 0.2s;}
+        .solution-upload-label:hover { background: var(--highlight-blue); }
+        .solution-toggle-btn { background: rgba(0,0,0,0.03); border: 1px dashed rgba(0,0,0,0.15); width: 100%; padding: 8px; margin-top: 10px; border-radius: 6px; font-family: var(--font-sans); font-size: 0.75rem; font-weight: bold; cursor: pointer; transition: all 0.2s; color: var(--main-charcoal); }
+        .solution-toggle-btn:hover { background: rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.3); }
+        .solution-image-container { margin-top: 10px; border-radius: 8px; overflow: hidden; border: 2px solid rgba(0,0,0,0.1); animation: slideDown 0.3s ease-out forwards; transform-origin: top; }
+        .solution-image-container img { width: 100%; display: block; }
+        @keyframes slideDown { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+
         .practice-container { grid-area: practice; display: flex; flex-direction: column; overflow-y: auto; padding-right: 5px; }
         .practice-cards-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex-grow: 1; padding-bottom: 5px; }
         .task-card {
@@ -540,12 +640,65 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate, p
         <div className="practice-container island sketch-border">
             <h2 className="panel-title">Practice Workspace <span>CR / VA / RC</span></h2>
             <div className="practice-cards-wrapper">
-                {[0, 1].map((index) => {
+               {[0, 1].map((index) => {
                     const q = selectedMission.crQuestions?.[index];
+                    const solutionUrl = globalSolutions[`cr-${index}`];
+                    const isAccordionOpen = openSolution === `cr-${index}`;
+
                     return (
                         <div className="task-card" key={`cr-${index}`}>
-                            <label>{q?.url ? <a href={q.url} target="_blank" rel="noreferrer" className="practice-link">CR {index + 1}: {q?.source || 'GMAT CLUB'} &#8599;</a> : `CR ${index + 1}: ${q?.source || 'GMAT CLUB'}`}</label>
-                            <textarea className="notebook-input" placeholder="Add Remarks..." value={index === 0 ? selectedMissionState.crRemarks1 : selectedMissionState.crRemarks2} onChange={(e) => updateField(index === 0 ? 'crRemarks1' : 'crRemarks2', e.target.value)} />
+                            <label style={{ display: 'block' }}>
+                                {q?.url ? <a href={q.url} target="_blank" rel="noreferrer" className="practice-link" style={{ display: 'inline-block' }}>CR {index + 1}: {q?.source || 'GMAT CLUB'} &#8599;</a> : `CR ${index + 1}: ${q?.source || 'GMAT CLUB'}`}
+                                
+                                {/* HIDDEN ADMIN UPLOAD TOOL */}
+                                {isAdmin && (
+                                    <>
+                                        <label htmlFor={`upload-cr-${index}`} className="solution-upload-label">
+                                            {isUploading ? '...' : '+ Upload'}
+                                        </label>
+                                        <input 
+                                            type="file" 
+                                            id={`upload-cr-${index}`} 
+                                            style={{ display: 'none' }} 
+                                            accept="image/*"
+                                            onChange={(e) => handleImageUpload(e, index)}
+                                            disabled={isUploading}
+                                        />
+                                    </>
+                                )}
+                            </label>
+                            
+                           <textarea 
+        className="notebook-input" 
+        placeholder="Add Remarks..." 
+        value={index === 0 ? selectedMissionState.crRemarks1 : selectedMissionState.crRemarks2} 
+        onChange={(e) => updateField(index === 0 ? 'crRemarks1' : 'crRemarks2', e.target.value)} 
+    />
+
+    {/* THE MISSING BUTTON & IMAGE LOGIC */}
+    {solutionUrl && (
+        <>
+            <button 
+                className="solution-toggle-btn" 
+                onClick={() => setOpenSolution(isAccordionOpen ? null : `cr-${index}`)}
+            >
+                {isAccordionOpen ? "Hide Mayank's Solution ▲" : "View Mayank's Solution ▼"}
+            </button>
+
+            {isAccordionOpen && (
+                <div 
+                    className="solution-image-container" 
+                    style={{ cursor: 'zoom-in' }} 
+                    onClick={() => setFullScreenImage(solutionUrl)}
+                >
+                    <img src={solutionUrl} alt={`CR ${index + 1} Logic Breakdown`} loading="lazy" />
+                    <div style={{ fontSize: '0.65rem', textAlign: 'center', padding: '8px', opacity: 0.6, fontFamily: 'var(--font-sketch)' }}>
+                        Click to enlarge logic breakdown
+                    </div>
+                </div>
+            )}
+        </>
+    )}
                         </div>
                     )
                 })}
@@ -622,6 +775,42 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate, p
                     </div>
                 </div>
             </div>
+        </div>
+      )}
+   {/* FULLSCREEN IMAGE OVERLAY */}
+      {fullScreenImage && (
+        <div 
+          className="pyq-modal-overlay" 
+          style={{ cursor: 'zoom-out', padding: '5vw' }} 
+          onClick={() => setFullScreenImage(null)} // Clicking the background closes it
+        >
+          <div style={{ position: 'relative', maxWidth: '100%', maxHeight: '100%' }}>
+            {/* The Close Button */}
+            <button 
+              className="pyq-close-btn" 
+              style={{ position: 'absolute', top: '-15px', right: '-15px', zIndex: 101 }}
+              onClick={() => setFullScreenImage(null)}
+            >
+              ✕
+            </button>
+
+            {/* The Actual Large Image */}
+            <img 
+              src={fullScreenImage} 
+              alt="Fullscreen Solution" 
+              style={{ 
+                width: 'auto', 
+                height: 'auto', 
+                maxWidth: '90vw', 
+                maxHeight: '90vh', 
+                borderRadius: '12px', 
+                boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+                border: '4px solid var(--base-cream)',
+                objectFit: 'contain'
+              }} 
+              onClick={(e) => e.stopPropagation()} // Prevents closing when clicking the image itself
+            />
+          </div>
         </div>
       )}
     </>
