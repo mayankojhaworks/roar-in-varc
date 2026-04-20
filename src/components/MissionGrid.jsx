@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { auth, db, storage } from '../firebase'
 
 
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, deleteField } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import pyqData from '../data/pyqDataV4.json'
 
@@ -172,6 +172,37 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate, p
     } finally {
       setIsUploading(false);
       e.target.value = ""; 
+    }
+  };
+
+  // Handle the Admin Image Deletion
+  const handleImageDelete = async (crIndex) => {
+    const currentDay = selectedMission?.dayNumber;
+    if (!currentDay) return;
+
+    // Safety confirmation
+    const confirmDelete = window.confirm(`Are you sure you want to delete the solution for CR ${crIndex + 1}?`);
+    if (!confirmDelete) return;
+
+    try {
+      const docRef = doc(db, "global_solutions", `day_${currentDay}`);
+
+      // 1. Remove the specific key from Firebase
+      await updateDoc(docRef, {
+        [`cr-${crIndex}`]: deleteField()
+      });
+
+      // 2. Update local UI state
+      setGlobalSolutions(prev => {
+        const updated = { ...prev };
+        delete updated[`cr-${crIndex}`];
+        return updated;
+      });
+
+      window.alert("🗑️ Solution deleted successfully.");
+    } catch (error) {
+      console.error("Delete failed:", error);
+      window.alert(`❌ Delete Error: ${error.message}`);
     }
   };
 
@@ -675,15 +706,37 @@ export default function MissionGrid({ missions, missionState, onMissionUpdate, p
         onChange={(e) => updateField(index === 0 ? 'crRemarks1' : 'crRemarks2', e.target.value)} 
     />
 
-    {/* THE MISSING BUTTON & IMAGE LOGIC */}
+    {/* THE TOGGLE BUTTON & DELETE OPTION */}
     {solutionUrl && (
         <>
-            <button 
-                className="solution-toggle-btn" 
-                onClick={() => setOpenSolution(isAccordionOpen ? null : `cr-${index}`)}
-            >
-                {isAccordionOpen ? "Hide Mayank's Solution ▲" : "View Mayank's Solution ▼"}
-            </button>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '10px' }}>
+                <button 
+                    className="solution-toggle-btn" 
+                    onClick={() => setOpenSolution(isAccordionOpen ? null : `cr-${index}`)}
+                    style={{ flex: 1, marginTop: 0 }} 
+                >
+                    {isAccordionOpen ? "Hide Mayank's Solution ▲" : "View Mayank's Solution ▼"}
+                </button>
+
+                {/* Trash Icon: Only visible to you as Admin */}
+                {isAdmin && (
+                    <button 
+                        onClick={() => handleImageDelete(index)}
+                        title="Delete Solution"
+                        style={{ 
+                            background: '#FFF5F5', 
+                            border: '1px solid #E74C3C', 
+                            borderRadius: '6px', 
+                            padding: '6px 10px', 
+                            cursor: 'pointer',
+                            fontSize: '1rem',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        🗑️
+                    </button>
+                )}
+            </div>
 
             {isAccordionOpen && (
                 <div 
