@@ -9,6 +9,7 @@ import MissionGrid from './components/MissionGrid'
 import WarRoom from './components/WarRoom'
 import missionPlanRaw from './data/generated/missionPlan.json' 
 import { useLocalStorage } from './hooks/useLocalStorage'
+import { Analytics } from '@vercel/analytics/react'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('crucible')
@@ -188,6 +189,7 @@ export default function App() {
         </div>
       )}
       
+      <Analytics />
     </AppShell>
   )
 }
