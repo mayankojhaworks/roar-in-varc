@@ -29,6 +29,11 @@ const READING_COACH_TIPS = [
   'Before judging an option, ask what job the paragraph is doing.',
 ]
 
+const DEFINITION_BUBBLE_MS = 2500
+const TEMP_SLOWDOWN_MS = 2500
+const TEMP_SLOWDOWN_FACTOR = 0.2
+const MAX_FRAME_DELTA_SECONDS = 0.05
+
 function getLocalText() {
   try {
     return localStorage.getItem(SAVED_TEXT_KEY) || ''
@@ -92,30 +97,35 @@ function getRelativeFocusSpeeds(baseWpm) {
 
   return [
     {
-      key: 'settle',
-      label: 'Settle',
-      wpm: roundToNearestFive(safeBase * 0.8),
+      key: 'minus-50',
+      label: '−50%',
+      wpm: roundToNearestFive(safeBase * 0.5),
     },
     {
-      key: 'chosen',
-      label: 'Chosen',
-      wpm: roundToNearestFive(safeBase),
+      key: 'minus-25',
+      label: '−25%',
+      wpm: roundToNearestFive(safeBase * 0.75),
+    },
+{
+  key: 'base',
+  label: 'Base Speed',
+  wpm: roundToNearestFive(safeBase),
+},
+    {
+      key: 'plus-25',
+      label: '+25%',
+      wpm: roundToNearestFive(safeBase * 1.25),
     },
     {
-      key: 'stretch',
-      label: 'Stretch',
-      wpm: roundToNearestFive(safeBase * 1.18),
-    },
-    {
-      key: 'push',
-      label: 'Push',
-      wpm: roundToNearestFive(safeBase * 1.35),
+      key: 'plus-50',
+      label: '+50%',
+      wpm: roundToNearestFive(safeBase * 1.5),
     },
   ]
 }
 
 function getReadingLineY(windowHeight) {
-  return Math.max(118, Math.min(176, windowHeight * 0.2))
+  return Math.max(132, Math.min(190, windowHeight * 0.22))
 }
 
 export default function ReadingAmigo() {
@@ -135,28 +145,34 @@ export default function ReadingAmigo() {
   const [vocabBank, setVocabBank] = useState(getLocalVocab)
   const [selectedWords, setSelectedWords] = useState([])
   const [definition, setDefinition] = useState(null)
+  const [floatingDefinition, setFloatingDefinition] = useState(null)
   const [message, setMessage] = useState('')
   const [isVocabOpen, setIsVocabOpen] = useState(false)
   const [isHighlightsOpen, setIsHighlightsOpen] = useState(false)
 
   const animationRef = useRef(null)
-  const lastTimeRef = useRef(0)
+  const lastFrameTimeRef = useRef(0)
 
   const currentYRef = useRef(0)
   const runningRef = useRef(false)
   const pausedRef = useRef(true)
+
   const readingWpmRef = useRef(180)
+  const selectedWpmRef = useRef(180)
 
   const elapsedSecondsRef = useRef(0)
   const shownSecondRef = useRef(0)
 
-  const baseTimeRef = useRef(0)
-  const baseWordIndexRef = useRef(0)
-  const currentWordIndexRef = useRef(0)
+  const wordProgressRef = useRef(0)
   const readerWordCountRef = useRef(0)
-  const wordPositionsRef = useRef([])
-  const wordLineStartsRef = useRef([])
+  const scrollStartYRef = useRef(0)
+  const scrollDistanceRef = useRef(1)
+
   const wordRefs = useRef([])
+
+  const slowdownTimeoutRef = useRef(null)
+  const floatingDefinitionTimeoutRef = useRef(null)
+  const definitionRequestIdRef = useRef(0)
 
   const readerWindowRef = useRef(null)
   const readerTextRef = useRef(null)
@@ -239,6 +255,8 @@ export default function ReadingAmigo() {
   useEffect(() => {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current)
+      if (slowdownTimeoutRef.current) clearTimeout(slowdownTimeoutRef.current)
+      if (floatingDefinitionTimeoutRef.current) clearTimeout(floatingDefinitionTimeoutRef.current)
     }
   }, [])
 
@@ -282,7 +300,7 @@ export default function ReadingAmigo() {
 
     requestAnimationFrame(() => {
       if (measureReaderLayout()) {
-        moveReaderToWord(currentWordIndexRef.current)
+        renderReaderAtProgress()
       }
     })
   }, [readerText, isFocusMode])
@@ -293,7 +311,7 @@ export default function ReadingAmigo() {
     function handleResize() {
       requestAnimationFrame(() => {
         if (measureReaderLayout()) {
-          moveReaderToWord(currentWordIndexRef.current)
+          renderReaderAtProgress()
         }
       })
     }
@@ -313,120 +331,31 @@ export default function ReadingAmigo() {
   function measureReaderLayout() {
     const windowEl = readerWindowRef.current
     const textEl = readerTextRef.current
-    const totalWords = getWordCount(readerText)
+    const totalWords = readerWordCountRef.current || getWordCount(readerText)
 
-    if (!windowEl || !textEl || !readerText || totalWords <= 0) return false
+    if (!windowEl || !textEl || totalWords <= 0) return false
 
-    const positions = []
+    const windowHeight = windowEl.clientHeight
+    const textHeight = textEl.scrollHeight
+    const computedStyle = window.getComputedStyle(textEl)
+    const lineHeight = Number.parseFloat(computedStyle.lineHeight) || 30
 
-    for (let index = 0; index < totalWords; index += 1) {
-      const wordEl = wordRefs.current[index]
+    const startY = getReadingLineY(windowHeight)
+    const scrollDistance = Math.max(1, textHeight - lineHeight)
 
-      if (!wordEl) return false
-
-      positions[index] = wordEl.offsetTop
-    }
-
-    const lineStarts = []
-    let lastTop = null
-
-    positions.forEach((top, index) => {
-      if (lastTop === null || Math.abs(top - lastTop) > 1) {
-        lineStarts.push({ index, top })
-        lastTop = top
-      }
-    })
-
-    if (!lineStarts.length) return false
-
-    wordPositionsRef.current = positions
-    wordLineStartsRef.current = lineStarts
+    scrollStartYRef.current = startY
+    scrollDistanceRef.current = scrollDistance
     readerWordCountRef.current = totalWords
 
     return true
   }
 
-  function getInterpolatedTextTop(activeWordIndex) {
-    const totalWords = readerWordCountRef.current || getWordCount(readerText)
-    const lineStarts = wordLineStartsRef.current
+  function renderReaderAtProgress() {
+    const totalWords = Math.max(readerWordCountRef.current, 1)
+    const progressRatio = Math.max(0, Math.min(1, wordProgressRef.current / totalWords))
+    const y = scrollStartYRef.current - scrollDistanceRef.current * progressRatio
 
-    if (!lineStarts.length || totalWords <= 0) return 0
-
-    const safeWordIndex = Math.max(0, Math.min(activeWordIndex, totalWords))
-    let low = 0
-    let high = lineStarts.length - 1
-    let lineIndex = 0
-
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2)
-
-      if (lineStarts[mid].index <= safeWordIndex) {
-        lineIndex = mid
-        low = mid + 1
-      } else {
-        high = mid - 1
-      }
-    }
-
-    const currentLine = lineStarts[lineIndex]
-    const nextLine = lineStarts[lineIndex + 1]
-
-    if (!nextLine) {
-      const previousLine = lineStarts[lineIndex - 1]
-      const estimatedLineHeight = previousLine
-        ? Math.max(26, currentLine.top - previousLine.top)
-        : 32
-
-      const remainingWordsInLine = Math.max(totalWords - currentLine.index, 1)
-      const progress = Math.max(
-        0,
-        Math.min(1, (safeWordIndex - currentLine.index) / remainingWordsInLine)
-      )
-
-      return currentLine.top + estimatedLineHeight * progress
-    }
-
-    const wordsInLine = Math.max(nextLine.index - currentLine.index, 1)
-    const progress = Math.max(
-      0,
-      Math.min(1, (safeWordIndex - currentLine.index) / wordsInLine)
-    )
-
-    return currentLine.top + (nextLine.top - currentLine.top) * progress
-  }
-
-  function moveReaderToWord(activeWordIndex) {
-    const windowEl = readerWindowRef.current
-
-    if (!windowEl) return
-
-    const readingLineY = getReadingLineY(windowEl.clientHeight)
-    const targetTop = getInterpolatedTextTop(activeWordIndex)
-
-    applyReaderPosition(readingLineY - targetTop)
-  }
-
-  function getCurrentActiveWordIndex(currentTime = performance.now()) {
-    if (!runningRef.current) return currentWordIndexRef.current
-
-    const elapsedSinceBase = Math.max(0, (currentTime - baseTimeRef.current) / 1000)
-    const wordsAdvanced = elapsedSinceBase * (readingWpmRef.current / 60)
-
-    return baseWordIndexRef.current + wordsAdvanced
-  }
-
-  function lockCurrentWord(currentTime = performance.now()) {
-    const totalWords = readerWordCountRef.current || getWordCount(readerText)
-    const currentWordIndex = Math.max(
-      0,
-      Math.min(getCurrentActiveWordIndex(currentTime), totalWords)
-    )
-
-    currentWordIndexRef.current = currentWordIndex
-    baseWordIndexRef.current = currentWordIndex
-    baseTimeRef.current = currentTime
-
-    return currentWordIndex
+    applyReaderPosition(y)
   }
 
   function startWordClockWhenReady(attempt = 0) {
@@ -449,14 +378,12 @@ export default function ReadingAmigo() {
       return
     }
 
-    moveReaderToWord(0)
+    wordProgressRef.current = 0
+    renderReaderAtProgress()
 
     const now = performance.now()
 
-    baseTimeRef.current = now
-    baseWordIndexRef.current = 0
-    currentWordIndexRef.current = 0
-    lastTimeRef.current = now
+    lastFrameTimeRef.current = now
 
     if (animationRef.current) cancelAnimationFrame(animationRef.current)
     animationRef.current = requestAnimationFrame(animate)
@@ -465,10 +392,13 @@ export default function ReadingAmigo() {
   function animate(currentTime) {
     if (!runningRef.current || pausedRef.current) return
 
-    const deltaSeconds = Math.max(0, (currentTime - lastTimeRef.current) / 1000)
-    lastTimeRef.current = currentTime
+    const rawDeltaSeconds = Math.max(0, (currentTime - lastFrameTimeRef.current) / 1000)
+    const deltaSeconds = Math.min(rawDeltaSeconds, MAX_FRAME_DELTA_SECONDS)
+
+    lastFrameTimeRef.current = currentTime
 
     elapsedSecondsRef.current += deltaSeconds
+    wordProgressRef.current += deltaSeconds * (readingWpmRef.current / 60)
 
     const nextVisibleSecond = Math.floor(elapsedSecondsRef.current)
 
@@ -477,23 +407,21 @@ export default function ReadingAmigo() {
       setElapsedSeconds(nextVisibleSecond)
     }
 
-    if (!wordLineStartsRef.current.length && !measureReaderLayout()) {
+    if (!measureReaderLayout()) {
       animationRef.current = requestAnimationFrame(animate)
       return
     }
 
-    const totalWords = readerWordCountRef.current || getWordCount(readerText)
-    const activeWordIndex = getCurrentActiveWordIndex(currentTime)
+    renderReaderAtProgress()
 
-    currentWordIndexRef.current = activeWordIndex
-    moveReaderToWord(activeWordIndex)
+    const totalWords = Math.max(readerWordCountRef.current, 1)
 
-    if (activeWordIndex >= totalWords) {
+    if (wordProgressRef.current >= totalWords) {
+      wordProgressRef.current = totalWords
+      renderReaderAtProgress()
+
       runningRef.current = false
       pausedRef.current = true
-
-      currentWordIndexRef.current = totalWords
-      moveReaderToWord(totalWords)
 
       setIsRunning(false)
       setIsPaused(true)
@@ -516,21 +444,22 @@ export default function ReadingAmigo() {
     }
 
     if (animationRef.current) cancelAnimationFrame(animationRef.current)
+    if (slowdownTimeoutRef.current) clearTimeout(slowdownTimeoutRef.current)
+    if (floatingDefinitionTimeoutRef.current) clearTimeout(floatingDefinitionTimeoutRef.current)
 
     const chosenWpm = activeSpeed.wpm
     const totalWords = getWordCount(cleanText)
 
     wordRefs.current = []
-    wordPositionsRef.current = []
-    wordLineStartsRef.current = []
     readerWordCountRef.current = totalWords
+    wordProgressRef.current = 0
 
     readingWpmRef.current = chosenWpm
+    selectedWpmRef.current = chosenWpm
+
     elapsedSecondsRef.current = 0
     shownSecondRef.current = 0
-    baseTimeRef.current = 0
-    baseWordIndexRef.current = 0
-    currentWordIndexRef.current = 0
+    lastFrameTimeRef.current = 0
     currentYRef.current = 0
 
     setFocusBaseWpm(chosenWpm)
@@ -541,6 +470,7 @@ export default function ReadingAmigo() {
     setHighlightedWords([])
     setSelectedWords([])
     setDefinition(null)
+    setFloatingDefinition(null)
     setMessage('')
     setIsComplete(false)
     setIsFocusMode(true)
@@ -561,9 +491,6 @@ export default function ReadingAmigo() {
   function pauseReading() {
     if (!runningRef.current) return
 
-    const currentWordIndex = lockCurrentWord()
-    moveReaderToWord(currentWordIndex)
-
     pausedRef.current = true
     setIsPaused(true)
 
@@ -580,14 +507,9 @@ export default function ReadingAmigo() {
 
     requestAnimationFrame(() => {
       measureReaderLayout()
+      renderReaderAtProgress()
 
-      const now = performance.now()
-
-      baseWordIndexRef.current = currentWordIndexRef.current
-      baseTimeRef.current = now
-      lastTimeRef.current = now
-
-      moveReaderToWord(currentWordIndexRef.current)
+      lastFrameTimeRef.current = performance.now()
 
       if (animationRef.current) cancelAnimationFrame(animationRef.current)
       animationRef.current = requestAnimationFrame(animate)
@@ -596,19 +518,18 @@ export default function ReadingAmigo() {
 
   function resetReader() {
     if (animationRef.current) cancelAnimationFrame(animationRef.current)
+    if (slowdownTimeoutRef.current) clearTimeout(slowdownTimeoutRef.current)
+    if (floatingDefinitionTimeoutRef.current) clearTimeout(floatingDefinitionTimeoutRef.current)
 
     runningRef.current = false
     pausedRef.current = true
 
     elapsedSecondsRef.current = 0
     shownSecondRef.current = 0
-    baseTimeRef.current = 0
-    baseWordIndexRef.current = 0
-    currentWordIndexRef.current = 0
+    wordProgressRef.current = 0
     readerWordCountRef.current = 0
+    selectedWpmRef.current = activeSpeed.wpm
     wordRefs.current = []
-    wordPositionsRef.current = []
-    wordLineStartsRef.current = []
 
     setIsRunning(false)
     setIsPaused(true)
@@ -616,6 +537,7 @@ export default function ReadingAmigo() {
     setReaderText('')
     setHighlightedWords([])
     setDefinition(null)
+    setFloatingDefinition(null)
     setMessage('')
     setIsFocusMode(false)
     setElapsedSeconds(0)
@@ -654,22 +576,36 @@ export default function ReadingAmigo() {
   }
 
   function handleFocusSpeedChange(mode) {
-    const now = performance.now()
-    const currentWordIndex =
-      runningRef.current && !pausedRef.current
-        ? lockCurrentWord(now)
-        : currentWordIndexRef.current
+    if (slowdownTimeoutRef.current) clearTimeout(slowdownTimeoutRef.current)
 
+    selectedWpmRef.current = mode.wpm
     readingWpmRef.current = mode.wpm
     setFocusWpm(mode.wpm)
 
-    baseWordIndexRef.current = currentWordIndex
-    baseTimeRef.current = now
+    lastFrameTimeRef.current = performance.now()
 
-    requestAnimationFrame(() => {
-      measureReaderLayout()
-      moveReaderToWord(currentWordIndex)
-    })
+    if (runningRef.current && !pausedRef.current) {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+      animationRef.current = requestAnimationFrame(animate)
+    }
+  }
+
+  function startTemporarySlowdown() {
+    if (!runningRef.current || pausedRef.current) return
+
+    if (slowdownTimeoutRef.current) clearTimeout(slowdownTimeoutRef.current)
+
+    const baseWpm = selectedWpmRef.current || readingWpmRef.current
+
+    readingWpmRef.current = Math.max(10, baseWpm * TEMP_SLOWDOWN_FACTOR)
+    lastFrameTimeRef.current = performance.now()
+
+    slowdownTimeoutRef.current = setTimeout(() => {
+      if (!runningRef.current || pausedRef.current) return
+
+      readingWpmRef.current = selectedWpmRef.current || baseWpm
+      lastFrameTimeRef.current = performance.now()
+    }, TEMP_SLOWDOWN_MS)
   }
 
   function saveWord(word) {
@@ -683,41 +619,120 @@ export default function ReadingAmigo() {
     })
   }
 
-  async function showDefinition(word) {
+  function getContextAroundWordIndex(wordIndex) {
+    if (!Number.isFinite(wordIndex)) return ''
+
+    const words = readerTokens.filter((token) => token.isWord).map((token) => token.token)
+    const start = Math.max(0, wordIndex - 22)
+    const end = Math.min(words.length, wordIndex + 23)
+
+    return words.slice(start, end).join(' ')
+  }
+
+  function getWordBubblePosition(wordIndex) {
+    const wordEl = wordRefs.current[wordIndex]
+    const windowEl = readerWindowRef.current
+
+    if (!wordEl || !windowEl) return null
+
+    const wordRect = wordEl.getBoundingClientRect()
+    const windowRect = windowEl.getBoundingClientRect()
+
+    return {
+      left: wordRect.left - windowRect.left + wordRect.width / 2,
+      top: wordRect.top - windowRect.top,
+    }
+  }
+
+  function showFloatingWordBubble(wordIndex, payload) {
+    const position = getWordBubblePosition(wordIndex)
+
+    if (!position) return
+
+    setFloatingDefinition({
+      ...payload,
+      wordIndex,
+      left: position.left,
+      top: position.top,
+    })
+  }
+
+  async function showDefinition(word, options = {}) {
     const cleaned = cleanWord(word)
 
     if (!cleaned) return
 
+    const requestId = definitionRequestIdRef.current + 1
+    definitionRequestIdRef.current = requestId
+
+    const wordIndex = options.wordIndex
+    const shouldShowBubble = Number.isFinite(wordIndex)
+    const context = shouldShowBubble ? getContextAroundWordIndex(wordIndex) : ''
+
     setMessage('')
-    setDefinition({
+
+    const loadingPayload = {
       word: cleaned,
       partOfSpeech: 'loading',
       definition: 'Fetching meaning...',
-    })
+    }
+
+    setDefinition(loadingPayload)
+
+    if (shouldShowBubble) {
+      if (floatingDefinitionTimeoutRef.current) clearTimeout(floatingDefinitionTimeoutRef.current)
+      showFloatingWordBubble(wordIndex, loadingPayload)
+    }
 
     try {
-      const result = await fetchDefinition(cleaned)
+      const result = await fetchDefinition(cleaned, context)
+
+      if (definitionRequestIdRef.current !== requestId) return
+
       setDefinition(result)
+
+      if (shouldShowBubble) {
+        showFloatingWordBubble(wordIndex, result)
+
+        floatingDefinitionTimeoutRef.current = setTimeout(() => {
+          setFloatingDefinition(null)
+        }, DEFINITION_BUBBLE_MS)
+      }
     } catch {
+      if (definitionRequestIdRef.current !== requestId) return
+
+      const fallback = {
+        word: cleaned,
+        partOfSpeech: 'unavailable',
+        definition: 'Meaning not found.',
+      }
+
       setDefinition(null)
       setMessage(`Could not fetch a definition for “${cleaned}”.`)
+
+      if (shouldShowBubble) {
+        showFloatingWordBubble(wordIndex, fallback)
+
+        floatingDefinitionTimeoutRef.current = setTimeout(() => {
+          setFloatingDefinition(null)
+        }, DEFINITION_BUBBLE_MS)
+      }
     }
   }
 
-  async function handleReaderWordClick(rawWord) {
+  async function handleReaderWordClick(rawWord, wordIndex) {
     const cleaned = cleanWord(rawWord)
 
     if (!cleaned) return
 
-    if (isRunning && !isPaused) pauseReading()
-
     setHighlightedWords((previous) => {
-      if (previous.includes(cleaned)) return previous.filter((word) => word !== cleaned)
+      if (previous.includes(cleaned)) return previous
       return [...previous, cleaned]
     })
 
     saveWord(cleaned)
-    await showDefinition(cleaned)
+    startTemporarySlowdown()
+    await showDefinition(cleaned, { wordIndex })
   }
 
   function toggleSelectedWord(word) {
@@ -810,6 +825,20 @@ export default function ReadingAmigo() {
   function renderReaderWindow(extraClass = '') {
     return (
       <div className={`ra-reader-window ${extraClass}`} ref={readerWindowRef}>
+        {floatingDefinition && (
+          <div
+            className="ra-definition-bubble"
+            style={{
+              left: `${floatingDefinition.left}px`,
+              top: `${floatingDefinition.top}px`,
+            }}
+          >
+            <strong>{floatingDefinition.word}</strong>
+            <span>{floatingDefinition.partOfSpeech}</span>
+            <p>{floatingDefinition.definition}</p>
+          </div>
+        )}
+
         {readerText ? (
           <div ref={readerTextRef} className="ra-reader-text">
             {readerTokens.map((token) => {
@@ -826,7 +855,7 @@ export default function ReadingAmigo() {
                     wordRefs.current[token.wordIndex] = node
                   }}
                   className={`ra-reader-word ${isHighlighted ? 'is-highlighted' : ''}`}
-                  onClick={() => handleReaderWordClick(token.token)}
+                  onClick={() => handleReaderWordClick(token.token, token.wordIndex)}
                 >
                   {token.token}
                 </span>
@@ -1050,7 +1079,9 @@ export default function ReadingAmigo() {
             <div className="ra-focus-bar">
               <div>
                 <p className="ra-kicker">Reading Timer</p>
-                <h2>{formatTime(elapsedSeconds)}</h2>
+                <h2>
+                  {formatTime(elapsedSeconds)} · {focusWpm} WPM
+                </h2>
               </div>
 
               <div className="ra-focus-actions">
@@ -1062,8 +1093,9 @@ export default function ReadingAmigo() {
                       key={mode.key}
                       className={`ra-btn ${isActive ? 'ra-btn-primary' : ''}`}
                       onClick={() => handleFocusSpeedChange(mode)}
+                      title={`${mode.wpm} WPM`}
                     >
-                      {mode.label} · {mode.wpm}
+                      {mode.label}
                     </button>
                   )
                 })}
