@@ -2,6 +2,7 @@ const tabs = [
   { key: 'crucible', label: 'Daily Plan' },
   { key: 'war-room', label: 'Mock Analytics' },
   { key: 'focus-beats', label: 'Study Audio' },
+  { key: 'reading-amigo', label: 'Reading Amigo' },
   { key: 'data-backup', label: 'Data Backup' },
 ]
 
