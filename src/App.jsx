@@ -10,6 +10,7 @@ import DataBackup from './components/DataBackup'
 import FocusBeats from './components/FocusBeats'
 import MissionGrid from './components/MissionGrid'
 import ReadingAmigo from './components/reading-amigo/ReadingAmigo'
+import AntiBrainrot from './components/anti-brainrot/AntiBrainrot'
 import WarRoom from './components/WarRoom'
 
 import missionPlanRaw from './data/generated/missionPlan.json'
@@ -241,6 +242,9 @@ export default function App() {
           <ReadingAmigo />
         </div>
       )}
+
+      {/* TAB: ANTI BRAINROT */}
+      {activeTab === 'anti-brainrot' && <AntiBrainrot />}
 
       {/* TAB: DATA BACKUP */}
       {activeTab === 'data-backup' && (

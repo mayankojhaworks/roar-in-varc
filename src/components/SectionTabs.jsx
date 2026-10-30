@@ -3,6 +3,7 @@ const tabs = [
   { key: 'war-room', label: 'Mock Analytics' },
   { key: 'focus-beats', label: 'Study Audio' },
   { key: 'reading-amigo', label: 'Reading Amigo' },
+  { key: 'anti-brainrot', label: 'Anti Brainrot' },
   { key: 'data-backup', label: 'Data Backup' },
 ]
 
