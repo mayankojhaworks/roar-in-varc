@@ -109,24 +109,29 @@ export default function AntiBrainrot() {
   const content = <section className={`anti-brainrot ${inSession ? `ab-session ab-view-${view}` : 'ab-library'}`} ref={workspace} aria-label={inSession ? `Anti Brainrot, Day ${drill.day}, Set ${drill.number}` : 'Anti Brainrot'} role={inSession ? 'dialog' : 'region'} inert={inSession && entering ? true : undefined} aria-modal={inSession ? true : undefined} data-mobile-panel={mobilePanel}>
     <div className="main">
       {view === 'library' ? <>
-        <div className="intro"><div><div className="eyebrow">Attention training / Retention Spike Drills</div><h1 ref={title} tabIndex={-1}>Anti Brainrot</h1><p>Keep the argument in mind. Keep the question in focus.</p></div><div className="note">Two questions.<br />A lot more than two details.</div></div>
-        <div className="stats"><div className="stat island"><strong>{completedDrills.length} / {drills.length}</strong><span>Sets completed</span></div><div className="stat island"><strong>{totalAnswered ? `${totalCorrect}/${totalAnswered}` : '—'}</strong><span>Correct across completed sets</span></div><div className="stat island"><strong>{formatTime(totalSeconds)}</strong><span>Total practice time</span></div></div>
-        <div className="library-layout"><section><div className="row desk-heading"><h3>Your drill desk</h3><span className="fine">{drills.length} sets · {days.length} days · 2 sets per day</span></div>
+        <div className="desk-top"><div className="intro"><div><h1 ref={title} tabIndex={-1}>Anti Brainrot</h1><p>Retention Spike Drills · 2 sets a day</p></div></div>
+          <div className="stats" aria-label="Practice summary"><div className="stat"><strong>{completedDrills.length}/{drills.length}</strong><span>completed</span></div><div className="stat"><strong>{totalAnswered ? `${totalCorrect}/${totalAnswered}` : '—'}</strong><span>correct</span></div><div className="stat"><strong>{formatTime(totalSeconds)}</strong><span>practice time</span></div></div>
+        </div>
+        <div className="library-layout"><section className="set-browser" aria-labelledby="ab-set-heading"><div className="row desk-heading"><h3 id="ab-set-heading">Choose a set</h3><div className="status-legend" aria-label="Status key"><span data-status="in-progress">In progress</span><span data-status="completed">Completed</span></div></div>
+          <div className="set-scroll" role="region" aria-label="Available practice sets" tabIndex={0}>
           {days.map(day => {
             const dayDrills = drills.filter(item => item.day === day)
             return <section className="day-section" key={day} aria-labelledby={`ab-day-${day}`}>
               <div className="row day-heading"><h2 id={`ab-day-${day}`}>Day {day}</h2><span className="fine">{dayDrills.filter(item => bank.attempts[item.id]?.completed).length} / {dayDrills.length} completed</span></div>
               <div className="day-drills">{dayDrills.map(item => {
                 const progress = bank.attempts[item.id]
-                return <article className="drill island" key={item.id}>
-                  <div className="chips"><span className="chip purple">SET {String(item.number).padStart(2, '0')}</span><span className="chip">{item.topic}</span><span className="chip">{item.passage.join(' ').split(/\s+/).length} words · {item.questions.length} questions</span></div>
+                const status = progress?.completed ? 'completed' : progress && (progress.seconds > 0 || progress.answers.some(answer => answer !== null) || progress.recall || progress.view !== 'library') ? 'in-progress' : 'new'
+                return <article className="drill island" key={item.id} data-status={status}>
+                  <div className="set-status-row"><span className="set-number">SET {String(item.number).padStart(2, '0')}</span><span className="attempt-badge">{status === 'completed' ? 'Completed' : status === 'in-progress' ? 'In progress' : 'Not started'}</span></div>
+                  <div className="chips"><span className="chip">{item.topic}</span><span className="chip">{item.passage.join(' ').split(/\s+/).length} words · {item.questions.length} questions</span></div>
                   <h3>{item.title}</h3>
                   <div className="row drill-start"><span className="fine">{progress?.completed ? `Completed · ${scoreAttempt(progress.answers, item.questions)}/${item.questions.length} correct` : progress?.seconds || progress?.view && progress.view !== 'library' ? 'In progress' : 'Untimed · timer counts up'}</span><button className="btn primary" onClick={() => setEntering(item)}>{progress?.completed ? 'Review set' : progress?.seconds || progress?.view && progress.view !== 'library' ? 'Continue set' : 'Begin set'} →</button></div>
                 </article>
               })}</div>
             </section>
           })}
-        </section><aside className="aside island"><div className="eyebrow">The practice loop</div><h2>Stay with the logic.</h2><ol><li><b>Read the passage.</b><br />Track the claim, objection and refinement.</li><li><b>Decode the task.</b><br />Two questions, each with its own demands.</li><li><b>Review your reasoning.</b><br />Check the stem, passage logic and eliminations.</li></ol><p className="fine">Work through two sets each day. Your answers, notes and time are saved separately for every set.</p><p className="fine">Read once, then answer from memory. The passage returns alongside the solutions after you submit.</p></aside></div>
+          </div>
+        </section></div>
       </> : <>
         <div className="workspace-head"><div className="session-identity"><span className="session-mark" aria-hidden="true">R</span><div><span className="session-brand">Anti Brainrot</span><span className="session-meta">Day {drill.day} <span aria-hidden="true">/</span> Set {String(drill.number).padStart(2, '0')}</span></div></div><div className="steps"><span className={reading ? 'current' : ''} aria-current={reading ? 'step' : undefined}>01 Read</span><span>→</span><span className={!reading && !reviewing ? 'current' : ''} aria-current={!reading && !reviewing ? 'step' : undefined}>02 Respond</span><span>→</span><span className={reviewing ? 'current' : ''} aria-current={reviewing ? 'step' : undefined}>03 Review</span></div><div className="session-tools"><div className="timer-block"><span>Time elapsed</span><div className="clock" aria-label="Practice time">{formatTime(seconds)}</div></div><button className="btn exit-session" onClick={() => setSessionOpen(false)}>Exit set <span aria-hidden="true">↗</span></button></div></div>
         {(reading || reviewing) && <div className="mobile-session-tabs" aria-label="Practice panels"><button className={mobilePanel === 'passage' ? 'selected' : ''} aria-pressed={mobilePanel === 'passage'} onClick={() => setMobileChoice({ view, id: drill.id, panel: 'passage' })}>Passage</button><button className={mobilePanel === 'response' ? 'selected' : ''} aria-pressed={mobilePanel === 'response'} onClick={() => setMobileChoice({ view, id: drill.id, panel: 'response' })}>{reading ? 'Notes & start' : 'Review'}</button></div>}
@@ -141,7 +146,7 @@ export default function AntiBrainrot() {
           </section></div>
       </>}
       <div className="session-bottom"><p className="saved" role="status">{saveMessage}.</p>{inSession && <span className="session-bottom-note">{reviewing ? 'Review your reasoning at your own pace' : 'Untimed practice · focus on the reasoning'}</span>}</div>
-      <footer className="footer">Read closely. Hold the logic. Stay with the question.</footer>
+
     </div>
   </section>
 
