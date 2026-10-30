@@ -6,7 +6,6 @@ import { auth, db } from './firebase'
 import { useLocalStorage } from './hooks/useLocalStorage'
 
 import AppShell from './components/AppShell'
-import DataBackup from './components/DataBackup'
 import FocusBeats from './components/FocusBeats'
 import MissionGrid from './components/MissionGrid'
 import ReadingAmigo from './components/reading-amigo/ReadingAmigo'
@@ -17,7 +16,6 @@ import missionPlanRaw from './data/generated/missionPlan.json'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('crucible')
-  const [user, setUser] = useState(null)
 
   // THE SWITCHBOARD: Controls the Test Launcher
   const [pendingTestLaunch, setPendingTestLaunch] = useState(null)
@@ -48,7 +46,6 @@ export default function App() {
     getRedirectResult(auth)
       .then(async (result) => {
         if (result && result.user) {
-          setUser(result.user)
           await fetchFromCloud(result.user.uid)
         }
       })
@@ -57,7 +54,6 @@ export default function App() {
       })
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser)
 
       if (currentUser) {
         await fetchFromCloud(currentUser.uid)
@@ -131,22 +127,6 @@ export default function App() {
       pushToCloud(missionState, updated)
       return updated
     })
-  }
-
-  const handleImportBackup = (payload) => {
-    const ms = payload.missionState || {}
-    const wr = payload.warRoomRecords || []
-
-    setMissionState(ms)
-    setWarRoomRecords(wr)
-    pushToCloud(ms, wr)
-  }
-
-  const handleClearAllProgress = () => {
-    if (window.confirm('Wipe local data? Cloud data is safe if you are logged in.')) {
-      setMissionState({})
-      setWarRoomRecords([])
-    }
   }
 
   const handleOpenTest = (dayNum, type, index) => {
@@ -246,22 +226,6 @@ export default function App() {
       {/* TAB: ANTI BRAINROT */}
       {activeTab === 'anti-brainrot' && <AntiBrainrot />}
 
-      {/* TAB: DATA BACKUP */}
-      {activeTab === 'data-backup' && (
-        <div className="tab-wrapper">
-          <div className="tab-scroll-area">
-            <DataBackup
-              user={user}
-              missionState={missionState}
-              warRoomRecords={warRoomRecords}
-              onImportBackup={handleImportBackup}
-              onClearAllProgress={handleClearAllProgress}
-            />
-
-            <div style={{ height: '150px', width: '100%', flexShrink: 0 }} />
-          </div>
-        </div>
-      )}
     </AppShell>
   )
 }

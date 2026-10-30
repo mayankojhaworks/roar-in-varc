@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import PracticeEntry from './PracticeEntry'
 import { drills } from './drillData'
 import { STORAGE_KEY, newAttempt, newBank, restoreBank, formatTime, scoreAttempt } from './attempt'
 import './antiBrainrot.css'
@@ -21,6 +22,7 @@ export default function AntiBrainrot() {
   const title = useRef(null)
   const responsePane = useRef(null)
   const [mobileChoice, setMobileChoice] = useState(null)
+  const [entering, setEntering] = useState(null)
   const { view, q, answers, notes, recall, seconds, hidden } = attempt
   const question = drill.questions[q]
   const score = scoreAttempt(answers, drill.questions)
@@ -53,26 +55,27 @@ export default function AntiBrainrot() {
   }, [bank])
 
   useEffect(() => {
-    if (!['read', 'questions'].includes(view)) return
+    if (entering || !['read', 'questions'].includes(view)) return
     const timer = setInterval(() => {
       if (!document.hidden) setAttempt(previous => ({ ...previous, seconds: previous.seconds + 1 }))
     }, 1000)
     return () => clearInterval(timer)
-  }, [view])
+  }, [view, entering])
 
   useEffect(() => {
+    if (entering) return
     workspace.current?.scrollTo({ top: 0 })
     responsePane.current?.scrollTo({ top: 0 })
     title.current?.focus({ preventScroll: true })
-  }, [view, q, drill.id])
+  }, [view, q, drill.id, entering])
 
   useEffect(() => {
-    if (!inSession) return
+    if (!inSession && !entering) return
     const root = document.getElementById('root')
     const previousInert = root?.inert
     if (root) root.inert = true
     return () => { if (root) root.inert = previousInert }
-  }, [inSession])
+  }, [inSession, entering])
 
   function selectAnswer(index) {
     patch({ answers: answers.map((answer, i) => i === q ? index : answer) })
@@ -100,7 +103,7 @@ export default function AntiBrainrot() {
     </>
   }
 
-  const content = <section className={`anti-brainrot ${inSession ? 'ab-session' : 'ab-library'}`} ref={workspace} aria-label={inSession ? `Anti Brainrot, Day ${drill.day}, Set ${drill.number}` : 'Anti Brainrot'} role={inSession ? 'dialog' : 'region'} aria-modal={inSession ? true : undefined} data-mobile-panel={mobilePanel}>
+  const content = <section className={`anti-brainrot ${inSession ? 'ab-session' : 'ab-library'}`} ref={workspace} aria-label={inSession ? `Anti Brainrot, Day ${drill.day}, Set ${drill.number}` : 'Anti Brainrot'} role={inSession ? 'dialog' : 'region'} inert={inSession && entering ? true : undefined} aria-modal={inSession ? true : undefined} data-mobile-panel={mobilePanel}>
     <div className="main">
       {view === 'library' ? <>
         <div className="intro"><div><div className="eyebrow">Attention training / Retention Spike Drills</div><h1 ref={title} tabIndex={-1}>Anti Brainrot</h1><p>Keep the argument in mind. Keep the question in focus.</p></div><div className="note">Two questions.<br />A lot more than two details.</div></div>
@@ -115,7 +118,7 @@ export default function AntiBrainrot() {
                 return <article className="drill island" key={item.id}>
                   <div className="chips"><span className="chip purple">SET {String(item.number).padStart(2, '0')}</span><span className="chip">{item.topic}</span><span className="chip">{item.passage.join(' ').split(/\s+/).length} words · {item.questions.length} questions</span></div>
                   <h3>{item.title}</h3>
-                  <div className="row drill-start"><span className="fine">{progress?.completed ? `Completed · ${scoreAttempt(progress.answers, item.questions)}/${item.questions.length} correct` : progress?.seconds || progress?.view && progress.view !== 'library' ? 'In progress' : 'Untimed · timer counts up'}</span><button className="btn primary" onClick={() => openDrill(item)}>{progress?.completed ? 'Review set' : progress?.seconds || progress?.view && progress.view !== 'library' ? 'Continue set' : 'Begin set'} →</button></div>
+                  <div className="row drill-start"><span className="fine">{progress?.completed ? `Completed · ${scoreAttempt(progress.answers, item.questions)}/${item.questions.length} correct` : progress?.seconds || progress?.view && progress.view !== 'library' ? 'In progress' : 'Untimed · timer counts up'}</span><button className="btn primary" onClick={() => setEntering(item)}>{progress?.completed ? 'Review set' : progress?.seconds || progress?.view && progress.view !== 'library' ? 'Continue set' : 'Begin set'} →</button></div>
                 </article>
               })}</div>
             </section>
@@ -139,5 +142,6 @@ export default function AntiBrainrot() {
     </div>
   </section>
 
-  return inSession && typeof document !== 'undefined' ? createPortal(content, document.body) : content
+  const surface = inSession && typeof document !== 'undefined' ? createPortal(content, document.body) : content
+  return <>{surface}{entering && <PracticeEntry drill={entering} onEnter={() => openDrill(entering)} onFinish={() => setEntering(null)} />}</>
 }
