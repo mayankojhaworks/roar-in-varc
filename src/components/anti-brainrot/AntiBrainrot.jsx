@@ -1,32 +1,51 @@
 import { useEffect, useRef, useState } from 'react'
-import { drill } from './drillData'
-import { STORAGE_KEY, newAttempt, restoreAttempt, formatTime, scoreAttempt } from './attempt'
+import { drills } from './drillData'
+import { STORAGE_KEY, newAttempt, newBank, restoreBank, formatTime, scoreAttempt } from './attempt'
 import './antiBrainrot.css'
 
 function loadAttempt() {
-  try { return restoreAttempt(localStorage.getItem(STORAGE_KEY)) } catch { return newAttempt() }
+  try { return restoreBank(localStorage.getItem(STORAGE_KEY), drills) } catch { return newBank(drills) }
 }
 
 export default function AntiBrainrot() {
-  const [attempt, setAttempt] = useState(loadAttempt)
+  const [bank, setBank] = useState(loadAttempt)
+  const drill = drills.find(item => item.id === bank.selectedId) || drills[0]
+  const attempt = bank.attempts[drill.id] || newAttempt(drill.questions.length)
+  const setAttempt = update => setBank(previous => {
+    const current = previous.attempts[previous.selectedId] || newAttempt(drill.questions.length)
+    return { ...previous, attempts: { ...previous.attempts, [previous.selectedId]: typeof update === 'function' ? update(current) : update } }
+  })
   const [saveMessage, setSaveMessage] = useState('')
   const workspace = useRef(null)
   const title = useRef(null)
-  const { view, q, answers, notes, recall, seconds, completed, hidden } = attempt
+  const { view, q, answers, notes, recall, seconds, hidden } = attempt
   const question = drill.questions[q]
   const score = scoreAttempt(answers, drill.questions)
   const reading = view === 'read'
   const reviewing = view === 'review'
   const patch = changes => setAttempt(previous => ({ ...previous, ...changes }))
+  const completedDrills = drills.filter(item => bank.attempts[item.id]?.completed)
+  const totalCorrect = completedDrills.reduce((sum, item) => sum + scoreAttempt(bank.attempts[item.id].answers, item.questions), 0)
+  const totalAnswered = completedDrills.reduce((sum, item) => sum + item.questions.length, 0)
+  const totalSeconds = drills.reduce((sum, item) => sum + (bank.attempts[item.id]?.seconds || 0), 0)
+  const days = [...new Set(drills.map(item => item.day))].sort((a, b) => a - b)
+  const lastQuestion = q === drill.questions.length - 1
+
+  function openDrill(item) {
+    setBank(previous => {
+      const current = previous.attempts[item.id] || newAttempt(item.questions.length)
+      return { ...previous, selectedId: item.id, attempts: { ...previous.attempts, [item.id]: { ...current, view: current.completed ? 'review' : current.answers.some(answer => answer !== null) ? 'questions' : 'read' } } }
+    })
+  }
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(attempt))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(bank))
       setSaveMessage('Progress saved in this browser')
     } catch {
       setSaveMessage('Browser storage unavailable; progress will last only while this tab stays open.')
     }
-  }, [attempt])
+  }, [bank])
 
   useEffect(() => {
     if (!['read', 'questions'].includes(view)) return
@@ -39,31 +58,31 @@ export default function AntiBrainrot() {
   useEffect(() => {
     workspace.current?.scrollTo({ top: 0 })
     title.current?.focus({ preventScroll: true })
-  }, [view, q])
+  }, [view, q, drill.id])
 
   function selectAnswer(index) {
     patch({ answers: answers.map((answer, i) => i === q ? index : answer) })
   }
 
   function retry() {
-    if (window.confirm('Start a new attempt? This replaces the saved sample attempt.')) {
-      setAttempt({ ...newAttempt(), view: 'read' })
+    if (window.confirm('Start a new attempt? This replaces the saved attempt for this set only.')) {
+      setAttempt({ ...newAttempt(drill.questions.length), view: 'read' })
     }
   }
 
   function renderReview() {
     return <>
-      <div className="result"><div className="eyebrow">Drill complete</div><strong>{score} / 2</strong><span className="muted"> correct · {formatTime(seconds)}</span></div>
+      <div className="result"><div className="eyebrow">Drill complete</div><strong>{score} / {drill.questions.length}</strong><span className="muted"> correct · {formatTime(seconds)}</span></div>
       <div className="row"><h3 ref={title} tabIndex={-1}>Question {q + 1} review</h3><div className="question-nav">{drill.questions.map((_, index) => <button key={index} className={`btn ${index === q ? 'active-q' : ''}`} onClick={() => patch({ q: index })} aria-label={`Review question ${index + 1}`} aria-pressed={q === index}>{index + 1}</button>)}</div></div>
       <p className="question">{question.stem}</p>
       {question.options.map((option, index) => <div className="review-choice" key={option}><b>{'ABCD'[index]}.</b> {option} {index === question.key && <strong className="correct-label">✓ Correct</strong>}{answers[q] === index && <em> (your answer)</em>}</div>)}
-      <div className="review-block"><h3>Understanding the question</h3><p>{q === 0 ? 'Two requirements operate together: the statement must bolster the critics’ particular objection and preserve the author’s replacement test.' : '“Least justified” asks for the judgement with the weakest support, not an accurate statement of the author’s view.'}</p></div>
-      <div className="review-block"><h3>Task in one line</h3><p>{question.task}</p>{notes[q] && <details><summary>Your stem paraphrase</summary><p>{notes[q]}</p></details>}</div>
-      <div className="review-block"><h3>Relevant passage logic</h3><p>{question.logic}</p></div>
-      <div className="review-block"><h3>Eliminating the options</h3>{question.elimination.map(text => <p key={text}>{text}</p>)}</div>
-      <div className="review-block"><h3>Why {'ABCD'[question.key]} works</h3><p>{q === 0 ? 'It demonstrates opportunistic evaluation—the critics’ actual target—without presenting any reason that usable opportunities cannot be assessed.' : 'It crosses the boundary the passage explicitly draws between permission and practical opportunity. The phrase “has thereby secured” makes the unsupported leap decisive.'}</p></div>
-      <div className="review-block"><h3>Retention check</h3><p>{question.retention}</p><details><summary>Check your recall</summary><p>Formal permission does not guarantee a usable opportunity. Seating, shade and management can determine whether people can realistically remain.</p></details>{recall && <details><summary>Your original passage note</summary><p>{recall}</p></details>}</div>
-      <div className="actions"><button className="btn" onClick={retry}>Try sample again</button></div>
+      {question.solution.map(section => <div className="review-block" key={section.heading}>
+        <h3>{section.heading}</h3>
+        {section.paragraphs.map((text, index) => <p key={index}>{text}</p>)}
+        {section.heading === 'The Task in One Line' && notes[q] && <details><summary>Your stem paraphrase</summary><p>{notes[q]}</p></details>}
+      </div>)}
+      {recall && <details className="original-note"><summary>Your original passage note</summary><p>{recall}</p></details>}
+      <div className="actions"><button className="btn" onClick={retry}>Try set again</button></div>
     </>
   }
 
@@ -71,17 +90,32 @@ export default function AntiBrainrot() {
     <div className="main">
       {view === 'library' ? <>
         <div className="intro"><div><div className="eyebrow">Attention training / Retention Spike Drills</div><h1 ref={title} tabIndex={-1}>Anti Brainrot</h1><p>Keep the argument in mind. Keep the question in focus.</p></div><div className="note">Two questions.<br />A lot more than two details.</div></div>
-        <div className="stats"><div className="stat island"><strong>{completed ? '1' : '0'}</strong><span>Drills completed</span></div><div className="stat island"><strong>{completed ? `${score}/2` : '—'}</strong><span>Latest accuracy</span></div><div className="stat island"><strong>{formatTime(seconds)}</strong><span>Practice time</span></div></div>
-        <div className="library-layout"><section><div className="row desk-heading"><h3>Your drill desk</h3><span className="fine">1 sample drill</span></div><article className="drill island"><div className="chips"><span className="chip purple">RETENTION SPIKE 01</span><span className="chip">{drill.topic}</span><span className="chip">{drill.passage.join(' ').split(/\s+/).length} words · 2 questions</span></div><h2>{drill.title}</h2><p className="muted">Follow a disagreement about public space, then hold its qualifications together as the questions change what you have to judge.</p><div className="row drill-start"><span className="fine">{completed ? 'Completed · available for review' : seconds ? 'In progress · pick up where you left off' : 'Untimed · timer counts up'}</span><button className="btn primary" onClick={() => patch({ view: completed ? 'review' : answers.some(answer => answer !== null) ? 'questions' : 'read' })}>{completed ? 'Review drill' : seconds ? 'Continue drill' : 'Begin drill'} →</button></div></article><p className="fine">Original sample content. The full passage bank will be added separately.</p></section><aside className="aside island"><div className="eyebrow">The practice loop</div><h2>Stay with the logic.</h2><ol><li><b>Read the passage.</b><br />Track the claim, objection and refinement.</li><li><b>Decode the task.</b><br />Two questions, each with its own demands.</li><li><b>Review your reasoning.</b><br />Check the stem, passage logic and eliminations.</li></ol><p className="fine">Passage visibility is your choice. Use “Hide passage” when you want to practise holding its argument in mind.</p></aside></div>
+        <div className="stats"><div className="stat island"><strong>{completedDrills.length} / {drills.length}</strong><span>Sets completed</span></div><div className="stat island"><strong>{totalAnswered ? `${totalCorrect}/${totalAnswered}` : '—'}</strong><span>Correct across completed sets</span></div><div className="stat island"><strong>{formatTime(totalSeconds)}</strong><span>Total practice time</span></div></div>
+        <div className="library-layout"><section><div className="row desk-heading"><h3>Your drill desk</h3><span className="fine">{drills.length} sets · {days.length} days · 2 sets per day</span></div>
+          {days.map(day => {
+            const dayDrills = drills.filter(item => item.day === day)
+            return <section className="day-section" key={day} aria-labelledby={`ab-day-${day}`}>
+              <div className="row day-heading"><h2 id={`ab-day-${day}`}>Day {day}</h2><span className="fine">{dayDrills.filter(item => bank.attempts[item.id]?.completed).length} / {dayDrills.length} completed</span></div>
+              <div className="day-drills">{dayDrills.map(item => {
+                const progress = bank.attempts[item.id]
+                return <article className="drill island" key={item.id}>
+                  <div className="chips"><span className="chip purple">SET {String(item.number).padStart(2, '0')}</span><span className="chip">{item.topic}</span><span className="chip">{item.passage.join(' ').split(/\s+/).length} words · {item.questions.length} questions</span></div>
+                  <h3>{item.title}</h3>
+                  <div className="row drill-start"><span className="fine">{progress?.completed ? `Completed · ${scoreAttempt(progress.answers, item.questions)}/${item.questions.length} correct` : progress?.seconds || progress?.view && progress.view !== 'library' ? 'In progress' : 'Untimed · timer counts up'}</span><button className="btn primary" onClick={() => openDrill(item)}>{progress?.completed ? 'Review set' : progress?.seconds || progress?.view && progress.view !== 'library' ? 'Continue set' : 'Begin set'} →</button></div>
+                </article>
+              })}</div>
+            </section>
+          })}
+        </section><aside className="aside island"><div className="eyebrow">The practice loop</div><h2>Stay with the logic.</h2><ol><li><b>Read the passage.</b><br />Track the claim, objection and refinement.</li><li><b>Decode the task.</b><br />Two questions, each with its own demands.</li><li><b>Review your reasoning.</b><br />Check the stem, passage logic and eliminations.</li></ol><p className="fine">Work through two sets each day. Your answers, notes and time are saved separately for every set.</p><p className="fine">Passage visibility is your choice. Use “Hide passage” when you want to practise holding its argument in mind.</p></aside></div>
       </> : <>
         <div className="workspace-head"><button className="btn" onClick={() => patch({ view: 'library' })}>← Drill desk</button><div className="steps"><span className={reading ? 'current' : ''} aria-current={reading ? 'step' : undefined}>01 Read</span><span>→</span><span className={!reading && !reviewing ? 'current' : ''} aria-current={!reading && !reviewing ? 'step' : undefined}>02 Respond</span><span>→</span><span className={reviewing ? 'current' : ''} aria-current={reviewing ? 'step' : undefined}>03 Review</span></div><div className="clock" aria-label="Practice time">{formatTime(seconds)}</div></div>
-        <div className="work-grid"><section className="pane island"><div className="row"><div className="eyebrow">Passage 01 · Urban life</div><button className="text-btn" onClick={() => patch({ hidden: !hidden })} aria-expanded={!hidden} aria-controls="ab-passage">{hidden ? 'Show' : 'Hide'} passage</button></div><h2>{drill.title}</h2><div className="passage" id="ab-passage" hidden={hidden}>{drill.passage.map(text => <p key={text}>{text}</p>)}</div>{hidden && <div className="hide-note">Passage hidden.<br />Hold the argument in mind; reveal it whenever you need.</div>}</section>
+        <div className="work-grid"><section className="pane island"><div className="row"><div className="eyebrow">Day {drill.day} · Set {drill.number}</div><button className="text-btn" onClick={() => patch({ hidden: !hidden })} aria-expanded={!hidden} aria-controls="ab-passage">{hidden ? 'Show' : 'Hide'} passage</button></div><h2>{drill.title}</h2><div className="passage" id="ab-passage" hidden={hidden}>{drill.passage.map(text => <p key={text}>{text}</p>)}</div>{hidden && <div className="hide-note">Passage hidden.<br />Hold the argument in mind; reveal it whenever you need.</div>}</section>
           <section className="pane island">
             {reading ? <><div className="eyebrow">Before you begin</div><h2 ref={title} tabIndex={-1}>Read for the movement.</h2><p className="muted">Notice what the author accepts, what they reject, and how the final test differs from the one they began with.</p><label className="field" htmlFor="ab-recall">Optional: capture the argument in one sentence.</label><textarea id="ab-recall" value={recall} onChange={event => patch({ recall: event.target.value })} placeholder="The author moves from… to…" /><p className="fine">This is a private note, not an automatically graded answer.</p><div className="actions"><span /><button className="btn primary" onClick={() => patch({ view: 'questions' })}>Go to questions →</button></div></> : reviewing ? renderReview() : <>
-              <div className="row"><div className="eyebrow" ref={title} tabIndex={-1}>Question {q + 1} of 2</div><div className="question-nav">{drill.questions.map((_, index) => <button key={index} className={`btn ${q === index ? 'active-q' : ''}`} onClick={() => patch({ q: index })} aria-label={`Question ${index + 1}${answers[index] !== null ? ', answered' : ''}`} aria-pressed={q === index}>{index + 1}{answers[index] !== null ? ' •' : ''}</button>)}</div></div>
+              <div className="row"><div className="eyebrow" ref={title} tabIndex={-1}>Question {q + 1} of {drill.questions.length}</div><div className="question-nav">{drill.questions.map((_, index) => <button key={index} className={`btn ${q === index ? 'active-q' : ''}`} onClick={() => patch({ q: index })} aria-label={`Question ${index + 1}${answers[index] !== null ? ', answered' : ''}`} aria-pressed={q === index}>{index + 1}{answers[index] !== null ? ' •' : ''}</button>)}</div></div>
               <p className="question" id="ab-question">{question.stem}</p><div className="options" role="group" aria-labelledby="ab-question">{question.options.map((option, index) => <button key={option} className={`option ${answers[q] === index ? 'selected' : ''}`} onClick={() => selectAnswer(index)} aria-pressed={answers[q] === index}><span className="letter">{'ABCD'[index]}</span><span>{option}</span></button>)}</div>
               <label className="field" htmlFor="ab-paraphrase">Optional: what exactly is this question asking you to do?</label><textarea id="ab-paraphrase" value={notes[q]} onChange={event => patch({ notes: notes.map((note, index) => index === q ? event.target.value : note) })} placeholder="In my own words…" />
-              <div className="actions"><button className="btn" onClick={() => patch(q ? { q: 0 } : { view: 'read' })}>{q ? '← Question 1' : '← Back to reading'}</button><button className="btn primary" disabled={q === 1 && answers.some(answer => answer === null)} onClick={() => { if (!q) patch({ q: 1 }); else if (answers.every(answer => answer !== null)) patch({ completed: true, view: 'review' }) }}>{q ? 'Submit drill' : 'Question 2 →'}</button></div>{q === 1 && answers.some(answer => answer === null) && <p className="fine">Choose one answer for each question to submit.</p>}
+              <div className="actions"><button className="btn" onClick={() => patch(q ? { q: q - 1 } : { view: 'read' })}>{q ? `← Question ${q}` : '← Back to reading'}</button><button className="btn primary" disabled={lastQuestion && answers.some(answer => answer === null)} onClick={() => { if (!lastQuestion) patch({ q: q + 1 }); else if (answers.every(answer => answer !== null)) patch({ completed: true, view: 'review' }) }}>{lastQuestion ? 'Submit set' : `Question ${q + 2} →`}</button></div>{lastQuestion && answers.some(answer => answer === null) && <p className="fine">Choose one answer for each question to submit this set.</p>}
             </>}
           </section></div>
       </>}

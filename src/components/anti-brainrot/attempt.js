@@ -1,11 +1,11 @@
-export const STORAGE_KEY = 'roar-anti-brainrot-empty-square-v1'
+export const STORAGE_KEY = 'roar-anti-brainrot-library-v1'
 
-export function newAttempt() {
-  return { view: 'library', q: 0, answers: [null, null], notes: ['', ''], recall: '', seconds: 0, completed: false, hidden: false }
+export function newAttempt(questionCount = 2) {
+  return { view: 'library', q: 0, answers: Array(questionCount).fill(null), notes: Array(questionCount).fill(''), recall: '', seconds: 0, completed: false, hidden: false }
 }
 
-export function restoreAttempt(raw) {
-  const initial = newAttempt()
+export function restoreAttempt(raw, questionCount = 2) {
+  const initial = newAttempt(questionCount)
   try {
     const value = JSON.parse(raw)
     if (!value || typeof value !== 'object') return initial
@@ -15,13 +15,35 @@ export function restoreAttempt(raw) {
     const view = ['library', 'read', 'questions', 'review'].includes(value.view) ? value.view : 'library'
     return {
       view: view === 'review' && !completed ? 'read' : view,
-      q: value.q === 1 ? 1 : 0,
+      q: Number.isInteger(value.q) && value.q >= 0 && value.q < questionCount ? value.q : 0,
       answers,
       notes: initial.notes.map((_, i) => typeof value.notes?.[i] === 'string' ? value.notes[i] : ''),
       recall: typeof value.recall === 'string' ? value.recall : '',
       seconds: Number.isSafeInteger(value.seconds) && value.seconds >= 0 ? value.seconds : 0,
       completed,
       hidden: value.hidden === true,
+    }
+  } catch {
+    return initial
+  }
+}
+
+export function newBank(drills) {
+  return { selectedId: drills[0].id, attempts: {} }
+}
+
+export function restoreBank(raw, drills) {
+  const initial = newBank(drills)
+  try {
+    const value = JSON.parse(raw)
+    if (!value || typeof value !== 'object') return initial
+    // Keep attempts for known stable IDs; new sets start fresh when added.
+    const attempts = Object.fromEntries(drills
+      .filter(drill => Object.hasOwn(value.attempts || {}, drill.id))
+      .map(drill => [drill.id, restoreAttempt(JSON.stringify(value.attempts[drill.id]), drill.questions.length)]))
+    return {
+      selectedId: drills.some(drill => drill.id === value.selectedId) ? value.selectedId : initial.selectedId,
+      attempts,
     }
   } catch {
     return initial
