@@ -12,6 +12,7 @@ function loadAttempt() {
 export default function AntiBrainrot() {
   const [bank, setBank] = useState(loadAttempt)
   const [sessionOpen, setSessionOpen] = useState(false)
+  const [sessionSeconds, setSessionSeconds] = useState(0)
   const drill = drills.find(item => item.id === bank.selectedId) || drills[0]
   const attempt = bank.attempts[drill.id] || newAttempt(drill.questions.length)
   const setAttempt = update => setBank(previous => {
@@ -41,6 +42,7 @@ export default function AntiBrainrot() {
   const lastQuestion = q === drill.questions.length - 1
 
   function openDrill(item) {
+    setSessionSeconds(0)
     setSessionOpen(true)
     setBank(previous => {
       const current = previous.attempts[item.id] || newAttempt(item.questions.length)
@@ -51,7 +53,7 @@ export default function AntiBrainrot() {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(bank))
-      setSaveMessage('Progress saved in this browser')
+      setSaveMessage('')
     } catch {
       setSaveMessage('Browser storage unavailable; progress will last only while this tab stays open.')
     }
@@ -60,7 +62,10 @@ export default function AntiBrainrot() {
   useEffect(() => {
     if (entering || !['read', 'questions'].includes(view)) return
     const timer = setInterval(() => {
-      if (!document.hidden) setAttempt(previous => ({ ...previous, seconds: previous.seconds + 1 }))
+      if (!document.hidden) {
+        setSessionSeconds(previous => previous + 1)
+        setAttempt(previous => ({ ...previous, seconds: previous.seconds + 1 }))
+      }
     }, 1000)
     return () => clearInterval(timer)
   }, [view, entering])
@@ -86,6 +91,7 @@ export default function AntiBrainrot() {
 
   function retry() {
     if (window.confirm('Start a new attempt? This replaces the saved attempt for this set only.')) {
+      setSessionSeconds(0)
       setAttempt({ ...newAttempt(drill.questions.length), view: 'read' })
     }
   }
@@ -125,7 +131,7 @@ export default function AntiBrainrot() {
                   <div className="set-status-row"><span className="set-number">SET {String(item.number).padStart(2, '0')}</span><span className="attempt-badge">{status === 'completed' ? 'Completed' : status === 'in-progress' ? 'In progress' : 'Not started'}</span></div>
                   <div className="chips"><span className="chip">{item.topic}</span><span className="chip">{item.passage.join(' ').split(/\s+/).length} words · {item.questions.length} questions</span></div>
                   <h3>{item.title}</h3>
-                  <div className="row drill-start"><span className="fine">{progress?.completed ? `Completed · ${scoreAttempt(progress.answers, item.questions)}/${item.questions.length} correct` : progress?.seconds || progress?.view && progress.view !== 'library' ? 'In progress' : 'Untimed · timer counts up'}</span><button className="btn primary" onClick={() => setEntering(item)}>{progress?.completed ? 'Review set' : progress?.seconds || progress?.view && progress.view !== 'library' ? 'Continue set' : 'Begin set'} →</button></div>
+                  <div className="row drill-start"><span className="fine">{progress?.completed ? `${scoreAttempt(progress.answers, item.questions)}/${item.questions.length} correct` : ''}</span><button className="btn primary" onClick={() => setEntering(item)}>{progress?.completed ? 'Review set' : progress?.seconds || progress?.view && progress.view !== 'library' ? 'Continue set' : 'Begin set'} →</button></div>
                 </article>
               })}</div>
             </section>
@@ -133,7 +139,7 @@ export default function AntiBrainrot() {
           </div>
         </section></div>
       </> : <>
-        <div className="workspace-head"><div className="session-identity"><span className="session-mark" aria-hidden="true">R</span><div><span className="session-brand">Anti Brainrot</span><span className="session-meta">Day {drill.day} <span aria-hidden="true">/</span> Set {String(drill.number).padStart(2, '0')}</span></div></div><div className="steps"><span className={reading ? 'current' : ''} aria-current={reading ? 'step' : undefined}>01 Read</span><span>→</span><span className={!reading && !reviewing ? 'current' : ''} aria-current={!reading && !reviewing ? 'step' : undefined}>02 Respond</span><span>→</span><span className={reviewing ? 'current' : ''} aria-current={reviewing ? 'step' : undefined}>03 Review</span></div><div className="session-tools"><div className="timer-block"><span>Time elapsed</span><div className="clock" aria-label="Practice time">{formatTime(seconds)}</div></div><button className="btn exit-session" onClick={() => setSessionOpen(false)}>Exit set <span aria-hidden="true">↗</span></button></div></div>
+        <div className="workspace-head"><div className="session-identity"><span className="session-mark" aria-hidden="true">R</span><div><span className="session-brand">Anti Brainrot</span><span className="session-meta">Day {drill.day} <span aria-hidden="true">/</span> Set {String(drill.number).padStart(2, '0')}</span></div></div><div className="steps"><span className={reading ? 'current' : ''} aria-current={reading ? 'step' : undefined}>01 Read</span><span>→</span><span className={!reading && !reviewing ? 'current' : ''} aria-current={!reading && !reviewing ? 'step' : undefined}>02 Respond</span><span>→</span><span className={reviewing ? 'current' : ''} aria-current={reviewing ? 'step' : undefined}>03 Review</span></div><div className="session-tools"><div className="timer-block"><span>Time elapsed</span><div className="clock" aria-label="Current session time">{formatTime(sessionSeconds)}</div></div><button className="btn exit-session" onClick={() => setSessionOpen(false)}>Exit set <span aria-hidden="true">↗</span></button></div></div>
         {(reading || reviewing) && <div className="mobile-session-tabs" aria-label="Practice panels"><button className={mobilePanel === 'passage' ? 'selected' : ''} aria-pressed={mobilePanel === 'passage'} onClick={() => setMobileChoice({ view, id: drill.id, panel: 'passage' })}>Passage</button><button className={mobilePanel === 'response' ? 'selected' : ''} aria-pressed={mobilePanel === 'response'} onClick={() => setMobileChoice({ view, id: drill.id, panel: 'response' })}>{reading ? 'Notes & start' : 'Review'}</button></div>}
         <div className="work-grid">{(reading || reviewing) && <section className="pane island passage-pane" aria-label="Reading passage"><div className="eyebrow">Day {drill.day} · Set {drill.number}</div><h2>{drill.title}</h2><div className="passage" id="ab-passage">{drill.passage.map(text => <p key={text}>{text}</p>)}</div></section>}
           <section className="pane island response-pane" ref={responsePane} aria-label={reviewing ? 'Answer review' : reading ? 'Reading notes' : 'Questions'}>
@@ -145,7 +151,8 @@ export default function AntiBrainrot() {
             </>}
           </section></div>
       </>}
-      <div className="session-bottom"><p className="saved" role="status">{saveMessage}.</p>{inSession && <span className="session-bottom-note">{reviewing ? 'Review your reasoning at your own pace' : 'Untimed practice · focus on the reasoning'}</span>}</div>
+      {saveMessage && <p className="storage-error" role="alert">{saveMessage}</p>}
+      {inSession && <div className="session-bottom"><span className="session-bottom-note">{reviewing ? 'Review your reasoning at your own pace' : 'Untimed practice · focus on the reasoning'}</span></div>}
 
     </div>
   </section>

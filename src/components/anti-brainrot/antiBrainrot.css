@@ -129,7 +129,7 @@
 
 /* The chooser uses the available AppShell height; only its set list scrolls. */
 .anti-brainrot.ab-library{overflow:hidden}
-.anti-brainrot.ab-library .main{height:100%;min-height:0;display:flex;flex-direction:column;padding:14px 10px 0;gap:14px}
+.anti-brainrot.ab-library .main{height:100%;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:14px 10px 0;gap:14px}
 .anti-brainrot.ab-library .desk-top{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-shrink:0}
 .anti-brainrot.ab-library .intro{margin:0}
 .anti-brainrot.ab-library h1{font-size:23px;line-height:1.3;margin:0 0 3px;letter-spacing:-.6px}
@@ -140,11 +140,11 @@
 .anti-brainrot.ab-library .stat:last-child{padding-right:0}
 .anti-brainrot.ab-library .stat strong{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
 .anti-brainrot.ab-library .stat span{font-size:10px}
-.anti-brainrot.ab-library .library-layout{display:flex;flex:1;min-height:0;gap:0}
-.anti-brainrot.ab-library .set-browser{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
+.anti-brainrot.ab-library .library-layout{display:flex;flex:1 1 0;min-height:0;align-items:stretch;overflow:hidden;gap:0}
+.anti-brainrot.ab-library .set-browser{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;height:100%;overflow:hidden}
 .anti-brainrot.ab-library .desk-heading{margin:0;padding:10px 2px 12px;flex-shrink:0;border-bottom:1px solid var(--line)}
 .anti-brainrot.ab-library .desk-heading h3{font-size:16px;line-height:1.4}
-.anti-brainrot.ab-library .set-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:14px 12px 12px 3px}
+.anti-brainrot.ab-library .set-scroll{flex:1 1 0;height:0;min-height:0;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;overscroll-behavior:contain;scrollbar-gutter:stable;padding:14px 12px 12px 3px}
 .anti-brainrot.ab-library .set-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:8px}
 .anti-brainrot.ab-library .day-section{margin:0 0 20px}
 .anti-brainrot.ab-library .day-section:last-child{margin-bottom:0}
@@ -192,3 +192,5 @@
 .anti-brainrot.ab-library .intro p{display:none}
 .anti-brainrot.ab-library .desk-heading{padding-top:6px;padding-bottom:6px}
 }
+
+.anti-brainrot .storage-error{flex-shrink:0;margin:0;padding:8px;font-size:11px;color:var(--ink)}
