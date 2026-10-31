@@ -1,7 +1,7 @@
-// Supplied passage bank. Keep IDs stable to preserve saved attempts.
+// Supplied passage bank. Revised sets use new IDs to prevent stale answers carrying forward.
 export const drills = [
   {
-    "id": "retention-001",
+    "id": "retention-001-r2",
     "number": 1,
     "day": 1,
     "title": "Intelligence, optimisation and autonomy",
@@ -15,144 +15,139 @@ export const drills = [
     ],
     "questions": [
       {
-        "id": "retention-001-q1",
-        "stem": "An AI system abandons a rewarded objective after considering objections that its pursuit would deny others equal standing. It explains its decision through principles it invites those affected to examine. Which further finding would most seriously undermine the claim that this demonstrates Kantian autonomy?",
+        "id": "retention-001-r2-q1",
+        "stem": "An AI abandons a rewarded goal, arguing that pursuing it would treat others unfairly. Which finding would most undermine the claim that this demonstrates Kantian autonomy?",
         "options": [
-          "The system acquired its initial principles from its designers, although it subsequently subjected those principles to examination.",
-          "The system assessed the objections solely by whether accepting them would advance a further purpose it never examined.",
-          "The system’s consideration of the objections was initially prompted by a disposition resembling sympathy rather than by abstract reasoning.",
-          "The system adopted its present principles after rejecting earlier principles that everyone affected had previously accepted."
+          "Its principles originated with its designers, but it subsequently examined whether those principles deserved its acceptance.",
+          "It assessed the fairness objection solely by whether accepting it would serve another goal whose worth it had not examined.",
+          "Its examination began with a response resembling sympathy, after which it considered reasons for abandoning the goal.",
+          "Its revised principles conflicted with the existing preferences of some people who would be affected by its decision."
         ],
         "key": 1,
         "solution": [
           {
             "heading": "Understanding the Question",
             "paragraphs": [
-              "The AI gives up a goal after considering an objection: pursuing that goal would mean treating other people as less than equals. The AI also explains its decision using principles that the affected people can examine.",
-              "These actions appear to show Kantian autonomy: the ability to examine whether a goal deserves to be pursued and to explain that judgement through principles other rational beings could recognise.",
-              "The question asks which new finding would most strongly weaken this interpretation. We need evidence that the AI’s apparent examination of its goal does not demonstrate the kind of reasoning Kant requires. The finding need not prove that the AI could never act autonomously."
+              "The AI abandons a goal and gives fairness as its reason. This appears to involve examining whether a goal deserves pursuit rather than merely finding an effective way to achieve it.",
+              "The question asks which finding would most weaken that interpretation. We need evidence that the apparent examination of the goal remains a calculation about achieving something else."
             ]
           },
           {
             "heading": "The Task in One Line",
             "paragraphs": [
-              "Find the strongest reason why the AI’s decision to abandon its goal does not demonstrate Kantian autonomy."
+              "Identify what would show that the AI is still serving an unquestioned purpose rather than examining the worth of its purposes."
             ]
           },
           {
             "heading": "Relevant Passage Logic",
             "paragraphs": [
-              "The passage separates two abilities.",
-              "The first is finding effective ways to achieve a goal. A system can be very clever at doing this while never asking whether the goal is worth pursuing.",
-              "The second is examining the goal itself. Kantian autonomy requires more than choosing a goal or refusing an instruction. It requires principles whose authority the decision-maker can acknowledge and which other rational beings could also recognise.",
-              "For example, abandoning one goal to achieve another does not necessarily show that the system has examined what deserves wanting. The system may simply have found a better way to get something else it already wants."
+              "The passage distinguishes effective pursuit from justified self-government. A system can change its methods, reject instructions or abandon an immediate objective while continuing to serve a purpose it has never examined.",
+              "Kantian autonomy requires more than such flexibility. It requires examining ends through principles whose authority the decision-maker can acknowledge and which other rational beings could also recognise.",
+              "The decisive question is therefore how the AI evaluates the fairness objection. Does it consider whether the objection gives it a justified reason to abandon the goal? Or does it accept the objection merely because doing so helps achieve another goal?"
             ]
           },
           {
             "heading": "Vocabulary in Context",
             "paragraphs": [
-              "Kantian autonomy: Governing oneself through principles one can examine and justify, rather than simply following desires or orders.",
-              "Equal standing: Being treated as someone whose reasons and interests deserve consideration, rather than as someone who matters less."
+              "Kantian autonomy: Governing oneself through principles whose authority one can rationally acknowledge, rather than merely pursuing given desires or objectives.",
+              "Fairness objection: A reason for questioning a goal because pursuing it would treat others unfairly."
             ]
           },
           {
             "heading": "Eliminating the Incorrect Options",
             "paragraphs": [
-              "Option A: The AI first received its principles from its designers, but later examined those principles.",
-              "Receiving a principle from someone else does not prevent the AI from examining whether that principle deserves to guide its actions. The passage questions whether we can justify the principles we follow, not whether we invented them ourselves.",
-              "This option does not establish autonomy, but it also does not seriously weaken the claim. The AI’s later examination still matters.",
-              "Option C: Something like sympathy first led the AI to consider the objections.",
-              "This tells us what started the examination. It does not tell us what decided the outcome. Sympathy could draw the AI’s attention to a problem, after which the AI could examine the reasons for changing its goal.",
-              "The passage does not say that feeling must play no part in the process. This option therefore does not show that the AI failed to examine and justify its decision.",
-              "Option D: The AI rejected principles that everyone affected had previously accepted.",
-              "People’s agreement does not automatically make a principle reasonable. Equally, rejecting a previously accepted principle does not automatically make the replacement unreasonable.",
-              "Kant’s requirement concerns principles that other rational beings could recognise as justified. It does not require the AI to preserve whatever people happened to accept earlier. This option gives us no reason to conclude that the new principles fail that requirement."
+              "Option A: Its principles originated with its designers, but it subsequently examined whether those principles deserved its acceptance.",
+              "The origin of a principle does not settle whether following it is autonomous. A principle received from someone else can still be examined and accepted for reasons the decision-maker acknowledges.",
+              "The passage questions whether we govern ourselves through justified principles, not whether we invented those principles. This finding therefore does not seriously undermine the claim.",
+              "Option C: Its examination began with a response resembling sympathy, after which it considered reasons for abandoning the goal.",
+              "This identifies what prompted the examination. It does not establish what determined the decision.",
+              "Sympathy could draw attention to unfairness without replacing the examination of reasons. The passage does not require autonomous judgement to begin without any contribution from feeling.",
+              "Option D: Its revised principles conflicted with the existing preferences of some people who would be affected by its decision.",
+              "Existing preferences are not the same as principles rational beings could recognise as justified. Someone can dislike a decision without showing that its governing principle lacks rational authority.",
+              "The passage does not make autonomy depend on satisfying everyone’s current wishes. This disagreement therefore does not establish a failure of autonomy."
             ]
           },
           {
             "heading": "Why the Correct Option Works",
             "paragraphs": [
-              "Option B says the AI considered only one question: would accepting the objections help it achieve another goal? It never examined whether that further goal deserved to be pursued.",
-              "The AI therefore changed its immediate goal while leaving its deeper purpose unquestioned. Its decision was still about finding an effective route to something it already wanted.",
-              "That directly weakens the claim of Kantian autonomy. The AI’s explanation may sound like a judgement about what is right, but the new finding shows that its actual test was only whether accepting the objections would serve another purpose. The passage identifies precisely this limitation: reason helps achieve an end without judging whether the end is worth pursuing."
+              "Option B makes the AI’s acceptance of the fairness objection entirely instrumental. The AI asks whether accepting the objection would advance another goal, while leaving that goal’s worth unexamined.",
+              "Its immediate objective changes, but the role of its reasoning does not. Reason continues to find an effective route to an unquestioned purpose.",
+              "This most directly undermines the claim that the decision demonstrates Kantian autonomy. The language of fairness does not establish autonomous judgement when the actual basis of the decision is usefulness to another unexamined end."
             ]
           },
           {
             "heading": "Retention Check",
             "paragraphs": [
-              "Giving up one goal is not enough. The AI may still be serving another goal whose worth it has never examined."
+              "Abandoning a goal for an apparently moral reason does not demonstrate autonomy if that reason is accepted solely as a means to another unquestioned goal."
             ]
           }
         ]
       },
       {
-        "id": "retention-001-q2",
-        "stem": "Suppose a research community defines intelligence exclusively as optimisation while maintaining a separate practice of rationally examining which ends deserve pursuit. Its members accept that this examination can justify abandoning even their most efficiently achieved goals. What would this case establish about the passage’s criticism?",
+        "id": "retention-001-r2-q2",
+        "stem": "Which of the following best captures the author’s final criticism of defining intelligence as optimisation?",
         "options": [
-          "It would challenge the alleged retreat from responsibility, while leaving open whether the definition wrongly excludes the rational appraisal of ends from intelligence.",
-          "It would answer the objection to the definition, since preserving rational appraisal elsewhere establishes that optimisation adequately characterises intelligence.",
-          "It would support the Humean restriction on reason, since separating appraisal from intelligence makes the choice of ends a matter of passion.",
-          "It would undermine the Kantian account of autonomy, since examining ends collectively makes their authority depend on other people’s judgement."
+          "It encourages the pursuit of goals supplied by feeling, although worthwhile goals must originate in reason rather than in desires shaped by circumstance.",
+          "It makes competence in pursuing goals the defining concern, allowing the neglect of their worth to appear justified by an account of what intelligence is.",
+          "It transfers responsibility for choosing human purposes to machines, although their technical competence establishes an ability to implement purposes rather than authority to select them.",
+          "It treats successful achievement as evidence that a goal deserves pursuit, turning measurable technical performance into a standard for judging the worth of human purposes."
         ],
-        "key": 0,
+        "key": 1,
         "solution": [
           {
             "heading": "Understanding the Question",
             "paragraphs": [
-              "We must accept the imagined case as described.",
-              "The researchers define intelligence only as optimisation: finding better ways to achieve goals. However, they also use reason to examine whether their goals deserve to be pursued. They are willing to abandon even goals they achieve very efficiently.",
-              "The question asks what this case would establish about the author’s criticism. We need to identify which part of that criticism the case challenges and whether any other part remains unanswered."
+              "The question asks for the author’s final criticism of the definition. It does not ask whether optimisation is useful or whether machines perform it successfully.",
+              "The author accepts optimisation as a powerful engineering method. The concern arises when that method becomes a definition of intelligence and helps excuse the failure to examine what deserves pursuing."
             ]
           },
           {
             "heading": "The Task in One Line",
             "paragraphs": [
-              "Decide which part of the author’s criticism is challenged by researchers who define intelligence as optimisation but still rationally question and abandon their goals."
+              "Identify how a definition centred on achieving goals can make responsibility for examining those goals easier to avoid."
             ]
           },
           {
             "heading": "Relevant Passage Logic",
             "paragraphs": [
-              "The author raises two connected concerns.",
-              "One concerns the definition of intelligence. Describing how AI achieves goals does not necessarily give us a complete account of intelligence. The passage presents examining the worth of goals as an important ability that the definition leaves out.",
-              "The other concern is responsibility. The author warns that focusing on optimisation can let people avoid asking whether their goals deserve pursuit. They may concentrate on getting what they want and leave the worth of those wants unquestioned.",
-              "The imagined researchers separate these issues. Their definition remains narrow, but their practice still includes examining goals. They take responsibility for deciding what deserves pursuit, even though they do not call that activity intelligence."
+              "The passage begins by distinguishing an apt description of how machines work from an adequate definition of intelligence.",
+              "It then contrasts reason as a means of satisfying desires with reason as an ability to examine ends. This distinction matters because successful pursuit does not answer whether a purpose deserves pursuit.",
+              "The final paragraph explains the danger of allowing measurable success to settle the definition. If intelligence is understood through effective pursuit, examining the worth of our purposes can be treated as somebody else’s concern or dismissed as no concern at all."
             ]
           },
           {
             "heading": "Vocabulary in Context",
             "paragraphs": [
-              "Optimisation: Finding the best or most effective way to achieve a goal.",
-              "Rational appraisal of ends: Using reasons to judge whether goals deserve to be pursued."
+              "Optimisation: Finding increasingly effective ways to achieve an objective.",
+              "Instrumental reasoning: Reasoning about how to achieve a purpose, without necessarily examining whether that purpose deserves pursuit."
             ]
           },
           {
             "heading": "Eliminating the Incorrect Options",
             "paragraphs": [
-              "Option B: This option says that keeping rational examination as a separate activity proves the definition of intelligence is adequate.",
-              "The case does show that the researchers continue to examine their goals. But that does not explain why this ability should be left outside their definition of intelligence.",
-              "A community can preserve an important ability while still defining intelligence too narrowly. The case therefore does not settle the objection to the definition.",
-              "Option C: This option says that excluding the examination of goals from intelligence makes the choice of goals a matter of feeling or desire.",
-              "But the question explicitly says that the researchers examine their goals rationally. They use reasons to decide whether a goal deserves pursuit.",
-              "Calling this activity something other than intelligence does not stop it from being reasoning. Hume’s restriction concerns what reason can judge, not which activities people choose to label intelligence.",
-              "Option D: This option treats examination within a community as evidence that people are letting others determine their principles.",
-              "Examining reasons together does not necessarily mean accepting someone else’s judgement without thinking. People can discuss a principle and each recognise why it deserves acceptance.",
-              "The passage makes this point when it says that a law can be ours without being ours alone. Also, the question does not establish that the researchers surrender their judgement to the group. Their practice therefore does not undermine Kant’s account of autonomy."
+              "Option A: It encourages the pursuit of goals supplied by feeling, although worthwhile goals must originate in reason rather than in desires shaped by circumstance.",
+              "The passage does not say that a worthwhile goal must originate in reason. Its concern is whether an end can be examined and justified, regardless of how the desire for it arose.",
+              "The discussion of sympathy and benevolence also prevents us from treating desires supplied by feeling as inherently objectionable.",
+              "Option C: It transfers responsibility for choosing human purposes to machines, although their technical competence establishes an ability to implement purposes rather than authority to select them.",
+              "The author does not claim that the definition gives machines authority to choose human purposes. People may continue pursuing their own wants while avoiding examination of whether those wants deserve pursuit.",
+              "This option changes an evasion of responsibility into a transfer of decision-making authority.",
+              "Option D: It treats successful achievement as evidence that a goal deserves pursuit, turning measurable technical performance into a standard for judging the worth of human purposes.",
+              "This option makes technical success a test of a goal’s worth. The author’s final concern is different: the worth of the goal may escape examination altogether.",
+              "Treating a question as settled by success and treating it as unnecessary are distinct mistakes. The ending emphasises the latter."
             ]
           },
           {
             "heading": "Why the Correct Option Works",
             "paragraphs": [
-              "Option A correctly separates the two concerns.",
-              "First, the researchers challenge the suggestion that defining intelligence as optimisation leads people to avoid responsibility for their goals. They continue to examine what deserves pursuit. Their willingness to abandon efficiently achieved goals shows that successful optimisation does not settle their decisions.",
-              "Second, the case does not establish that their definition of intelligence is complete. They still use reason to judge goals but exclude that activity from intelligence. Whether that exclusion is justified remains an open question.",
-              "The case therefore challenges the claimed retreat from responsibility without resolving the concern about the definition itself."
+              "Option B preserves the connection between the definition and the retreat from responsibility.",
+              "When intelligence is defined through competence in achieving goals, people can concentrate on improving that competence while treating the examination of goals as outside the relevant task. The definition then provides an intellectual excuse for neglecting what deserves wanting.",
+              "The author’s objection is therefore not to optimisation itself. It is to allowing optimisation’s success to justify an account of intelligence that leaves the worth of our purposes unexamined."
             ]
           },
           {
             "heading": "Retention Check",
             "paragraphs": [
-              "People can question their goals even while defining intelligence narrowly. Preserving that practice does not, by itself, prove that their definition is complete."
+              "The final criticism concerns a question being avoided: whether our goals deserve pursuit. It does not require machines to choose those goals or successful achievement to prove their worth."
             ]
           }
         ]
@@ -160,7 +155,7 @@ export const drills = [
     ]
   },
   {
-    "id": "retention-002",
+    "id": "retention-002-r2",
     "number": 2,
     "day": 1,
     "title": "Consciousness and the limits of explanation",
@@ -174,136 +169,140 @@ export const drills = [
     ],
     "questions": [
       {
-        "id": "retention-002-q1",
-        "stem": "A critic argues: “Better brain science may explain behaviour, but it will never explain experience. Even a complete account of someone’s pain would not let another person feel it.” Which finding, if true, would most strengthen the author’s response to this argument?",
+        "id": "retention-002-r2-q1",
+        "stem": "Which of the following best captures the author’s objection to Chalmers’s claim about a complete account of brain processes?",
         "options": [
-          "People who have felt a particular kind of pain understand descriptions of it better than people who have only studied the brain activity associated with it.",
-          "Some explanations of pain predict what patients will say and do, yet fail to explain differences in what patients feel when their outward behaviour is similar.",
-          "When readers stop requiring an explanation to give its audience the patient’s experience, they withdraw their claim that brain science must fail, despite receiving no new scientific information.",
-          "As brain science advances, researchers predict patients’ reports more accurately, although patients continue to distinguish what the researchers know from what they themselves feel."
-        ],
-        "key": 2,
-        "solution": [
-          {
-            "heading": "Understanding the Question",
-            "paragraphs": [
-              "The critic claims that brain science will never explain experience. The reason offered is that even a complete explanation of someone’s pain would not make another person feel that pain.",
-              "The author would question the connection between that reason and the conclusion. Why must an explanation make its audience feel someone else’s pain before it can count as an explanation?",
-              "Treat each option as true. Then choose the finding that most strongly supports the author’s response to this particular argument. We do not need a finding that proves science has already explained consciousness."
-            ]
-          },
-          {
-            "heading": "The Task in One Line",
-            "paragraphs": [
-              "Choose the finding that most strongly supports the author’s reply that failing to give someone another person’s experience does not establish that science must fail to explain it."
-            ]
-          },
-          {
-            "heading": "Relevant Passage Logic",
-            "paragraphs": [
-              "The author accepts that experiencing a brain process and studying that process from outside will be different. A person in pain feels the pain; an investigator studies what is happening. The author questions why a scientific explanation should have to remove that difference.",
-              "The passage also suggests that our expectations can create the very gap we then blame science for failing to close. If we demand that an explanation give the investigator the patient’s experience, science may seem certain to fail because of the demand we have imposed.",
-              "The author does not claim that current brain science explains everything. The narrower point is that a difference between experiencing and investigating does not establish that a complete scientific explanation is impossible."
-            ]
-          },
-          {
-            "heading": "Eliminating the Incorrect Options",
-            "paragraphs": [
-              "Option A: People who have felt a particular pain understand descriptions of it better than people who have only studied the related brain activity.",
-              "This shows that personal experience can help someone understand a description. However, the author can accept that advantage without accepting that science must fail.",
-              "The finding does not address the crucial question: must an explanation make someone feel the patient’s pain to explain that pain? It therefore gives little support to the author’s response.",
-              "Option B: Some explanations predict patients’ words and actions but do not explain why patients feel differently when they behave similarly.",
-              "This identifies something those explanations fail to explain. It does not show that every future explanation must have the same limitation.",
-              "However, the question asks for evidence that strengthens the author’s response. Pointing out a weakness in some existing explanations does not support the author’s challenge to the critic’s requirement. The finding leaves that requirement untouched.",
-              "Option D: Researchers become better at predicting what patients report, but patients still distinguish the researchers’ knowledge from their own feelings.",
-              "Better predictions show scientific progress. Yet the critic could accept that progress and repeat the original objection: predicting a patient’s report does not make the researcher feel the patient’s pain.",
-              "The finding is compatible with the author’s position, but it does not directly challenge the reason the critic gives for declaring scientific explanation impossible."
-            ]
-          },
-          {
-            "heading": "Why the Correct Option Works",
-            "paragraphs": [
-              "Option C says that readers abandon their claim that brain science must fail once they stop demanding that an explanation give them the patient’s experience.",
-              "Notice what changes: their expectation of an explanation. They receive no new scientific information.",
-              "This supports the author’s suggestion that the claim of unavoidable failure can come from what people demand of science, rather than from a demonstrated limit of science itself. Once the demand is removed, the readers no longer regard failure as certain.",
-              "C therefore addresses the critic’s reasoning more directly than the other options. It does not prove that brain science will explain consciousness. It strengthens the author’s response that the critic has not established why brain science must fail."
-            ]
-          },
-          {
-            "heading": "Retention Check",
-            "paragraphs": [
-              "Explaining someone’s pain and making another person feel that pain are different tasks. The critic treats failure at the second task as proof of failure at the first."
-            ]
-          }
-        ]
-      },
-      {
-        "id": "retention-002-q2",
-        "stem": "Suppose a theory explains consciousness entirely through brain processes. It predicts people’s words and actions accurately, but a reviewer objects: “That success could leave experience untouched. The theory might explain why someone says a sunset looks beautiful without explaining anything about how the sunset looks to them.” Which additional information would best support the author’s defence of a natural account against this objection?",
-        "options": [
-          "The theory explains why people believe their experiences have qualities that no account of brain activity could capture, while treating those qualities as mistakes people make about themselves.",
-          "The theory predicts how a sunset’s colours will appear to someone before they describe them, including differences between viewers whose words and outward responses are otherwise alike.",
-          "The theory explains why observers agree about another person’s experience, including cases where that person’s description conflicts with what their behaviour would ordinarily lead observers to expect.",
-          "The theory shows that teaching people about the brain changes how they describe sunsets, although they report no corresponding change in how the colours actually appear to them."
+          "It mistakes a difference between perspectives for a permanent explanatory gap, although further scientific understanding could eventually remove the difference between experiencing and observing.",
+          "It declares a future explanatory limit before the relevant processes are understood, although present ignorance cannot establish what understanding those processes would leave unexplained.",
+          "It requires knowledge of underlying processes to make experience intelligible, although the bicycle example shows that scientific explanations should instead be judged by their practical usefulness.",
+          "It presents consciousness as exceptionally difficult to explain, although the opening examples suggest that its difficulty differs from other scientific problems in degree rather than kind."
         ],
         "key": 1,
         "solution": [
           {
             "heading": "Understanding the Question",
             "paragraphs": [
-              "The theory already predicts what people say and do. The reviewer argues that this success may still tell us nothing about their actual experience.",
-              "For example, explaining why someone says “The sunset looks beautiful” may leave unanswered how the sunset’s colours appear to that person.",
-              "We must choose the additional information that best supports the author’s defence against this specific objection. The strongest answer will show that the theory addresses how things appear to the person, beyond merely predicting words and actions."
+              "Chalmers’s claim is stronger than the observation that current science cannot explain consciousness. He argues that even a complete account of brain processes and behaviour would leave experience unexplained.",
+              "The question asks how the author challenges that stronger claim. We must distinguish questioning a prediction of inevitable failure from proving that scientific explanation will succeed."
             ]
           },
           {
             "heading": "The Task in One Line",
             "paragraphs": [
-              "Find the strongest evidence that the brain-based theory addresses how the sunset actually appears to someone, beyond predicting their words and actions."
+              "Identify why the author thinks our present ignorance does not establish the limits of a completed explanation."
             ]
           },
           {
             "heading": "Relevant Passage Logic",
             "paragraphs": [
-              "The author argues that explaining experience through nature need not mean denying experience.",
-              "The sunset example makes this clear. Explaining sunsets through Earth’s rotation changed our understanding of what causes them. It did not make sunsets disappear. Similarly, explaining consciousness through brain processes need not mean that people’s felt experiences disappear from the explanation.",
-              "The reviewer is concerned that the theory accounts only for outward signs of experience. To answer that concern, we need evidence that the theory also addresses differences in what people experience, including differences that their outward responses do not reveal."
+              "The opening examples separate difficulty in understanding a phenomenon from evidence that it requires something outside nature. They also distinguish knowing underlying laws from understanding how a particular phenomenon works.",
+              "The author then questions our confidence about what would remain unexplained after we understood processes that we currently do not understand. Present failure does not, by itself, establish necessary future failure.",
+              "This leaves the outcome open. The author challenges the justification for declaring an explanatory limit, rather than demonstrating that a complete natural explanation is already available."
             ]
           },
           {
             "heading": "Vocabulary in Context",
             "paragraphs": [
-              "A natural account: An explanation through processes within nature, such as brain activity.",
-              "Subjectivity: How something feels or appears to the person experiencing it."
+              "A complete account of brain processes: An account that fully explains the relevant physical processes and behaviour, rather than merely improving on current knowledge.",
+              "An explanatory limit: A boundary beyond which a particular kind of explanation cannot reach."
             ]
           },
           {
             "heading": "Eliminating the Incorrect Options",
             "paragraphs": [
-              "Option A: The theory explains why people believe their experiences contain qualities that brain science cannot capture. However, it treats those qualities as errors in people’s understanding of themselves.",
-              "Explaining why people hold a belief about their experience does not, by itself, explain the experience they are describing.",
-              "The reviewer could still ask: “Have you explained how the sunset looks to the person, or only why the person believes certain things about it?” By treating the qualities as mistakes, this option leaves that concern unanswered. It gives weaker support than evidence that the theory directly addresses how colours appear.",
-              "Option C: The theory explains why outside observers agree about another person’s experience, even when that person’s description is unexpected.",
-              "The finding concerns how observers reach a shared judgement. Their agreement does not establish that the theory explains what the person actually experiences.",
-              "Even an explanation of why everyone reaches the same conclusion could leave the reviewer’s question unanswered: how does the sunset look to the person seeing it?",
-              "Option D: Learning about the brain changes how people describe sunsets, although they report no matching change in how the colours appear.",
-              "This finding concerns changes in descriptions. It explicitly separates those changes from changes in reported appearance.",
-              "The reviewer has already warned that explaining someone’s words may leave their experience unexplained. D provides another result about words, without showing that the theory addresses the experience itself."
+              "Option A: It mistakes a difference between perspectives for a permanent explanatory gap, although further scientific understanding could eventually remove the difference between experiencing and observing.",
+              "The author does question whether different perspectives establish a fundamental division. However, the passage does not suggest that scientific progress must remove the difference between undergoing a process and investigating it.",
+              "That difference can remain without proving that natural explanation has failed. A therefore proposes the removal of something the author allows an explanation to preserve.",
+              "Option C: It requires knowledge of underlying processes to make experience intelligible, although the bicycle example shows that scientific explanations should instead be judged by their practical usefulness.",
+              "The bicycle example shows that knowing fundamental laws need not provide the understanding needed for a particular problem. It does not replace explanation with practical usefulness as the standard for science.",
+              "The author questions what counts as an adequate explanation, not whether science should abandon the attempt to make phenomena intelligible.",
+              "Option D: It presents consciousness as exceptionally difficult to explain, although the opening examples suggest that its difficulty differs from other scientific problems in degree rather than kind.",
+              "Chalmers’s claim is not simply that consciousness is exceptionally difficult. It concerns what would remain unexplained even after a complete account of physical processes.",
+              "The opening examples challenge an inference from difficulty to exemption from nature. They do not establish that all explanatory difficulties differ merely in degree."
             ]
           },
           {
             "heading": "Why the Correct Option Works",
             "paragraphs": [
-              "Option B says the theory predicts how the colours will appear to a person before that person describes them. It also predicts differences between people whose words and outward responses are otherwise alike.",
-              "The second part is especially important. If two viewers respond in the same outward way but experience the colours differently, predicting their shared response would miss that difference. According to B, the theory captures the difference in appearance as well.",
-              "This directly answers the reviewer’s concern. The theory’s success extends beyond what people say and do to how something appears to them. It therefore supports the author’s claim that a brain-based account can explain experience while retaining the fact that people have experiences.",
-              "B does not establish that the theory explains every aspect of consciousness. It gives the strongest evidence against the particular objection that its success leaves experience untouched."
+              "Option B identifies the author’s objection to the claim about completed knowledge.",
+              "We do not yet understand the relevant processes fully. The author therefore questions how our present inability to explain experience could establish what would remain unexplained after those processes were understood.",
+              "This challenges the certainty of the predicted limit. It does not prove that science will explain consciousness or that differences between perspectives will disappear."
             ]
           },
           {
             "heading": "Retention Check",
             "paragraphs": [
-              "Predicting what someone says about a sunset is different from addressing how the sunset appears to them. B adds evidence about appearance even when outward responses are alike."
+              "The author rejects the inference from present failure to necessary future failure. That is different from proving eventual success."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "retention-002-r2-q2",
+        "stem": "Which of the following best captures the connection between the author’s account of scientific theories and the sunset analogy?",
+        "options": [
+          "Both suggest that explaining a phenomenon means showing how observers construct it, rather than identifying a reality that exists independently of their experience.",
+          "Both suggest that science must preserve familiar appearances by limiting its claims to observable patterns rather than revising our understanding of the reality behind them.",
+          "Both allow an account formed within the world to revise our understanding of a real phenomenon without treating the phenomenon itself as an illusion.",
+          "Both allow science to preserve experience by replacing an individual’s perspective with an objective description that presents the phenomenon identically to every observer."
+        ],
+        "key": 2,
+        "solution": [
+          {
+            "heading": "Understanding the Question",
+            "paragraphs": [
+              "The question connects two parts of the argument.",
+              "First, the author describes scientific theories as instruments developed by inhabitants of the world. Second, the sunset analogy shows that changing an explanation need not abolish the phenomenon being explained.",
+              "We must identify the relationship between these claims without making the world dependent on observers or making scientific explanation erase their perspectives."
+            ]
+          },
+          {
+            "heading": "The Task in One Line",
+            "paragraphs": [
+              "Identify how science can revise an explanation while preserving both the reality of its subject and the experience being explained."
+            ]
+          },
+          {
+            "heading": "Relevant Passage Logic",
+            "paragraphs": [
+              "The author rejects the picture of science as a report delivered from outside the world. Scientific accounts arise within the world, through embodied investigators. This does not mean that the world depends on those investigators for its reality.",
+              "The sunset analogy makes a related distinction. Explaining sunsets through Earth’s rotation replaced an inherited account of what happens. It did not abolish sunsets.",
+              "Applied to consciousness, a natural explanation could revise our understanding of subjectivity without denying that experience occurs. What may be abandoned is the belief that subjectivity requires an exemption from nature."
+            ]
+          },
+          {
+            "heading": "Vocabulary in Context",
+            "paragraphs": [
+              "An account formed within the world: An explanation produced by investigators who are themselves part of the reality they study.",
+              "An inherited account: An established way of understanding a phenomenon that may later be revised or replaced."
+            ]
+          },
+          {
+            "heading": "Eliminating the Incorrect Options",
+            "paragraphs": [
+              "Option A: Both suggest that explaining a phenomenon means showing how observers construct it, rather than identifying a reality that exists independently of their experience.",
+              "The passage explicitly preserves the world’s independence from us. Its claim is that accounts of reality arise within reality, not that observers create the phenomena they explain.",
+              "A turns a claim about the position of investigators into a claim that reality depends on them.",
+              "Option B: Both suggest that science must preserve familiar appearances by limiting its claims to observable patterns rather than revising our understanding of the reality behind them.",
+              "The sunset example permits a substantial revision of our understanding. Earth’s rotation replaces the explanation involving a travelling sun.",
+              "Preserving the phenomenon therefore does not require restricting science to descriptions of appearances or avoiding claims about underlying processes.",
+              "Option D: Both allow science to preserve experience by replacing an individual’s perspective with an objective description that presents the phenomenon identically to every observer.",
+              "The author allows undergoing a process and investigating it to remain different. An explanation need not make the process appear identical from every standpoint.",
+              "D makes the removal of perspectival differences a condition of explanation, whereas the passage questions that expectation."
+            ]
+          },
+          {
+            "heading": "Why the Correct Option Works",
+            "paragraphs": [
+              "Option C preserves the two distinctions governing these sections.",
+              "An explanation can arise within the world while addressing something real. It can also revise an inherited understanding without declaring the phenomenon unreal.",
+              "The sunset remains when its explanation changes. Similarly, the author argues that subjectivity need not disappear when it is understood naturally. The possible error lies in the belief that subjectivity requires exemption from nature, rather than in the existence of subjective experience."
+            ]
+          },
+          {
+            "heading": "Retention Check",
+            "paragraphs": [
+              "Revising our account of an experience does not necessarily deny the experience. Explaining from within the world does not make the world dependent on the explanation."
             ]
           }
         ]
@@ -311,7 +310,7 @@ export const drills = [
     ]
   },
   {
-    "id": "retention-003",
+    "id": "retention-003-r2",
     "number": 3,
     "day": 2,
     "title": "Who is in charge of the brain?",
@@ -326,144 +325,140 @@ export const drills = [
     ],
     "questions": [
       {
-        "id": "retention-003-q1",
-        "stem": "Two explanations are offered for the reassignment of cortical territory described in the passage. One proposes that a coordinating region issues new instructions when familiar input disappears. The other proposes that reassignment develops through interactions among the affected neurons. Which finding would most clearly favour the second explanation?",
+        "id": "retention-003-r2-q1",
+        "stem": "Two computational models reproduce the cortical reassignment described in the passage. One uses central instructions, while the other uses local interactions. How would the author most likely assess this result?",
         "options": [
-          "Reassignment continues when signals from the proposed coordinator are blocked, but stops when interactions among the affected neurons are disrupted.",
-          "The proposed coordinator becomes active before reassignment begins, but its activity varies with the number of neurons that eventually change tasks.",
-          "Reassignment occurs more quickly when neighbouring neurons already perform the new task, but blocking signals from the proposed coordinator prevents it.",
-          "The affected neurons become active before reassignment is complete, but their new roles can be predicted from earlier signals sent by the proposed coordinator."
-        ],
-        "key": 0,
-        "solution": [
-          {
-            "heading": "Understanding the Question",
-            "paragraphs": [
-              "The question gives two explanations for how a brain area takes on new work after losing its usual input.",
-              "According to the first explanation, a coordinating region sends instructions telling the affected neurons what to do. According to the second, the new work develops through the neurons’ interactions with one another.",
-              "We need the finding that most clearly helps us choose the second explanation over the first. Evidence that neurons are involved is not enough: both explanations involve neurons. The important question is whether their interactions produce the change or whether they carry out instructions from the proposed coordinator."
-            ]
-          },
-          {
-            "heading": "The Task in One Line",
-            "paragraphs": [
-              "Choose the finding that most clearly supports reassignment through interactions among the affected neurons rather than through instructions from the proposed coordinator."
-            ]
-          },
-          {
-            "heading": "Relevant Passage Logic",
-            "paragraphs": [
-              "The passage describes brain regions taking on different tasks after losing familiar input. The author asks whether a central authority must have assigned those new tasks.",
-              "The city example suggests another possibility. Shops can develop different roles through local activity without an office assigning every shop its customers. Similarly, neurons might develop new roles through their interactions rather than through detailed instructions from above.",
-              "However, the author presents this as a possibility to investigate. The passage does not establish that brains work as markets or that the suggestion about “feral” neurons is correct."
-            ]
-          },
-          {
-            "heading": "Vocabulary in Context",
-            "paragraphs": [
-              "Reassignment of cortical territory: An area of the brain takes on different work after losing the input it usually receives.",
-              "Coordinator: The proposed brain region that sends instructions to organise other neurons’ activity."
-            ]
-          },
-          {
-            "heading": "Eliminating the Incorrect Options",
-            "paragraphs": [
-              "Option B: The proposed coordinator becomes active before reassignment starts. Its activity also changes according to how many neurons eventually take on new tasks.",
-              "This finding fits the first explanation. The coordinator could become active because it is preparing or sending instructions for the change.",
-              "The finding does not prove that the coordinator directs reassignment. But it gives us no clear reason to prefer the explanation based on interactions among the affected neurons.",
-              "Option C: Reassignment happens faster when nearby neurons already perform the new task. However, reassignment does not happen when the coordinator’s signals are blocked.",
-              "The first part suggests that nearby neurons help the process. That makes the option initially attractive.",
-              "But the second part matters more for the comparison: reassignment still requires signals from the proposed coordinator. The finding therefore fits an explanation in which the coordinator directs the change while neighbouring neurons help it happen faster. It does not clearly favour the second explanation over the first.",
-              "Option D: The affected neurons become active before reassignment finishes, but their new roles can be predicted from earlier signals from the coordinator.",
-              "Neurons would need to become active even if they were following instructions. Their activity alone does not show that they organise their new roles through local interactions.",
-              "The connection between the earlier signals and the later roles also leaves the first explanation open: the neurons could be carrying out instructions already received."
-            ]
-          },
-          {
-            "heading": "Why the Correct Option Works",
-            "paragraphs": [
-              "Option A tests the two proposed sources of reassignment separately.",
-              "When signals from the proposed coordinator are blocked, reassignment continues. This weakens the claim that those signals direct the change.",
-              "When interactions among the affected neurons are disrupted, reassignment stops. This supports the claim that those interactions are needed for the change.",
-              "Together, the findings most clearly favour the second explanation: reassignment survives the loss of the proposed central instructions but does not survive the loss of local interactions.",
-              "The result would support this explanation of reassignment. It would not, by itself, prove the passage’s broader suggestions about markets, inventiveness or obsession."
-            ]
-          },
-          {
-            "heading": "Retention Check",
-            "paragraphs": [
-              "Neurons can be active while following central instructions. The stronger evidence is that reassignment continues without the proposed coordinator’s signals but stops without local interactions."
-            ]
-          }
-        ]
-      },
-      {
-        "id": "retention-003-q2",
-        "stem": "Suppose researchers identify a brain region that combines information from many areas and sends signals that coordinate their activity. A commentator declares: “We have found the executive. The author’s objection to putting someone in charge has been answered.” Which question would most directly test whether the finding answers the author’s final objection?",
-        "options": [
-          "Does the region coordinate ordinary activities as well as the inventive and obsessive behaviour discussed in the passage?",
-          "Does the region issue different signals for different tasks, rather than send a general signal that increases activity elsewhere?",
-          "Does the region’s coordinating role remain stable when other cortical areas lose their familiar inputs and take on new tasks?",
-          "Can the region’s coordinated decisions be explained through its organisation, or does the account simply assume that it acts as a unified decision-maker?"
+          "The local model is better supported because the city analogy explains how specialised roles can emerge without instructions assigning each participant its work.",
+          "The central model is better supported because reassignment preserves organised activity, whereas the proposed competition among neurons could produce disruptive tendencies such as obsession.",
+          "Both models answer the objection to the logical neuron because reproducing biological adaptation establishes that their computational designs adequately capture the organisation responsible for it.",
+          "Their success leaves the biological question open because reproducing reassignment does not establish whether either model captures the organisation through which the brain achieves it."
         ],
         "key": 3,
         "solution": [
           {
             "heading": "Understanding the Question",
             "paragraphs": [
-              "Researchers have found a region that gathers information and helps different brain areas work together. The commentator thinks that finding this region answers the author’s objection: the brain’s “executive” has been located.",
-              "The question asks us to test that claim against the author’s final objection. We are not simply checking whether the region coordinates activity; the question already tells us that it does.",
-              "We need to ask whether finding the region explains how coordinated decision-making arises, or whether the explanation merely assumes that the region already possesses that ability."
+              "Both models reproduce the observed reassignment of cortical territory. However, they produce that result through different forms of organisation: central instructions in one case and local interactions in the other.",
+              "The question asks how the author would assess this shared success. We must decide whether reproducing the result establishes how the brain actually produces it."
             ]
           },
           {
             "heading": "The Task in One Line",
             "paragraphs": [
-              "Choose the question that most directly tests whether finding a coordinating region explains unified decision-making rather than simply assuming it within that region."
+              "Distinguish reproducing a biological outcome from explaining the biological organisation that produces it."
             ]
           },
           {
             "heading": "Relevant Passage Logic",
             "paragraphs": [
-              "The author’s final point is that the mind’s unity needs an explanation. We should not begin by placing a ready-made decision-maker at the top of a diagram and then use it to explain how everything below works together.",
-              "Finding a coordinating region can tell us where important coordination occurs. But a further question remains: how do the parts of that region work together to produce coordinated decisions?",
-              "The author’s objection is therefore not answered merely by naming a region “the executive”. The account must explain the ability assigned to that region."
+              "The author continues to defend the brain-as-computer idea. The objection concerns treating a demonstration of computational possibility as an adequate account of biological organisation.",
+              "The city analogy introduces local coordination as an alternative worth investigating. However, the author explicitly warns that describing neurons as entrepreneurs does not establish that brains operate as markets.",
+              "Together, these points limit what the hypothetical models establish. Their performance shows that each proposed organisation can reproduce reassignment. Further evidence is needed to determine whether either captures how reassignment occurs in the brain."
             ]
           },
           {
             "heading": "Vocabulary in Context",
             "paragraphs": [
-              "Executive: A supposed central controller that gathers information and directs other brain areas.",
-              "Unified decision-maker: A system whose parts work together to produce a connected decision, rather than separate, uncoordinated responses."
+              "Cortical reassignment: Brain territory takes on different work after losing its familiar input.",
+              "Biological organisation: The arrangement and interactions through which an actual living system produces its activity."
             ]
           },
           {
             "heading": "Eliminating the Incorrect Options",
             "paragraphs": [
-              "Option A: Does the region coordinate everyday activities as well as inventive and obsessive behaviour?",
-              "This asks how wide the region’s responsibilities are. The answer could help researchers understand which activities the region coordinates.",
-              "However, even if the region coordinates all these activities, we would still need to explain how it produces coordinated decisions. The range of its work does not settle the author’s final objection.",
-              "Option B: Does the region send task-specific instructions, or does it simply increase activity elsewhere?",
-              "This asks what kind of signal the region sends. Task-specific signals might make the region look more like an executive giving detailed instructions.",
-              "Yet discovering detailed instructions would still leave a question: how does the region combine information and produce those instructions? The option examines its output without directly testing whether its own coordinated decision-making has been explained.",
-              "Option C: Does the region keep its coordinating role when other brain areas change tasks?",
-              "This asks whether the region’s role remains stable during changes elsewhere in the brain.",
-              "A stable role could be important evidence about what the region does. But stability does not explain how the region’s parts work together. Even a permanent coordinator could remain unexplained in exactly the way the author criticises."
+              "Option A: The local model is better supported because the city analogy explains how specialised roles can emerge without instructions assigning each participant its work.",
+              "The city analogy makes local coordination conceivable. It challenges the assumption that specialised activity must depend on centrally assigned roles.",
+              "However, showing how a city coordinates activity does not establish how the brain does so. The author explicitly limits the analogy’s evidential force. A therefore gives a suggestive comparison more authority than the passage allows.",
+              "Option B: The central model is better supported because reassignment preserves organised activity, whereas the proposed competition among neurons could produce disruptive tendencies such as obsession.",
+              "Organised activity does not, by itself, establish central control. Whether organisation can emerge through local interactions is precisely the issue being investigated.",
+              "The connection between neuronal competition and obsession is also conjectural. Moreover, the same conjecture links shifting alliances with inventiveness. B selectively uses a possible disruptive outcome to favour central instructions.",
+              "Option C: Both models answer the objection to the logical neuron because reproducing biological adaptation establishes that their computational designs adequately capture the organisation responsible for it.",
+              "This repeats the mistake the author identifies. A computational system’s ability to reproduce an outcome does not automatically establish that its organisation corresponds to the biological organisation producing that outcome.",
+              "The models demonstrate possible ways of generating reassignment. Their shared performance does not establish biological adequacy."
             ]
           },
           {
             "heading": "Why the Correct Option Works",
             "paragraphs": [
-              "Option D asks whether the region’s organisation explains its coordinated decisions, or whether the account simply treats it as an already unified decision-maker.",
-              "That is the author’s final concern.",
-              "If researchers explain how the region’s parts interact to produce coordinated decisions, their account addresses the need to explain unity. If they merely say, “This region makes the decisions and directs the others,” they have assigned the unexplained ability to a particular location.",
-              "D therefore tests the commentator’s claim directly. It distinguishes finding a region that coordinates activity from explaining how that region achieves coordination."
+              "Option D preserves the distinction between computational success and biological explanation.",
+              "The two models reach the same observed result through different arrangements. Their success therefore does not settle which arrangement, if either, captures the brain’s actual organisation.",
+              "This conclusion respects both qualifications in the passage. Computational possibility is not sufficient evidence of biological adequacy, and the city analogy does not independently establish local organisation.",
+              "D does not reject either model. It identifies what their shared success leaves unresolved."
             ]
           },
           {
             "heading": "Retention Check",
             "paragraphs": [
-              "Locating the coordinator does not automatically explain coordination. The author wants an account of how its parts produce unified decisions."
+              "Showing that a model can reproduce reassignment is different from showing that the brain achieves reassignment through that model’s organisation."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "retention-003-r2-q2",
+        "stem": "The suggestion that shifting neuronal alliances might contribute to both inventiveness and obsession primarily serves to:",
+        "options": [
+          "Extend the evidence from cortical reassignment into an explanation of human creativity, treating changes in neuronal employment as the mechanism connecting adaptation with obsession.",
+          "Propose a common source for creative and disruptive tendencies, presenting an orderly mind as something that must emerge from its organisation rather than be assumed.",
+          "Identify the limitation of decentralised coordination, suggesting that exploratory activity needs a supervising authority to turn its creative possibilities into a consistently well-tempered mind.",
+          "Separate the benefits of cultural influence from the dangers of ancestral neuronal independence, attributing inventiveness to expanded opportunities and obsession to the recovery of competitive capacities."
+        ],
+        "key": 1,
+        "solution": [
+          {
+            "heading": "Understanding the Question",
+            "paragraphs": [
+              "The author suggests that shifting neuronal alliances might help explain both inventiveness and obsession. The same proposed organisation could contribute to productive exploration and disruptive fixation.",
+              "The question asks what this suggestion contributes to the argument. We must preserve its tentative status and connect it with the concluding claim about mental unity."
+            ]
+          },
+          {
+            "heading": "The Task in One Line",
+            "paragraphs": [
+              "Identify how a proposed source of both creativity and disruption makes an orderly mind something to explain rather than assume."
+            ]
+          },
+          {
+            "heading": "Relevant Passage Logic",
+            "paragraphs": [
+              "The passage begins by questioning the practice of explaining the brain through a ready-made executive directing obedient departments.",
+              "It then considers neurons as agents whose interactions might generate coordination without detailed central instructions. The further suggestion about “feral” neurons is explicitly presented as a conjecture, not an established discovery.",
+              "If shifting alliances can contribute to both inventiveness and obsession, a well-tempered mind is not guaranteed simply by having active, exploratory neurons. Its coordination becomes an achievement requiring explanation. This connects the conjecture with the final paragraph."
+            ]
+          },
+          {
+            "heading": "Vocabulary in Context",
+            "paragraphs": [
+              "Shifting neuronal alliances: Changing patterns of cooperation or interaction among neurons.",
+              "A well-tempered mind: A mind whose activity is sufficiently balanced and coordinated, rather than dominated by disruptive tendencies."
+            ]
+          },
+          {
+            "heading": "Eliminating the Incorrect Options",
+            "paragraphs": [
+              "Option A: Extend the evidence from cortical reassignment into an explanation of human creativity, treating changes in neuronal employment as the mechanism connecting adaptation with obsession.",
+              "The reassignment experiments establish that cortical territory can take on new work. They do not establish that shifting neuronal alliances explain inventiveness or obsession.",
+              "The author marks the later proposal as riskier and explicitly says it remains something to investigate. A turns that proposal into an explanation supported by the earlier experiments.",
+              "Option C: Identify the limitation of decentralised coordination, suggesting that exploratory activity needs a supervising authority to turn its creative possibilities into a consistently well-tempered mind.",
+              "The possibility of disruption raises a question about how coordination is achieved. It does not establish that a supervising authority is necessary.",
+              "C supplies the kind of controller the author warns against installing as an unexplained solution. The passage asks us to explain mental unity rather than assume that an authority provides it.",
+              "Option D: Separate the benefits of cultural influence from the dangers of ancestral neuronal independence, attributing inventiveness to expanded opportunities and obsession to the recovery of competitive capacities.",
+              "The conjecture does not divide culture and ancestral capacities into separate beneficial and harmful causes.",
+              "Instead, culture gives the proposed competitive and exploratory capacities greater scope. Their shifting alliances might contribute to both inventiveness and obsession. D breaks this combined proposal into a division the passage does not make."
+            ]
+          },
+          {
+            "heading": "Why the Correct Option Works",
+            "paragraphs": [
+              "Option B captures both the proposal’s content and its argumentative function.",
+              "The author tentatively connects creative and disruptive tendencies with the same changing neuronal relationships. This makes mental order an outcome that needs explaining, rather than a unity we can assume at the outset.",
+              "B also preserves the proposal’s status. It identifies a possible common source without claiming that the conjecture has been established."
+            ]
+          },
+          {
+            "heading": "Retention Check",
+            "paragraphs": [
+              "The conjecture links inventiveness and obsession to the same proposed organisation. It does not establish that organisation or supply an executive to control it."
             ]
           }
         ]
