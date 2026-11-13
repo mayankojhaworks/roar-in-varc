@@ -15,8 +15,9 @@ export default function QuantsSmurfs({ onBack }) {
     const doc = frame?.contentDocument
     if (!doc || !win) return
 
+    const inPractice = () => doc.querySelector('#main')?.classList.contains('practicepage')
     const pauseIfRunning = () => {
-      if (win.session?.()?.state === 'running' && win.UI?.page === 'practice') {
+      if (win.session?.()?.state === 'running' && inPractice()) {
         win.markPaused?.('Fullscreen exited. Your work is saved. Resume when ready.')
       }
     }
@@ -51,7 +52,7 @@ export default function QuantsSmurfs({ onBack }) {
             }
           }
           win.doAction?.(action, control)
-          if (win.session?.()?.state !== 'running' || win.UI?.page !== 'practice') {
+          if (win.session?.()?.state !== 'running' || !inPractice()) {
             if (doc.fullscreenElement) await doc.exitFullscreen()
             stopFallback()
           }
@@ -67,7 +68,7 @@ export default function QuantsSmurfs({ onBack }) {
       if (['pause-session', 'end-session', 'nav'].includes(action)) {
         // The underlying app handles confirmation, persistence and navigation.
         queueMicrotask(() => {
-          if (win.UI?.page !== 'practice' || win.session?.()?.state !== 'running') {
+          if (!inPractice() || win.session?.()?.state !== 'running') {
             if (doc.fullscreenElement) doc.exitFullscreen().catch(() => {})
             stopFallback()
           }
@@ -77,7 +78,7 @@ export default function QuantsSmurfs({ onBack }) {
 
     const main = doc.querySelector('#main')
     const watchResult = new MutationObserver(() => {
-      if (win.UI?.page === 'result' || win.UI?.page === 'setup') {
+      if (!inPractice()) {
         if (doc.fullscreenElement) doc.exitFullscreen().catch(() => {})
         stopFallback()
       }
