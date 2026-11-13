@@ -56,7 +56,7 @@ export default function QuantsSmurfs({ onBack }) {
             if (doc.fullscreenElement) await doc.exitFullscreen()
             stopFallback()
           }
-        } catch (error) {
+        } catch {
           // If permission was denied, do not begin the session or its timer.
           win.notify?.('Fullscreen was blocked. Please allow fullscreen to start practice.')
         } finally {
