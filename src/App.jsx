@@ -156,6 +156,8 @@ export default function App() {
           width: 100%;
         }
 
+        .smurfs-tab-host { height: 100%; width: 100%; min-height: 0; overflow: hidden; }
+
         .reading-amigo-host {
           overflow: hidden;
         }
@@ -227,10 +229,10 @@ export default function App() {
       {/* TAB: ANTI BRAINROT */}
       {activeTab === 'anti-brainrot' && <AntiBrainrot />}
 
-      {/* TAB: QUANTS SMURFS — independent CAT Quant practice workspace */}
+      {/* TAB: QUANTS SMURFS — full-height independent practice workspace */}
       {activeTab === 'quants-smurfs' && (
-        <div className="tab-relative">
-          <QuantsSmurfs />
+        <div className="smurfs-tab-host">
+          <QuantsSmurfs onBack={() => setActiveTab('crucible')} />
         </div>
       )}
 
