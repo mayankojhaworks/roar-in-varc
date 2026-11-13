@@ -4,6 +4,7 @@ const tabs = [
   { key: 'focus-beats', label: 'Study Audio' },
   { key: 'reading-amigo', label: 'Reading Amigo' },
   { key: 'anti-brainrot', label: 'Anti Brainrot' },
+  { key: 'quants-smurfs', label: 'Quants Smurfs' },
 ]
 
 export default function SectionTabs({ activeTab, onChange }) {
@@ -20,6 +21,21 @@ export default function SectionTabs({ activeTab, onChange }) {
       }}
     >
       <style>{`
+        @media (max-width: 768px) {
+          .top-nav .nav-links-container {
+            justify-content: flex-start !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch;
+          }
+          .top-nav .nav-links-container button.nav-tab-link {
+            flex: 0 0 auto !important;
+            min-width: max-content;
+            padding: 7px 11px !important;
+            font-size: .72rem !important;
+          }
+        }
+
         .nav-tab-link {
           background: none; border: none; padding: 0; margin: 0;
           color: rgba(51, 51, 51, 0.6); /* muted charcoal */

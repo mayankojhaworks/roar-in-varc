@@ -11,6 +11,7 @@ import MissionGrid from './components/MissionGrid'
 import ReadingAmigo from './components/reading-amigo/ReadingAmigo'
 import AntiBrainrot from './components/anti-brainrot/AntiBrainrot'
 import WarRoom from './components/WarRoom'
+import QuantsSmurfs from './components/QuantsSmurfs'
 
 import missionPlanRaw from './data/generated/missionPlan.json'
 
@@ -225,6 +226,13 @@ export default function App() {
 
       {/* TAB: ANTI BRAINROT */}
       {activeTab === 'anti-brainrot' && <AntiBrainrot />}
+
+      {/* TAB: QUANTS SMURFS — independent CAT Quant practice workspace */}
+      {activeTab === 'quants-smurfs' && (
+        <div className="tab-relative">
+          <QuantsSmurfs />
+        </div>
+      )}
 
     </AppShell>
   )
