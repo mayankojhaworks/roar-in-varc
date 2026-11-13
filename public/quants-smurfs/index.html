@@ -5568,7 +5568,7 @@
       "correct_option_cracku": null,
       "correct_option_2iim": null,
       "correct_option_display": null,
-      "explanation": "Let S be initial fruits and A apples. The condition on sales yields 4A=3S−960, hence S=(4A+960)/3. Integrality requires A to be a positive multiple of 15; A=15 yields S=340 and a feasible nonzero stock of each fruit.",
+      "explanation": "Let S be the initial stock and A the number of apples. The sale totals give 0.2S + 96 + 0.4A = 0.5S, so 3S = 960 + 4A. Since the number of apples sold is 2A/5, A is divisible by 5. The equation also makes A divisible by 3, so the smallest positive candidate is A = 15. This gives S = 340, with 136 mangoes and 189 bananas. The required sales are feasible, so 340 is the minimum.",
       "independent_check": "Question content and visual equations manually compared across the two provided PDF versions; correct value independently derived using the stated calculation.",
       "classification_note": "The primary label describes the dominant idea, while secondary tags expose supporting concepts.",
       "sources": {
@@ -5586,7 +5586,9 @@
       "solution_figure": null,
       "options_html": {},
       "solution_steps": [
-        "Let S be initial fruits and A apples. The condition on sales yields 4A=3S−960, hence S=(4A+960)/3. Integrality requires A to be a positive multiple of 15; A=15 yields S=340 and a feasible nonzero stock of each fruit."
+        "Let S be the initial stock and A the number of apples. The sale totals give 0.2S + 96 + 0.4A = 0.5S, so 3S = 960 + 4A.",
+        "Since the number of apples sold is 2A/5, A is divisible by 5. The equation also makes A divisible by 3, so the smallest positive candidate is A = 15.",
+        "This gives S = 340, with 136 mangoes and 189 bananas. The required sales are feasible, so 340 is the minimum."
       ],
       "solution_figure_svg": null,
       "verification_status": "rebuilt_2024_cross_source",
@@ -5619,7 +5621,7 @@
       "correct_option_cracku": null,
       "correct_option_2iim": null,
       "correct_option_display": null,
-      "explanation": "Using change of base, the logarithmic equation simplifies to ln(a²−b²)=2ln c, or a²=b²+c². With b,c≤10, a≤10√2<15, and a=14 is attainable; the greatest integer is 14.",
+      "explanation": "The denominators require c ≠ 1. By change of base, the two terms are ln(a+b)/(3 ln c) and ln(a−b)/(3 ln c). Their sum equals 2/3, so ln[(a+b)(a−b)] = 2 ln c, giving a² = b² + c². Since b and c are at most 10, a ≤ 10√2 < 15. Taking b = c = 7√2 gives a = 14 and satisfies all the conditions.",
       "independent_check": "Question content and visual equations manually compared across the two provided PDF versions; correct value independently derived using the stated calculation.",
       "classification_note": "The primary label describes the dominant idea, while secondary tags expose supporting concepts.",
       "sources": {
@@ -5637,9 +5639,9 @@
       "solution_figure": null,
       "options_html": {},
       "solution_steps": [
-        "Change each logarithm to a natural-log ratio. The first quotient simplifies to (1/3)·ln(a+b)/ln c, and the second to (1/3)·ln(a−b)/ln c.",
+        "The denominators require c ≠ 1. By change of base, the two terms are ln(a+b)/(3 ln c) and ln(a−b)/(3 ln c).",
         "Their sum equals 2/3, so ln[(a+b)(a−b)] = 2 ln c, giving a² = b² + c².",
-        "Since 10 ≥ b ≥ c > 0 and a > 10, we get a ≤ 10√2 < 15. The integer a = 14 is achievable, so the greatest possible integer is 14."
+        "Since b and c are at most 10, a ≤ 10√2 < 15. Taking b = c = 7√2 gives a = 14 and satisfies all the conditions."
       ],
       "solution_figure_svg": null,
       "verification_status": "rebuilt_2024_cross_source",
@@ -6398,7 +6400,7 @@
       "correct_option_cracku": null,
       "correct_option_2iim": null,
       "correct_option_display": null,
-      "explanation": "Complete the quadratic form: 4x²+4y²−4xy−6y+3=0 equals a positive-definite square sum, with unique real solution (x,y)=(1/2,1). Hence 4x+5y=7.",
+      "explanation": "Rewrite the left-hand side as (2x − y)² + 3(y − 1)². The sum is zero only if both squares are zero. Thus y = 1 and x = 1/2, giving 4x + 5y = 7.",
       "independent_check": "Question content and visual equations manually compared across the two provided PDF versions; correct value independently derived using the stated calculation.",
       "classification_note": "The primary label describes the dominant idea, while secondary tags expose supporting concepts.",
       "sources": {
@@ -6416,7 +6418,8 @@
       "solution_figure": null,
       "options_html": {},
       "solution_steps": [
-        "Complete the quadratic form: 4x²+4y²−4xy−6y+3=0 equals a positive-definite square sum, with unique real solution (x,y)=(1/2,1). Hence 4x+5y=7."
+        "Rewrite the left-hand side as (2x − y)² + 3(y − 1)².",
+        "The sum is zero only if both squares are zero. Thus y = 1 and x = 1/2, giving 4x + 5y = 7."
       ],
       "solution_figure_svg": null,
       "verification_status": "rebuilt_2024_cross_source",
@@ -7068,12 +7071,12 @@
         "The smaller segment area equals its 120° sector minus the central isosceles triangle: (120/360)π(10)² − (1/2)(10)² sin120° = 100π/3 − 25√3.",
         "Factor out 25 to obtain 25(4π/3 − √3)."
       ],
-      "solution_figure_svg": "<svg viewBox=\"0 0 420 300\" role=\"img\" aria-label=\"Circle with central angle 120 degrees and chord dividing the minor circular segment\"><circle cx=\"205\" cy=\"155\" r=\"108\" stroke=\"#286d55\" stroke-width=\"2.5\" fill=\"none\"/><path d=\"M205 155 L111.5 101 L298.5 101 Z\" fill=\"rgba(40,109,85,.13)\" stroke=\"#286d55\" stroke-width=\"2\"/><path d=\"M222 146 A23 23 0 0 0 188 136\" stroke=\"#a77c3e\" stroke-width=\"2.5\" fill=\"none\"/><g fill=\"currentColor\" font-size=\"16\"><text x=\"210\" y=\"161\">O</text><text x=\"180\" y=\"92\">10√3</text><text x=\"170\" y=\"123\">120°</text><text x=\"223\" y=\"143\">10</text></g></svg>",
+      "solution_figure_svg": "<svg viewBox=\"0 0 420 300\" role=\"img\" aria-label=\"Circle with a shaded minor segment bounded by its chord and 120-degree arc\"><path d=\"M111.47 101 A108 108 0 0 1 298.53 101 Z\" fill=\"#d9ece3\"/><circle cx=\"205\" cy=\"155\" r=\"108\" fill=\"none\" stroke=\"#286d55\" stroke-width=\"2.5\"/><path d=\"M111.47 101 H298.53 M111.47 101 L205 155 L298.53 101\" fill=\"none\" stroke=\"#286d55\" stroke-width=\"2\"/><path d=\"M184.22 143 A24 24 0 0 1 225.78 143\" fill=\"none\" stroke=\"#a77c3e\" stroke-width=\"2\"/><g fill=\"currentColor\" font-size=\"16\"><text x=\"205\" y=\"89\" text-anchor=\"middle\">10√3</text><text x=\"205\" y=\"125\" text-anchor=\"middle\">120°</text><text x=\"210\" y=\"173\">O</text><text x=\"259\" y=\"140\">10</text></g></svg>",
       "verification_status": "rebuilt_2024_cross_source",
       "type": "MCQ",
       "number": 6,
       "correct_option": "C",
-      "fig": "<svg viewBox=\"0 0 420 300\" role=\"img\" aria-label=\"Circle with central angle 120 degrees and chord dividing the minor circular segment\"><circle cx=\"205\" cy=\"155\" r=\"108\" stroke=\"#286d55\" stroke-width=\"2.5\" fill=\"none\"/><path d=\"M205 155 L111.5 101 L298.5 101 Z\" fill=\"rgba(40,109,85,.13)\" stroke=\"#286d55\" stroke-width=\"2\"/><path d=\"M222 146 A23 23 0 0 0 188 136\" stroke=\"#a77c3e\" stroke-width=\"2.5\" fill=\"none\"/><g fill=\"currentColor\" font-size=\"16\"><text x=\"210\" y=\"161\">O</text><text x=\"180\" y=\"92\">10√3</text><text x=\"170\" y=\"123\">120°</text><text x=\"223\" y=\"143\">10</text></g></svg>",
+      "fig": "<svg viewBox=\"0 0 420 300\" role=\"img\" aria-label=\"Circle with a shaded minor segment bounded by its chord and 120-degree arc\"><path d=\"M111.47 101 A108 108 0 0 1 298.53 101 Z\" fill=\"#d9ece3\"/><circle cx=\"205\" cy=\"155\" r=\"108\" fill=\"none\" stroke=\"#286d55\" stroke-width=\"2.5\"/><path d=\"M111.47 101 H298.53 M111.47 101 L205 155 L298.53 101\" fill=\"none\" stroke=\"#286d55\" stroke-width=\"2\"/><path d=\"M184.22 143 A24 24 0 0 1 225.78 143\" fill=\"none\" stroke=\"#a77c3e\" stroke-width=\"2\"/><g fill=\"currentColor\" font-size=\"16\"><text x=\"205\" y=\"89\" text-anchor=\"middle\">10√3</text><text x=\"205\" y=\"125\" text-anchor=\"middle\">120°</text><text x=\"210\" y=\"173\">O</text><text x=\"259\" y=\"140\">10</text></g></svg>",
       "browse_group": "Circles",
       "search_index": "cat2024-s3-qa-06 2024 geometry circles — area of circular segment circles a circular plot of land is divided into two regions by a chord of length 10√3 metres such that the chord subtends an angle of 120° at the centre. then, the area, in square metres, of the smaller region is a circular plot of land is divided into two regions by a chord of length 10√3 metres such that the chord subtends an angle of 120° at the centre. then, the area, in square metres, of the smaller region is"
     },
@@ -7867,12 +7870,12 @@
         "The midpoint-segment intersections produce X=(1/2,1/2), Y=(1,1/2), Z=(1/2,1); triangle XYZ has area 1/8, which is 1/16 of ABC.",
         "Consequently, the required area is 1440/16 = 90 sq cm."
       ],
-      "solution_figure_svg": "<svg viewBox=\"0 0 450 300\" role=\"img\" aria-label=\"Triangle ABC with midpoints M N P and interior triangle XYZ\"><path d=\"M70 250 L370 250 L110 30 Z\" stroke=\"#254f42\" fill=\"none\" stroke-width=\"2.3\"/><path d=\"M70 250 L240 140 M370 250 L90 140 M110 30 L220 250\" stroke=\"#a1b5a7\" stroke-width=\"1.6\" stroke-dasharray=\"5 5\"/><path d=\"M155 195 L230 195 L165 140 Z\" stroke=\"#286d55\" stroke-width=\"3\" fill=\"rgba(40,109,85,.18)\"/><g fill=\"currentColor\" font-size=\"15\"><text x=\"54\" y=\"270\">A</text><text x=\"373\" y=\"272\">B</text><text x=\"101\" y=\"22\">C</text><text x=\"213\" y=\"269\">M</text><text x=\"71\" y=\"135\">P</text><text x=\"241\" y=\"134\">N</text><text x=\"139\" y=\"210\">X</text><text x=\"232\" y=\"212\">Y</text><text x=\"165\" y=\"132\">Z</text></g></svg>",
+      "solution_figure_svg": "<svg viewBox=\"0 0 450 300\" role=\"img\" aria-label=\"Medians AN, BP and CM meet the midpoint segments at X, Y and Z, respectively\"><path d=\"M70 250 H370 L110 30 Z\" fill=\"none\" stroke=\"#254f42\" stroke-width=\"2.3\"/><path d=\"M220 250 L240 140 L90 140 Z\" fill=\"none\" stroke=\"#839b8b\" stroke-width=\"1.5\"/><path d=\"M70 250 L240 140 M370 250 L90 140 M110 30 L220 250\" fill=\"none\" stroke=\"#a1b5a7\" stroke-width=\"1.5\" stroke-dasharray=\"5 5\"/><path d=\"M155 195 L230 195 L165 140 Z\" fill=\"#d9ece3\" stroke=\"#286d55\" stroke-width=\"2.5\"/><g fill=\"currentColor\" font-size=\"16\"><text x=\"54\" y=\"270\">A</text><text x=\"373\" y=\"270\">B</text><text x=\"102\" y=\"22\">C</text><text x=\"214\" y=\"269\">M</text><text x=\"72\" y=\"135\">P</text><text x=\"247\" y=\"139\">N</text><text x=\"141\" y=\"210\">X</text><text x=\"232\" y=\"211\">Y</text><text x=\"158\" y=\"132\">Z</text></g></svg>",
       "verification_status": "rebuilt_2024_cross_source",
       "type": "TITA",
       "number": 20,
       "correct_option": null,
-      "fig": "<svg viewBox=\"0 0 450 300\" role=\"img\" aria-label=\"Triangle ABC with midpoints M N P and interior triangle XYZ\"><path d=\"M70 250 L370 250 L110 30 Z\" stroke=\"#254f42\" fill=\"none\" stroke-width=\"2.3\"/><path d=\"M70 250 L240 140 M370 250 L90 140 M110 30 L220 250\" stroke=\"#a1b5a7\" stroke-width=\"1.6\" stroke-dasharray=\"5 5\"/><path d=\"M155 195 L230 195 L165 140 Z\" stroke=\"#286d55\" stroke-width=\"3\" fill=\"rgba(40,109,85,.18)\"/><g fill=\"currentColor\" font-size=\"15\"><text x=\"54\" y=\"270\">A</text><text x=\"373\" y=\"272\">B</text><text x=\"101\" y=\"22\">C</text><text x=\"213\" y=\"269\">M</text><text x=\"71\" y=\"135\">P</text><text x=\"241\" y=\"134\">N</text><text x=\"139\" y=\"210\">X</text><text x=\"232\" y=\"212\">Y</text><text x=\"165\" y=\"132\">Z</text></g></svg>",
+      "fig": "<svg viewBox=\"0 0 450 300\" role=\"img\" aria-label=\"Medians AN, BP and CM meet the midpoint segments at X, Y and Z, respectively\"><path d=\"M70 250 H370 L110 30 Z\" fill=\"none\" stroke=\"#254f42\" stroke-width=\"2.3\"/><path d=\"M220 250 L240 140 L90 140 Z\" fill=\"none\" stroke=\"#839b8b\" stroke-width=\"1.5\"/><path d=\"M70 250 L240 140 M370 250 L90 140 M110 30 L220 250\" fill=\"none\" stroke=\"#a1b5a7\" stroke-width=\"1.5\" stroke-dasharray=\"5 5\"/><path d=\"M155 195 L230 195 L165 140 Z\" fill=\"#d9ece3\" stroke=\"#286d55\" stroke-width=\"2.5\"/><g fill=\"currentColor\" font-size=\"16\"><text x=\"54\" y=\"270\">A</text><text x=\"373\" y=\"270\">B</text><text x=\"102\" y=\"22\">C</text><text x=\"214\" y=\"269\">M</text><text x=\"72\" y=\"135\">P</text><text x=\"247\" y=\"139\">N</text><text x=\"141\" y=\"210\">X</text><text x=\"232\" y=\"211\">Y</text><text x=\"158\" y=\"132\">Z</text></g></svg>",
       "browse_group": "Triangles",
       "search_index": "cat2024-s3-qa-20 2024 geometry triangles — medians & area ratios triangles the midpoints of sides ab, bc and ac in △abc are m, n and p, respectively. the medians drawn from a, b and c intersect the line segments mp, mn and np at x, y and z, respectively. if the area of △abc is 1440 sq cm, then the area, in sq cm, of △xyz is the midpoints of sides ab, bc and ac in △abc are m, n and p, respectively. the medians drawn from a, b and c intersect the line segments mp, mn and np at x, y and z, respectively. if the area of △abc is 1440 sq cm, then the area, in sq cm, of △xyz is"
     },
