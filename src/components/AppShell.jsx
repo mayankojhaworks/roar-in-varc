@@ -1,10 +1,37 @@
 import GlobalHeader from './GlobalHeader'
 
 export default function AppShell({ activeTab, onTabChange, children }) {
+  const isSmurfs = activeTab === 'quants-smurfs'
   return (
     <>
       <style>{`
         /* --- Global Setup --- */
+        /* Hide ROAR chrome over two seconds when opening Quants Smurfs. */
+        .roar-header-curtain {
+          display: grid;
+          grid-template-rows: 1fr;
+          transition: grid-template-rows 2s cubic-bezier(.22,.66,.25,1);
+          flex-shrink: 0;
+        }
+        .roar-header-curtain > .roar-header-inner {
+          min-height: 0;
+          overflow: hidden;
+          opacity: 1;
+          transform: translateY(0);
+          transition: transform 2s cubic-bezier(.22,.66,.25,1), opacity .9s ease;
+        }
+        .roar-header-curtain.is-hidden {
+          grid-template-rows: 0fr;
+          pointer-events: none;
+        }
+        .roar-header-curtain.is-hidden > .roar-header-inner {
+          opacity: 0;
+          transform: translateY(-100%);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .roar-header-curtain,
+          .roar-header-curtain > .roar-header-inner { transition-duration: .15s; }
+        }
         :root {
             --base-cream: #F5F0E6;
             --main-charcoal: #333333;
@@ -107,9 +134,13 @@ export default function AppShell({ activeTab, onTabChange, children }) {
       `}</style>
 
       <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', padding: '15px', boxSizing: 'border-box' }}>
-        <div style={{ maxWidth: '1500px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', height: '100%', gap: '15px' }}>
+        <div style={{ maxWidth: '1500px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', height: '100%', gap: isSmurfs ? '0px' : '15px', transition: 'gap 2s ease' }}>
           
-          <GlobalHeader activeTab={activeTab} onTabChange={onTabChange} />
+          <div className={`roar-header-curtain${isSmurfs ? ' is-hidden' : ''}`} aria-hidden={isSmurfs} inert={isSmurfs}>
+            <div className="roar-header-inner">
+              <GlobalHeader activeTab={activeTab} onTabChange={onTabChange} />
+            </div>
+          </div>
 
           <main style={{ flex: 1, minHeight: 0, overflow: 'hidden', position: 'relative' }}>
             {children}
