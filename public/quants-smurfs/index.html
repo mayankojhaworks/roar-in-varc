@@ -12653,7 +12653,7 @@
       ],
       "explanation": "For 3ᵏ+4ᵏ+5ᵏ, gcd of k=1 (12) and k=2 (50) is 2, which always divides. Second expression=20·4ᵏ, gcd=80; total 82.",
       "sources": {
-        "cl_page": 11,
+        "cl_page": 12,
         "cracku_page": 5
       },
       "verification": {
@@ -12880,10 +12880,10 @@
         "D": "P²/8 − R²/2"
       },
       "options_html": {
-        "A": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><mrow>P<sup>2</sup></mrow><mrow>16</mrow></mfrac></math> − R²",
-        "B": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><mrow>P<sup>2</sup></mrow><mrow>8</mrow></mfrac></math> − 2R²",
-        "C": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><mrow>P<sup>2</sup></mrow><mrow>2</mrow></mfrac></math> − 2PR",
-        "D": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><mrow>P<sup>2</sup></mrow><mrow>8</mrow></mfrac></math> − <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><mrow>R<sup>2</sup></mrow><mrow>2</mrow></mfrac></math>"
+        "A": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><msup><mi>P</mi><mn>2</mn></msup><mn>16</mn></mfrac></math> − R²",
+        "B": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><msup><mi>P</mi><mn>2</mn></msup><mn>8</mn></mfrac></math> − 2R²",
+        "C": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><msup><mi>P</mi><mn>2</mn></msup><mn>2</mn></mfrac></math> − 2PR",
+        "D": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><msup><mi>P</mi><mn>2</mn></msup><mn>8</mn></mfrac></math> − <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mfrac><msup><mi>R</mi><mn>2</mn></msup><mn>2</mn></mfrac></math>"
       },
       "correct_answer": "P²/8 − 2R²",
       "correct_option": "B",
@@ -13097,9 +13097,11 @@
       "correct_option": "A",
       "correct_option_display": "A",
       "solution_steps": [
-        "At most 52 students like all three; at least 73+80+52−200=5. Difference=47."
+        "The three preferences account for 205 selections. If t students like all three, the 100 students account for at most 200 + t selections. Hence t ≥ 5.",
+        "Five is attainable: let 48 like only coffee and tea, 20 only coffee and lemonade, 27 only tea and lemonade, and 5 all three.",
+        "At most 52 can like all three. This is attainable if all 52 lemonade drinkers also like coffee and tea, with 21 of the remaining 48 liking coffee and 28 liking tea, including one who likes both. The difference is 52 − 5 = 47."
       ],
-      "explanation": "At most 52 students like all three; at least 73+80+52−200=5. Difference=47.",
+      "explanation": "The three preferences account for 205 selections. If t students like all three, the 100 students account for at most 200 + t selections. Hence t ≥ 5. Five is attainable: let 48 like only coffee and tea, 20 only coffee and lemonade, 27 only tea and lemonade, and 5 all three. At most 52 can like all three. This is attainable if all 52 lemonade drinkers also like coffee and tea, with 21 of the remaining 48 liking coffee and 28 liking tea, including one who likes both. The difference is 52 − 5 = 47.",
       "sources": {
         "cl_page": 5,
         "cracku_page": 9
@@ -13411,9 +13413,11 @@
       "correct_option": null,
       "correct_option_display": null,
       "solution_steps": [
-        "Replacement raises sum by 5a₁=100N, so a₁=20N. Since first element cannot exceed mean 300, 2≤N≤15; 14 feasible values."
+        "Replacing the first term raises the sum by 5a₁ = 100N, so a₁ = 20N. The first term cannot exceed the mean 300, giving N ≤ 15. N = 1 would make a₁ = 300 from the original mean, contradicting a₁ = 20N.",
+        "For each N from 2 to 15, take the remaining N − 1 terms all equal to (300N − 20N)/(N − 1). This value is at least 20N, so the sequence is non-decreasing and has the required mean.",
+        "Thus each N from 2 to 15 yields a distinct possible a₁, for a total of 14."
       ],
-      "explanation": "Replacement raises sum by 5a₁=100N, so a₁=20N. Since first element cannot exceed mean 300, 2≤N≤15; 14 feasible values.",
+      "explanation": "Replacing the first term raises the sum by 5a₁ = 100N, so a₁ = 20N. The first term cannot exceed the mean 300, giving N ≤ 15. N = 1 would make a₁ = 300 from the original mean, contradicting a₁ = 20N. For each N from 2 to 15, take the remaining N − 1 terms all equal to (300N − 20N)/(N − 1). This value is at least 20N, so the sequence is non-decreasing and has the required mean. Thus each N from 2 to 15 yields a distinct possible a₁, for a total of 14.",
       "sources": {
         "cl_page": 32,
         "cracku_page": 23
@@ -13943,9 +13947,10 @@
       "correct_option": "A",
       "correct_option_display": "A",
       "solution_steps": [
-        "After day1, 100; day2 150; each subsequent day adds 50. Thus 100+50(m−1)=1000 gives m=19."
+        "Day 2 starts with 100 particles, or 50 × 2. If day n starts with 50n particles, one in every n produces another, adding 50. The next day therefore starts with 50(n + 1) particles.",
+        "The end-of-day count on day m is 100 + 50(m − 1). Setting it to 1000 gives m = 19."
       ],
-      "explanation": "After day1, 100; day2 150; each subsequent day adds 50. Thus 100+50(m−1)=1000 gives m=19.",
+      "explanation": "Day 2 starts with 100 particles, or 50 × 2. If day n starts with 50n particles, one in every n produces another, adding 50. The next day therefore starts with 50(n + 1) particles. The end-of-day count on day m is 100 + 50(m − 1). Setting it to 1000 gives m = 19.",
       "sources": {
         "cl_page": 33,
         "cracku_page": 28
@@ -14122,8 +14127,8 @@
       "secondary_tags": [],
       "question_type": "MCQ",
       "type": "MCQ",
-      "statement": "Two equal-volume containers initially hold, respectively, half a container of sugar syrup and half a container of milk. Half the syrup in the first is transferred to the second, then half of the resulting mixture is transferred back to the first, and then half of the first container is transferred to the second. The final syrup:milk ratio in the second is",
-      "question_html": "Two equal-volume containers initially hold, respectively, half a container of sugar syrup and half a container of milk. Half the syrup in the first is transferred to the second, then half of the resulting mixture is transferred back to the first, and then half of the first container is transferred to the second. The final syrup:milk ratio in the second is",
+      "statement": "Two containers have the same capacity. The first is half-filled with sugar syrup and the second is half-filled with milk. Half the contents of the first container are transferred to the second, then half the resulting mixture is transferred back to the first. Next, half the contents of the first container are transferred back to the second. The final ratio of sugar syrup to milk in the second container is",
+      "question_html": "Two containers have the same capacity. The first is half-filled with sugar syrup and the second is half-filled with milk. Half the contents of the first container are transferred to the second, then half the resulting mixture is transferred back to the first. Next, half the contents of the first container are transferred back to the second. The final ratio of sugar syrup to milk in the second container is",
       "question_display_mode": "clean_text_math_markup",
       "options": {
         "A": "4 : 5",
@@ -14141,9 +14146,11 @@
       "correct_option": "D",
       "correct_option_display": "D",
       "solution_steps": [
-        "After the three transfers, second container has 5/16 unit syrup and 6/16 milk, ratio 5:6."
+        "Start with 8 units of syrup in the first container and 8 units of milk in the second. After the first transfer, the second contains 4 units of syrup and 8 of milk.",
+        "Half of that mixture goes back to the first container, leaving it with 6 syrup and 4 milk. The second now has 2 syrup and 4 milk.",
+        "Transfer half the first container’s contents back to the second. The second ends with 5 syrup and 6 milk, a ratio of 5 : 6."
       ],
-      "explanation": "After the three transfers, second container has 5/16 unit syrup and 6/16 milk, ratio 5:6.",
+      "explanation": "Start with 8 units of syrup in the first container and 8 units of milk in the second. After the first transfer, the second contains 4 units of syrup and 8 of milk. Half of that mixture goes back to the first container, leaving it with 6 syrup and 4 milk. The second now has 2 syrup and 4 milk. Transfer half the first container’s contents back to the second. The second ends with 5 syrup and 6 milk, a ratio of 5 : 6.",
       "sources": {
         "cl_page": 18,
         "cracku_page": 30
@@ -14159,7 +14166,7 @@
       "verification_status": "2022_source_crosschecked_and_independently_derived",
       "source_solution_caveat": "",
       "fig": null,
-      "search_index": "cat2022-s2-qa-17 2 arithmetic mixtures — repeated transfer mixtures & alligation two equal-volume containers initially hold, respectively, half a container of sugar syrup and half a container of milk. half the syrup in the first is transferred to the second, then half of the resulting mixture is transferred back to the first, and then half of the first container is transferred to the second. the final syrup:milk ratio in the second is"
+      "search_index": "cat2022-s2-qa-17 2 arithmetic mixtures — repeated transfer mixtures & alligation two containers have the same capacity. the first is half-filled with sugar syrup and the second is half-filled with milk. half the contents of the first container are transferred to the second, then half the resulting mixture is transferred back to the first. next, half the contents of the first container are transferred back to the second. the final ratio of sugar syrup to milk in the second container is"
     },
     {
       "id": "CAT2022-S2-QA-18",
@@ -14339,9 +14346,11 @@
       "correct_option": "D",
       "correct_option_display": "D",
       "solution_steps": [
-        "Sum marks=190. Four maximum other marks 50,49,48,32 sum179 gives Amit minimum11. Amit max31 is feasible with three others above32; difference20."
+        "The five scores sum to 190. The other four students can score at most 50, 49, 48 and 32. This gives Amit a lower bound of 11, attained by those four scores.",
+        "Exactly one other student scores at most 32. Since Amit scores strictly less than that student, his upper bound is 31. The scores 31, 32, 41, 42 and 44 attain it and sum to 190.",
+        "The difference is 31 − 11 = 20."
       ],
-      "explanation": "Sum marks=190. Four maximum other marks 50,49,48,32 sum179 gives Amit minimum11. Amit max31 is feasible with three others above32; difference20.",
+      "explanation": "The five scores sum to 190. The other four students can score at most 50, 49, 48 and 32. This gives Amit a lower bound of 11, attained by those four scores. Exactly one other student scores at most 32. Since Amit scores strictly less than that student, his upper bound is 31. The scores 31, 32, 41, 42 and 44 attain it and sum to 190. The difference is 31 − 11 = 20.",
       "sources": {
         "cl_page": 23,
         "cracku_page": 32
@@ -14725,9 +14734,11 @@
       "correct_option": null,
       "correct_option_display": null,
       "solution_steps": [
-        "Centroid divides medians in 2:1; triangle EOD has 1/12 area of ABC. 108/12=9."
+        "Because D and E are midpoints, DE is parallel to BC and triangle ADE has one quarter of the area of ABC.",
+        "The centroid O is two thirds of the way from A to the midpoint of BC. Line DE is halfway down the same median, so O is one sixth of the full altitude below DE, while A is one half of that altitude above DE.",
+        "Triangles EOD and EAD share base ED, so EOD has one third of the area of EAD. The required area is 108 ÷ 4 ÷ 3 = 9 sq. cm."
       ],
-      "explanation": "Centroid divides medians in 2:1; triangle EOD has 1/12 area of ABC. 108/12=9.",
+      "explanation": "Because D and E are midpoints, DE is parallel to BC and triangle ADE has one quarter of the area of ABC. The centroid O is two thirds of the way from A to the midpoint of BC. Line DE is halfway down the same median, so O is one sixth of the full altitude below DE, while A is one half of that altitude above DE. Triangles EOD and EAD share base ED, so EOD has one third of the area of EAD. The required area is 108 ÷ 4 ÷ 3 = 9 sq. cm.",
       "sources": {
         "cl_page": 43,
         "iim_page": 51
@@ -14862,8 +14873,8 @@
       "secondary_tags": [],
       "question_type": "MCQ",
       "type": "MCQ",
-      "statement": "Two cars travel at constant speeds and meet in 1.5 hours going towards each other, or 10.5 hours going in the same direction. If the slower car is 60 km/h, the distance that car travels when meeting head-on is",
-      "question_html": "Two cars travel at constant speeds and meet in 1.5 hours going towards each other, or 10.5 hours going in the same direction. If the slower car is 60 km/h, the distance that car travels when meeting head-on is",
+      "statement": "Two cars start at the same time from different locations and travel at constant speeds. They meet in 1.5 hours if they travel towards each other and in 10.5 hours if they travel in the same direction. If the slower car travels at 60 km/h, the distance it travels, in km, before they meet while travelling towards each other is",
+      "question_html": "Two cars start at the same time from different locations and travel at constant speeds. They meet in 1.5 hours if they travel towards each other and in 10.5 hours if they travel in the same direction. If the slower car travels at 60 km/h, the distance it travels, in km, before they meet while travelling towards each other is",
       "question_display_mode": "clean_text_math_markup",
       "options": {
         "A": "150",
@@ -14899,7 +14910,7 @@
       "verification_status": "2022_source_crosschecked_and_independently_derived",
       "source_solution_caveat": "",
       "fig": null,
-      "search_index": "cat2022-s3-qa-10 3 arithmetic time speed distance — relative motion time, speed & distance two cars travel at constant speeds and meet in 1.5 hours going towards each other, or 10.5 hours going in the same direction. if the slower car is 60 km/h, the distance that car travels when meeting head-on is"
+      "search_index": "cat2022-s3-qa-10 3 arithmetic time speed distance — relative motion time, speed & distance two cars start at the same time from different locations and travel at constant speeds. they meet in 1.5 hours if they travel towards each other and in 10.5 hours if they travel in the same direction. if the slower car travels at 60 km/h, the distance it travels, in km, before they meet while travelling towards each other is"
     },
     {
       "id": "CAT2022-S3-QA-11",
@@ -14923,9 +14934,11 @@
       "correct_option": null,
       "correct_option_display": null,
       "solution_steps": [
-        "875/2401=(5/7)³ and (√(7/5))^(3x−y)=(7/5)^((3x−y)/2), so 3x−y=−6. Second identity for all a,b implies 6x−y=0; x=2,y=12, sum14."
+        "Since 875/2401 = 125/343 = (5/7)³, the first equation gives 3x − y = −6.",
+        "The second equation holds for every nonzero a and b. Set a/b = 1/2, so 2 raised to 6x − y equals 1. Hence 6x − y = 0.",
+        "Solving gives x = 2 and y = 12, so x + y = 14."
       ],
-      "explanation": "875/2401=(5/7)³ and (√(7/5))^(3x−y)=(7/5)^((3x−y)/2), so 3x−y=−6. Second identity for all a,b implies 6x−y=0; x=2,y=12, sum14.",
+      "explanation": "Since 875/2401 = 125/343 = (5/7)³, the first equation gives 3x − y = −6. The second equation holds for every nonzero a and b. Set a/b = 1/2, so 2 raised to 6x − y equals 1. Hence 6x − y = 0. Solving gives x = 2 and y = 12, so x + y = 14.",
       "sources": {
         "cl_page": 44,
         "iim_page": 55
@@ -15017,9 +15030,10 @@
       "correct_option": "A",
       "correct_option_display": "A",
       "solution_steps": [
-        "Maximize middle terms with 4,24,25,26,27,29. Smallest pair sums28, largest56, total135; mean22.5."
+        "The largest pair sums to 56, so its smaller member is at most 27. The two middle numbers are distinct and below it, so their sum is at most 26 + 25 = 51.",
+        "The six numbers 4, 24, 25, 26, 27 and 29 attain this bound and meet both pair averages. Their total is 28 + 51 + 56 = 135, so the maximum mean is 22.5."
       ],
-      "explanation": "Maximize middle terms with 4,24,25,26,27,29. Smallest pair sums28, largest56, total135; mean22.5.",
+      "explanation": "The largest pair sums to 56, so its smaller member is at most 27. The two middle numbers are distinct and below it, so their sum is at most 26 + 25 = 51. The six numbers 4, 24, 25, 26, 27 and 29 attain this bound and meet both pair averages. Their total is 28 + 51 + 56 = 135, so the maximum mean is 22.5.",
       "sources": {
         "cl_page": 53,
         "iim_page": 57
@@ -15267,9 +15281,11 @@
       "correct_option": "B",
       "correct_option_display": "B",
       "solution_steps": [
-        "Right isosceles triangle ABC has area32, and the two circular sectors forming the intersection contribute32π. Lens=32(π−1)."
+        "Since BC is a diameter and A lies on the circle, angle BAC is 90°. Thus BC = 8√2 and the circle with diameter BC has radius 4√2.",
+        "The overlap consists of the semicircle on the A side of BC and the segment of the circle centred at A on the other side of BC. The segment is the 90° sector BAC minus triangle ABC.",
+        "The semicircle has area 16π, the sector also has area 16π, and the triangle has area 32. The overlap is 32(π − 1) sq. cm."
       ],
-      "explanation": "Right isosceles triangle ABC has area32, and the two circular sectors forming the intersection contribute32π. Lens=32(π−1).",
+      "explanation": "Since BC is a diameter and A lies on the circle, angle BAC is 90°. Thus BC = 8√2 and the circle with diameter BC has radius 4√2. The overlap consists of the semicircle on the A side of BC and the segment of the circle centred at A on the other side of BC. The segment is the 90° sector BAC minus triangle ABC. The semicircle has area 16π, the sector also has area 16π, and the triangle has area 32. The overlap is 32(π − 1) sq. cm.",
       "sources": {
         "cl_page": 47,
         "iim_page": 62
@@ -15403,9 +15419,11 @@
       "correct_option": "B",
       "correct_option_display": "B",
       "solution_steps": [
-        "When slow ship travels8 it is16km from port; right triangle geometry implies fast has travelled16, twice the speed. When fast travels24, slow travels12 and has12 left."
+        "At the right-angle moment, the slower ship is 16 km from the port. The angle at the port remains 60°, so the right angle is at one of the ships.",
+        "The faster ship is closer to the port, so its distance to the port is the shorter leg of the 30°–60°–90° triangle. The slower ship’s 16 km distance is the hypotenuse, so the faster ship is 8 km from the port.",
+        "The faster ship has travelled 16 km while the slower ship has travelled 8 km. When the faster ship completes the full 24 km, the slower ship has travelled 12 km and has 12 km left."
       ],
-      "explanation": "When slow ship travels8 it is16km from port; right triangle geometry implies fast has travelled16, twice the speed. When fast travels24, slow travels12 and has12 left.",
+      "explanation": "At the right-angle moment, the slower ship is 16 km from the port. The angle at the port remains 60°, so the right angle is at one of the ships. The faster ship is closer to the port, so its distance to the port is the shorter leg of the 30°–60°–90° triangle. The slower ship’s 16 km distance is the hypotenuse, so the faster ship is 8 km from the port. The faster ship has travelled 16 km while the slower ship has travelled 8 km. When the faster ship completes the full 24 km, the slower ship has travelled 12 km and has 12 km left.",
       "sources": {
         "cl_page": 37,
         "iim_page": 65
