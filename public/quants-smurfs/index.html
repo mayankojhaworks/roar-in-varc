@@ -9615,7 +9615,7 @@
         "Sign Analysis"
       ],
       "question_type": "MCQ",
-      "statement": "Nonzero x,y satisfying x/y=(x+3)/(y−3)",
+      "statement": "Nonzero x, y with y ≠ 3 and x/y < (x+3)/(y−3)",
       "statement_role": "search_summary_only_exact_wording_in_source_image",
       "question_html": "Any non-zero real numbers <i>x</i>, <i>y</i> such that <i>y</i> ≠ 3 and <math xmlns=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\"><mrow><mfrac><mi>x</mi><mi>y</mi></mfrac><mo>&lt;</mo><mfrac><mrow><mi>x</mi><mo>+</mo><mn>3</mn></mrow><mrow><mi>y</mi><mo>−</mo><mn>3</mn></mrow></mfrac></mrow></math> will satisfy the condition:",
       "question_image": null,
@@ -9645,7 +9645,7 @@
         "visible_renderer_tested": true,
         "status": "reviewed_for_practice"
       },
-      "source_solution_caveat": "",
+      "source_solution_caveat": "Career Launcher expresses the keyed choice as an if–then statement. Cracku prints “and” where the implication is intended.",
       "solution_figure": null,
       "question_text": "Any non-zero real numbers x,y such that y ≠ 3 and x/y < (x+3)/(y−3), will satisfy the condition.",
       "options_html": {
@@ -9665,7 +9665,7 @@
       "type": "MCQ",
       "number": 2,
       "browse_group": "Inequalities & Absolute Value",
-      "search_index": "cat2023-s2-qa-02 2023 algebra rational identities & inequalities inequalities & absolute value nonzero x,y satisfying x/y=(x+3)/(y−3) any non-zero real numbers x , y such that y ≠ 3 and x y < x + 3 y − 3 will satisfy the condition:"
+      "search_index": "cat2023-s2-qa-02 2023 algebra rational identities & inequalities inequalities & absolute value nonzero x, y with y ≠ 3 and x/y < (x+3)/(y−3) any non-zero real numbers x , y such that y ≠ 3 and x y < x + 3 y − 3 will satisfy the condition:"
     },
     {
       "id": "CAT2023-S2-QA-03",
@@ -10261,7 +10261,7 @@
       "correct_option_cracku": "D",
       "correct_option_cl": null,
       "correct_option_display": "D",
-      "explanation": "If price = <i>k × (weight)²</i>, the four pieces have total price <i>k(w₁² + w₂² + w₃² + w₄²)</i>. Their distinct positive integer weights sum to 18. The minimum sum of squares comes from <i>3, 4, 5, 6</i>: <i>9 + 16 + 25 + 36 = 86</i>. The maximum comes from <i>1, 2, 3, 12</i>: <i>1 + 4 + 9 + 144 = 158</i>. Their difference is <i>72k = 288000</i>, so <i>k = 4000</i>. Original price = <i>4000 × 18² = ₹12,96,000</i>.",
+      "explanation": "Let price be <i>k</i> times weight squared. The four distinct positive integer weights sum to 18, so their total price is <i>k</i> times the sum of their squares. If the lightest piece is 3, the only possible weights are 3, 4, 5 and 6, with squares summing to 86. If the lightest is 1 or 2, the other three weigh at least 16 in total. Their squares alone sum to at least <i>16²/3 &gt; 85</i>. Including the lightest piece gives a sum greater than 86. For the maximum, move every unit above the minimum weights 1, 2 and 3 from the three lighter pieces to the heaviest. Each transfer increases the sum of squares, so the maximum occurs at 1, 2, 3 and 12, with squares summing to 158. The price difference gives <i>72k = 288000</i>, so <i>k = 4000</i>. The original stone costs <b>4000 × 18² = ₹12,96,000</b>.",
       "independent_check": "Independent mathematical derivation documented in the answer explanation; both source answer values cross-matched.",
       "classification_note": "Primary topic uses the dominant solution method; additional concepts are secondary tags.",
       "sources": {
@@ -10286,9 +10286,10 @@
       },
       "correct_option": "D",
       "solution_steps": [
-        "If price = <i>k × (weight)²</i>, the four pieces have total price <i>k(w₁² + w₂² + w₃² + w₄²)</i>. Their distinct positive integer weights sum to 18.",
-        "The minimum sum of squares comes from <i>3, 4, 5, 6</i>: <i>9 + 16 + 25 + 36 = 86</i>. The maximum comes from <i>1, 2, 3, 12</i>: <i>1 + 4 + 9 + 144 = 158</i>.",
-        "Their difference is <i>72k = 288000</i>, so <i>k = 4000</i>. Original price = <i>4000 × 18² = ₹12,96,000</i>."
+        "Let price be <i>k</i> times weight squared. The four distinct positive integer weights sum to 18, so their total price is <i>k</i> times the sum of their squares.",
+        "If the lightest piece is 3, the only possible weights are 3, 4, 5 and 6, with squares summing to 86. If the lightest is 1 or 2, the other three weigh at least 16 in total. Their squares alone sum to at least <i>16²/3 &gt; 85</i>. Including the lightest piece gives a sum greater than 86.",
+        "For the maximum, move every unit above the minimum weights 1, 2 and 3 from the three lighter pieces to the heaviest. Each transfer increases the sum of squares, so the maximum occurs at 1, 2, 3 and 12, with squares summing to 158.",
+        "The price difference gives <i>72k = 288000</i>, so <i>k = 4000</i>. The original stone costs <b>4000 × 18² = ₹12,96,000</b>."
       ],
       "fig": null,
       "qa_note": "Both extreme partitions independently exhaustively checked over all four-distinct-positive-integer splits.",
@@ -10712,7 +10713,7 @@
         "The two boundary lines are <i>x − y = 7 − x</i> ⇒ <i>y = 2x − 7</i> and <i>x − y = x − 7</i> ⇒ <i>y = 7</i>.",
         "The vertical gap is <i>7 − (2x − 7) = 14 − 2x</i>. The area is <i>∫₀⁵(14 − 2x) dx = [14x − x²]₀⁵ = 45</i>."
       ],
-      "fig": "<svg viewBox=\"0 0 500 340\" role=\"img\" aria-label=\"Region between x equals 0 and 5 with y equals 7 above and y equals 2x minus 7 below\"><rect width=\"500\" height=\"340\" rx=\"10\" fill=\"#fcfdfc\"/><defs><pattern id=\"xygrid\" width=\"22\" height=\"22\" patternUnits=\"userSpaceOnUse\"><path d=\"M22 0H0V22\" fill=\"none\" stroke=\"#e8eee9\" stroke-width=\".8\"/></pattern></defs><rect x=\"34\" y=\"28\" width=\"420\" height=\"268\" fill=\"url(#xygrid)\"/><path d=\"M73 20V314M25 220H470\" stroke=\"#73897d\" stroke-width=\"1.6\"/><path d=\"M73 105L295 105L295 155L73 280Z\" fill=\"#c8e1d4\" fill-opacity=\".7\" stroke=\"#376c56\" stroke-width=\"2\"/><path d=\"M25 105H470\" stroke=\"#b76c43\" stroke-width=\"2\"/><path d=\"M73 280L411 83\" stroke=\"#396d57\" stroke-width=\"2\"/><path d=\"M295 22V312\" stroke=\"#a76e41\" stroke-width=\"1.9\" stroke-dasharray=\"5 4\"/><g font-size=\"13\" fill=\"#31483d\"><text x=\"304\" y=\"302\">x = 5</text><text x=\"316\" y=\"99\">y = 7</text><text x=\"324\" y=\"137\">y = 2x − 7</text><text x=\"63\" y=\"237\">0</text><text x=\"460\" y=\"240\">x</text><text x=\"58\" y=\"17\">y</text></g></svg>",
+      "fig": "<svg viewBox=\"0 0 500 340\" role=\"img\" aria-label=\"Region between x equals 0 and 5 with y equals 7 above and y equals 2x minus 7 below\"><rect width=\"500\" height=\"340\" rx=\"10\" fill=\"#fcfdfc\"/><path d=\"M73 20V314M25 192.5H470\" stroke=\"#73897d\" stroke-width=\"1.6\"/><path d=\"M73 105H295V155L73 280Z\" fill=\"#c8e1d4\" fill-opacity=\".7\" stroke=\"#376c56\" stroke-width=\"2\"/><path d=\"M25 105H470\" stroke=\"#b76c43\" stroke-width=\"2\"/><path d=\"M73 280L428.2 80\" stroke=\"#396d57\" stroke-width=\"2\"/><path d=\"M295 22V312\" stroke=\"#a76e41\" stroke-width=\"1.9\" stroke-dasharray=\"5 4\"/><g font-size=\"13\" fill=\"#31483d\"><text x=\"304\" y=\"302\">x = 5</text><text x=\"316\" y=\"99\">y = 7</text><text x=\"324\" y=\"137\">y = 2x − 7</text><text x=\"60\" y=\"208\">0</text><text x=\"460\" y=\"211\">x</text><text x=\"58\" y=\"17\">y</text></g></svg>",
       "qa_note": "The absolute-value bars refer to two separate absolute values; verified with both PDFs.",
       "type": "TITA",
       "number": 19,
@@ -11254,7 +11255,7 @@
       "correct_option_cracku": null,
       "correct_option_cl": null,
       "correct_option_display": null,
-      "explanation": "If <i>N</i> has exactly 15 positive divisors, its prime factorisation has exponent pattern either <i>p¹⁴</i> or <i>p⁴q²</i>, where <i>p</i> and <i>q</i> are distinct primes. The smallest possibilities of the latter kind are <i>2⁴×3² = 144</i> and <i>3⁴×2² = 324</i>. Powers <i>p¹⁴</i> are larger. Thus the sum is <b>144 + 324 = 468</b>.",
+      "explanation": "Exactly 15 divisors requires the prime-exponent pattern <i>p¹⁴</i> or <i>p⁴q²</i>, where <i>p</i> and <i>q</i> are distinct primes. For <i>p = 2</i>, the two smallest possibilities are <i>2⁴ × 3² = 144</i> and <i>2⁴ × 5² = 400</i>. For <i>p ≥ 3</i>, the smallest is <i>3⁴ × 2² = 324</i>. Even the smallest fourteenth power, <i>2¹⁴</i>, exceeds these. The first two numbers are therefore 144 and 324. Their sum is <b>468</b>.",
       "independent_check": "Independent mathematical derivation documented in the answer explanation; both source answer values cross-matched.",
       "classification_note": "Primary topic uses the dominant solution method; additional concepts are secondary tags.",
       "sources": {
@@ -11274,9 +11275,9 @@
       "options_html": {},
       "correct_option": null,
       "solution_steps": [
-        "If <i>N</i> has exactly 15 positive divisors, its prime factorisation has exponent pattern either <i>p¹⁴</i> or <i>p⁴q²</i>, where <i>p</i> and <i>q</i> are distinct primes.",
-        "The smallest possibilities of the latter kind are <i>2⁴×3² = 144</i> and <i>3⁴×2² = 324</i>. Powers <i>p¹⁴</i> are larger.",
-        "Thus the sum is <b>144 + 324 = 468</b>."
+        "Exactly 15 divisors requires the prime-exponent pattern <i>p¹⁴</i> or <i>p⁴q²</i>, where <i>p</i> and <i>q</i> are distinct primes.",
+        "For <i>p = 2</i>, the two smallest possibilities are <i>2⁴ × 3² = 144</i> and <i>2⁴ × 5² = 400</i>. For <i>p ≥ 3</i>, the smallest is <i>3⁴ × 2² = 324</i>. Even the smallest fourteenth power, <i>2¹⁴</i>, exceeds these.",
+        "The first two numbers are therefore 144 and 324. Their sum is <b>468</b>."
       ],
       "fig": null,
       "qa_note": "",
@@ -11819,7 +11820,7 @@
       "correct_option_cracku": null,
       "correct_option_cl": null,
       "correct_option_display": null,
-      "explanation": "Let original stock be <i>N</i> fruits, with <i>M=0.4N</i> mangoes, <i>B</i> bananas and <i>A</i> apples. Then <i>A+B=0.6N</i>. Exactly half the stock is sold: <i>0.5M+96+0.4A=0.5N</i>, giving <i>A=0.75N−240</i> and hence <i>B=240−0.15N</i>. Both mango sales and apple sales must be whole numbers. The conditions imply <i>N</i> is a multiple of 20. Positive apples require <i>N&gt;320</i>. The smallest permitted <i>N</i> is <b>340</b>. It gives <i>M=136, A=15, B=189</i>, all positive, and sales <i>68+6+96=170=N/2</i>.",
+      "explanation": "Let <i>N</i> be the initial stock and <i>A</i> the initial number of apples. Half of the <i>0.4N</i> mangoes are sold, so the total-sales equation is <i>0.2N + 96 + 0.4A = 0.5N</i>, or <i>3N = 960 + 4A</i>. Selling <i>2A/5</i> apples requires <i>A</i> to be divisible by 5. The equation also requires <i>A</i> to be divisible by 3, so the smallest positive candidate is <i>A = 15</i>. This gives <i>N = 340</i>, with 136 mangoes and 189 bananas. The sales are 68 mangoes, 96 bananas and 6 apples, exactly half the stock. Thus the minimum is <b>340</b>.",
       "independent_check": "Independent mathematical derivation documented in the answer explanation; both source answer values cross-matched.",
       "classification_note": "Primary topic uses the dominant solution method; additional concepts are secondary tags.",
       "sources": {
@@ -11839,10 +11840,9 @@
       "options_html": {},
       "correct_option": null,
       "solution_steps": [
-        "Let original stock be <i>N</i> fruits, with <i>M=0.4N</i> mangoes, <i>B</i> bananas and <i>A</i> apples. Then <i>A+B=0.6N</i>.",
-        "Exactly half the stock is sold: <i>0.5M+96+0.4A=0.5N</i>, giving <i>A=0.75N−240</i> and hence <i>B=240−0.15N</i>.",
-        "Both mango sales and apple sales must be whole numbers. The conditions imply <i>N</i> is a multiple of 20. Positive apples require <i>N&gt;320</i>.",
-        "The smallest permitted <i>N</i> is <b>340</b>. It gives <i>M=136, A=15, B=189</i>, all positive, and sales <i>68+6+96=170=N/2</i>."
+        "Let <i>N</i> be the initial stock and <i>A</i> the initial number of apples. Half of the <i>0.4N</i> mangoes are sold, so the total-sales equation is <i>0.2N + 96 + 0.4A = 0.5N</i>, or <i>3N = 960 + 4A</i>.",
+        "Selling <i>2A/5</i> apples requires <i>A</i> to be divisible by 5. The equation also requires <i>A</i> to be divisible by 3, so the smallest positive candidate is <i>A = 15</i>.",
+        "This gives <i>N = 340</i>, with 136 mangoes and 189 bananas. The sales are 68 mangoes, 96 bananas and 6 apples, exactly half the stock. Thus the minimum is <b>340</b>."
       ],
       "fig": null,
       "qa_note": "",
@@ -11937,7 +11937,7 @@
       "correct_option_cracku": "C",
       "correct_option_cl": null,
       "correct_option_display": "C",
-      "explanation": "AD is perpendicular to BC and BE is perpendicular to AC. The angle formed by AO and BO is 105°, so the base angle <i>∠ACB = 75°</i>. Hence the apex angle <i>∠A = 30°</i>. Using the triangle area in two ways, <i>½×BC×AD = ½×AC×BE</i>, giving <i>AD/BE = AC/BC</i>. Because AB = AC and ∠A = 30°, <i>BC = 2AC sin15°</i>. Thus <i>AD/BE = 1/(2sin15°) = <b>2cos15°</b></i>.",
+      "explanation": "Since <i>AD ⟂ BC</i> and <i>BE ⟂ AC</i>, <i>∠AOB</i> and <i>∠ACB</i> are supplementary. Thus <i>∠ACB = 75°</i>, and the isosceles triangle has apex angle <i>∠BAC = 30°</i>. Since <i>BE</i> is perpendicular to <i>AC</i>, <i>BE = AB sin 30° = AB/2</i>. The altitude <i>AD</i> bisects the apex angle, so <i>AD = AB cos 15°</i>. Dividing gives <b>AD/BE = 2 cos 15°</b>.",
       "independent_check": "Independent mathematical derivation documented in the answer explanation; both source answer values cross-matched.",
       "classification_note": "Primary topic uses the dominant solution method; additional concepts are secondary tags.",
       "sources": {
@@ -11962,9 +11962,9 @@
       },
       "correct_option": "C",
       "solution_steps": [
-        "AD is perpendicular to BC and BE is perpendicular to AC. The angle formed by AO and BO is 105°, so the base angle <i>∠ACB = 75°</i>. Hence the apex angle <i>∠A = 30°</i>.",
-        "Using the triangle area in two ways, <i>½×BC×AD = ½×AC×BE</i>, giving <i>AD/BE = AC/BC</i>.",
-        "Because AB = AC and ∠A = 30°, <i>BC = 2AC sin15°</i>. Thus <i>AD/BE = 1/(2sin15°) = <b>2cos15°</b></i>."
+        "Since <i>AD ⟂ BC</i> and <i>BE ⟂ AC</i>, <i>∠AOB</i> and <i>∠ACB</i> are supplementary. Thus <i>∠ACB = 75°</i>, and the isosceles triangle has apex angle <i>∠BAC = 30°</i>.",
+        "Since <i>BE</i> is perpendicular to <i>AC</i>, <i>BE = AB sin 30° = AB/2</i>.",
+        "The altitude <i>AD</i> bisects the apex angle, so <i>AD = AB cos 15°</i>. Dividing gives <b>AD/BE = 2 cos 15°</b>."
       ],
       "fig": "<svg viewBox=\"0 0 500 360\" role=\"img\" aria-label=\"Isosceles triangle ABC with altitude AD and altitude BE intersecting at O\"><rect x=\"0\" y=\"0\" width=\"500\" height=\"360\" rx=\"14\" fill=\"#fbfcfb\"/><path d=\"M250 36 L175 315 L325 315 Z\" fill=\"#e9f4ed\" fill-opacity=\".7\" stroke=\"#396e58\" stroke-width=\"2.5\"/><path d=\"M250 36V315 M175 315L314.97 277.51\" fill=\"none\" stroke=\"#b97340\" stroke-width=\"2.4\"/><path d=\"M238 303H250V315 M302 274l3.3 12l12-3.3\" fill=\"none\" stroke=\"#b97340\" stroke-width=\"1.6\"/><circle cx=\"250\" cy=\"294.91\" r=\"4.5\" fill=\"#a4522b\"/><g font-family=\"system-ui,sans-serif\" font-size=\"15\" fill=\"#24493a\"><text x=\"245\" y=\"22\">A</text><text x=\"157\" y=\"332\">B</text><text x=\"330\" y=\"333\">C</text><text x=\"247\" y=\"335\">D</text><text x=\"323\" y=\"277\">E</text><text x=\"257\" y=\"291\">O</text></g><text x=\"56\" y=\"54\" font-size=\"13\" fill=\"#52685e\">AB = AC, AD ⟂ BC, BE ⟂ AC</text></svg>",
       "qa_note": "Constructed diagram is a solution-only illustration; question itself contains no embedded publisher image.",
@@ -12032,7 +12032,7 @@
         "Rectangle area is <i>2wh</i>. By AM–GM or calculus, its maximum occurs at <i>w=h=√2</i>.",
         "The full width is <i>2w</i> and height is <i>w</i>, so the larger-to-smaller side ratio is <b>2:1</b>."
       ],
-      "fig": "<svg viewBox=\"0 0 500 355\" role=\"img\" aria-label=\"Maximum-area rectangle inscribed in semicircle with base as diameter\"><rect width=\"500\" height=\"355\" rx=\"12\" fill=\"#fbfcfb\"/><path d=\"M100 285 A150 150 0 0 1 400 285\" stroke=\"#396e58\" fill=\"none\" stroke-width=\"3\"/><path d=\"M100 285H400\" stroke=\"#396e58\" stroke-width=\"2.2\"/><rect x=\"143.934\" y=\"178.934\" width=\"212.132\" height=\"106.066\" fill=\"#dceee3\" fill-opacity=\".9\" stroke=\"#af7241\" stroke-width=\"2.4\"/><circle cx=\"250\" cy=\"285\" r=\"3.5\" fill=\"#396e58\"/><path d=\"M250 285 L356.066 178.934\" stroke=\"#396e58\" stroke-width=\"1.5\" stroke-dasharray=\"6 4\"/><g font-family=\"system-ui,sans-serif\" font-size=\"14\" fill=\"#24493a\"><text x=\"242\" y=\"306\">O</text><text x=\"292\" y=\"211\">r = 2</text><text x=\"202\" y=\"174\">width = 2w</text><text x=\"363\" y=\"240\">height = h</text></g></svg>",
+      "fig": "<svg viewBox=\"0 0 500 355\" role=\"img\" aria-label=\"Maximum-area rectangle inscribed in semicircle with its base lying on the diameter\"><rect width=\"500\" height=\"355\" rx=\"12\" fill=\"#fbfcfb\"/><path d=\"M100 285 A150 150 0 0 1 400 285\" stroke=\"#396e58\" fill=\"none\" stroke-width=\"3\"/><path d=\"M100 285H400\" stroke=\"#396e58\" stroke-width=\"2.2\"/><rect x=\"143.934\" y=\"178.934\" width=\"212.132\" height=\"106.066\" fill=\"#dceee3\" fill-opacity=\".9\" stroke=\"#af7241\" stroke-width=\"2.4\"/><circle cx=\"250\" cy=\"285\" r=\"3.5\" fill=\"#396e58\"/><path d=\"M250 285 L356.066 178.934\" stroke=\"#396e58\" stroke-width=\"1.5\" stroke-dasharray=\"6 4\"/><g font-family=\"system-ui,sans-serif\" font-size=\"14\" fill=\"#24493a\"><text x=\"242\" y=\"306\">O</text><text x=\"292\" y=\"211\">r = 2</text><text x=\"202\" y=\"174\">width = 2w</text><text x=\"363\" y=\"240\">height = h</text></g></svg>",
       "qa_note": "",
       "type": "MCQ",
       "number": 18,
