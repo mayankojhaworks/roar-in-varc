@@ -1,10 +1,10 @@
 import { useCallback, useRef, useState } from 'react'
 
-/**
- * The 330-question engine is deliberately left unchanged.
- * We attach a same-origin fullscreen gate to its Start / Resume controls so a
- * user gesture grants fullscreen BEFORE the question timer can run.
- */
+function usesViewportPractice({ userAgent, platform, maxTouchPoints }) {
+  // iPadOS can identify itself as a Mac when it requests desktop sites.
+  return /iPad|iPhone|iPod/.test(userAgent) || (platform === 'MacIntel' && maxTouchPoints > 1)
+}
+
 export default function QuantsSmurfs({ onBack }) {
   const frameRef = useRef(null)
   const [viewportFallback, setViewportFallback] = useState(false)
@@ -15,75 +15,62 @@ export default function QuantsSmurfs({ onBack }) {
     const doc = frame?.contentDocument
     if (!doc || !win) return
 
-    const inPractice = () => doc.querySelector('#main')?.classList.contains('practicepage')
-    const pauseIfRunning = () => {
-      if (win.session?.()?.state === 'running' && inPractice()) {
-        win.markPaused?.('Fullscreen exited. Your work is saved. Resume when ready.')
-      }
-    }
+    const main = doc.querySelector('#main')
+    if (!main) return
 
-    const stopFallback = () => {
+    const practiceIsRunning = () => main.classList.contains('practicepage') && win.session?.()?.state === 'running'
+    const prefersViewport = usesViewportPractice(win.navigator)
+    let nativeFullscreen = false
+    let starting = false
+
+    const leavePracticeView = () => {
+      nativeFullscreen = false
+      if (doc.fullscreenElement) doc.exitFullscreen().catch(() => {})
       setViewportFallback(false)
-      doc.documentElement.classList.remove('smurfs-view-fullscreen')
     }
 
     const onFullscreenChange = () => {
-      if (!doc.fullscreenElement) pauseIfRunning()
+      if (!nativeFullscreen || doc.fullscreenElement) return
+      nativeFullscreen = false
+      if (practiceIsRunning()) {
+        win.markPaused?.('Fullscreen exited. Your work is saved. Resume when ready.')
+      }
     }
 
     const handlePracticeControl = async (event) => {
       const control = event.target.closest?.('[data-action]')
       const action = control?.dataset.action
-      if (!control || control.disabled) return
-      if (action === 'start' || action === 'resume-session') {
-        // Capture in the iframe before its original click handler starts the timer.
-        event.preventDefault()
-        event.stopImmediatePropagation()
-        if (frame.dataset.fullscreenBusy === '1') return
-        frame.dataset.fullscreenBusy = '1'
-        try {
-          if (!doc.fullscreenElement) {
-            if (doc.documentElement.requestFullscreen) {
-              await doc.documentElement.requestFullscreen({ navigationUI: 'hide' })
-            } else {
-              // iOS/Safari versions without the element Fullscreen API.
-              doc.documentElement.classList.add('smurfs-view-fullscreen')
-              setViewportFallback(true)
-            }
-          }
-          win.doAction?.(action, control)
-          if (win.session?.()?.state !== 'running' || !inPractice()) {
-            if (doc.fullscreenElement) await doc.exitFullscreen()
-            stopFallback()
-          }
-        } catch {
-          // If permission was denied, do not begin the session or its timer.
-          win.notify?.('Fullscreen was blocked. Please allow fullscreen to start practice.')
-        } finally {
-          frame.dataset.fullscreenBusy = '0'
-        }
-        return
-      }
+      if (control?.disabled || (action !== 'start' && action !== 'resume-session')) return
 
-      if (['pause-session', 'end-session', 'nav'].includes(action)) {
-        // The underlying app handles confirmation, persistence and navigation.
-        queueMicrotask(() => {
-          if (!inPractice() || win.session?.()?.state !== 'running') {
-            if (doc.fullscreenElement) doc.exitFullscreen().catch(() => {})
-            stopFallback()
+      // Capture in the iframe before its original click handler starts the timer.
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      if (starting) return
+      starting = true
+      try {
+        if (!prefersViewport && !doc.fullscreenElement && doc.documentElement.requestFullscreen) {
+          try {
+            await doc.documentElement.requestFullscreen({ navigationUI: 'hide' })
+          } catch {
+            // An unavailable fullscreen request should still allow Start and Resume.
           }
-        })
+        }
+        if (frameRef.current !== frame || frame.contentDocument !== doc) return
+        nativeFullscreen = Boolean(doc.fullscreenElement)
+        setViewportFallback(!nativeFullscreen)
+        win.doAction?.(action, control)
+      } finally {
+        if (frameRef.current === frame && frame.contentDocument === doc && !practiceIsRunning()) {
+          leavePracticeView()
+        }
+        starting = false
       }
     }
 
-    const main = doc.querySelector('#main')
-    const watchResult = new MutationObserver(() => {
-      if (!inPractice()) {
-        if (doc.fullscreenElement) doc.exitFullscreen().catch(() => {})
-        stopFallback()
-      }
+    const watchPractice = new MutationObserver(() => {
+      if (!starting && !practiceIsRunning()) leavePracticeView()
     })
-    if (main) watchResult.observe(main, { attributes: true, attributeFilter: ['class'] })
+    watchPractice.observe(main, { childList: true, attributes: true, attributeFilter: ['class'] })
 
     doc.addEventListener('click', handlePracticeControl, true)
     doc.addEventListener('fullscreenchange', onFullscreenChange)
