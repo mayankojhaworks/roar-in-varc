@@ -3,6 +3,11 @@
 @media (max-width:1080px){.topnav{gap:0}.navbtn{padding:9px 11px}.version{display:none}}@media(max-width:810px){.topbar{height:66px}.topinner{padding:0 17px}.topnav{display:none}.brandname{font-size:20px}.brandhint{font-size:9px}.page{padding:26px 16px 65px}.page.practicepage{padding-top:16px}.setupgrid,.twocol{grid-template-columns:1fr}.summarycard{position:static}.summary-stat{font-size:44px}.headerrow{margin-bottom:22px}.metricrow{grid-template-columns:repeat(2,1fr)}.sessionclock{display:none}.resultgrid{grid-template-columns:repeat(8,1fr)}.qbody{padding:30px 0 26px}.qinner{padding:23px 20px 0}.qfooter{margin:0 -20px;padding:14px 20px}.warning{padding:11px 18px}.navsquare{min-height:48px}}@media(max-width:520px){.brandname span{display:none}.toptools .textbtn{display:none}.headerrow{flex-direction:column;gap:12px}.head-extra{justify-content:start}.configcard,.summarycard{padding:20px}.modegrid{grid-template-columns:1fr 1fr}.modechoice{min-height:86px;padding:12px}.modechoice strong{font-size:12px}.fieldrow{grid-template-columns:1fr}.sessiontop{align-items:flex-start}.sessionright{gap:4px}.sessionright .btn.icononly{width:36px;height:36px;padding:7px}.clockpill{font-size:12px;padding:7px 9px}.tags .pill:nth-of-type(2){display:none}.qmeta{align-items:flex-start}.qactions .iconbtn{width:32px;height:32px}.qbody{font-size:18px;line-height:1.75}.choice{padding:10px 11px;gap:10px;min-height:62px}.choice-value{font-size:15px}.qfooterleft .btn{padding:10px 11px}.qfooterright .btn{padding:10px 13px}.warning{font-size:11px;gap:8px}.warning button{font-size:11px}.metricrow{gap:8px}.metric{padding:17px}.metric .v{font-size:27px}.resultgrid{grid-template-columns:repeat(6,1fr)}.barrow{grid-template-columns:90px 1fr 35px;font-size:11px}.belowq .pagehint{display:none}.banktools .fieldinput{max-width:100%}.banktools .select{flex:1;max-width:none;min-width:130px}.btn.lg{width:100%}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
 </style><style>html.embedded .topbar,html.embedded .infofooter{display:none!important}html.embedded .page{padding-top:22px;max-width:1180px}html.embedded body{overflow:auto!important}html.embedded .app{min-height:100%}</style><script>if(new URLSearchParams(location.search).has('embedded'))document.documentElement.classList.add('embedded');</script><style>
+.history-launch { white-space: nowrap; }
+.setup-history-launch { display: none; }
+.embedded .setup-history-launch { display: inline-block; }
+.history-launch svg.icon { width: 12px; height: 12px; }
+.history-rows .bankdetails span { white-space: normal; }
 .sessionright { flex-wrap: wrap; justify-content: flex-end; }
 .sessionright .calculator-launch { color: #88500e; }
 .calculator-launch svg { fill: none; stroke: currentColor; stroke-linecap: round; }
@@ -19069,7 +19074,7 @@ let P=blankState();
 try{let saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(saved&&typeof saved==='object'){P={...blankState(),...saved,config:{...defaultConfig(),...(saved.config||{})}};for(let key of ['progress','bookmarks','notes'])if(!P[key]||typeof P[key]!=='object')P[key]={};if(!Array.isArray(P.sessions))P.sessions=[];}}
 catch(e){}
 if(P.active&&P.active.state==='running')P.active.state='paused'; // reload NEVER starts any timer.
-const UI={page:'setup',drawer:false,modal:null,subSearch:'',bankSearch:'',bankYear:'all',bankSlot:'all',bankTopic:'all',bankPage:0,reviewAt:null};
+const UI={page:'setup',drawer:false,modal:null,subSearch:'',bankSearch:'',bankYear:'all',bankSlot:'all',bankTopic:'all',bankPage:0,reviewAt:null,historyId:null,historyFrom:'setup'};
 let lastClock=performance.now(),lastSave=performance.now(),toastTimeout=null;
 const $=s=>document.querySelector(s);
 const icon=n=>`<svg class="icon" aria-hidden="true"><use href="#i-${n}"/></svg>`;
@@ -19112,7 +19117,7 @@ function arrange(items,config){let c=config;if(c.mode==='full'||c.order==='paper
  return shuffle(items);
 }
 function page(name){flushClock();if(P.active&&P.active.state==='running'&&UI.page==='practice'&&name!=='practice')P.active.state='paused';UI.page=name;UI.reviewAt=null;lastClock=performance.now();persist();render();window.scrollTo({top:0,behavior:'instant'})}
-function render(){const main=$('#main');main.className='page'+(UI.page==='practice'||UI.page==='review'?' practicepage':'');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.page===UI.page||(UI.page==='practice'&&b.dataset.page==='setup')));if(UI.page==='setup')main.innerHTML=setupHTML();else if(UI.page==='practice')main.innerHTML=practiceHTML();else if(UI.page==='result')main.innerHTML=resultHTML();else if(UI.page==='review')main.innerHTML=reviewHTML();else if(UI.page==='progress')main.innerHTML=progressHTML();else if(UI.page==='bank')main.innerHTML=bankHTML();else main.innerHTML=setupHTML();calculator.sync();updateClockUI();}
+function render(){const main=$('#main');main.className='page'+(UI.page==='practice'||UI.page==='review'||UI.page==='history-review'?' practicepage':'');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.page===UI.page||(UI.page==='practice'&&b.dataset.page==='setup')));if(UI.page==='setup')main.innerHTML=setupHTML();else if(UI.page==='practice')main.innerHTML=practiceHTML();else if(UI.page==='result')main.innerHTML=resultHTML();else if(UI.page==='review')main.innerHTML=reviewHTML();else if(UI.page==='progress')main.innerHTML=progressHTML();else if(UI.page==='history')main.innerHTML=historyHTML();else if(UI.page==='history-session')main.innerHTML=historySessionHTML();else if(UI.page==='history-review')main.innerHTML=historyReviewHTML();else if(UI.page==='bank')main.innerHTML=bankHTML();else main.innerHTML=setupHTML();calculator.sync();updateClockUI();}
 function settingsRow(title,body,small=''){return `<div class="setting"><div class="settop"><strong>${title}</strong>${small?`<span class="hint">${small}</span>`:''}</div>${body}</div>`}
 function chipRow(kind,values,labels=values){let c=P.config,selected=c[kind]||[],full=modeFull();return `<div class="chiprow"><button type="button" class="chip ${!selected.length&&!full?'on':''} ${full?'hidden':''}" data-action="set-all" data-kind="${kind}">All</button>${values.map((v,i)=>`<button type="button" class="chip ${selected.includes(v)?'on':''}" data-action="toggle-chip" data-kind="${kind}" data-value="${esc(v)}" aria-pressed="${selected.includes(v)}">${labels[i]}</button>`).join('')}</div>`}
 function setupHTML(){let c=P.config,avail=eligible(),count=modeFull()?22:Math.min(c.count,avail.length),allGroups=groupNames();let topTopics=TOPICS.map(t=>({name:t,n:BANK.filter(q=>q.topic===t&&(!c.years.length||c.years.includes(q.year))&&(!c.slots.length||c.slots.includes(q.slot))).length}));let selectedGroups=c.groups.length;
@@ -19125,7 +19130,7 @@ let freeFilters=full?`<div class="helpernote">Full-slot test uses all 22 questio
 `${settingsRow('Topics',`<div class="chipsbox">${topTopics.map(x=>`<button class="chip ${c.topics.includes(x.name)?'on':''}" data-action="toggle-chip" data-kind="topics" data-value="${esc(x.name)}">${esc(x.name)}<span class="ct">${x.n}</span></button>`).join('')}<button class="chip ${!c.topics.length?'on':''}" data-action="set-all" data-kind="topics">All</button></div>`,'Choose one or more')}${settingsRow('Subtopics',groupSection,'Grouped for useful filtering')}${settingsRow('Question type',`<div class="chiprow">${[['all','MCQ + TITA'],['MCQ','MCQ only'],['TITA','TITA only']].map(([v,l])=>`<button class="chip ${c.qtype===v?'on':''}" data-action="qtype" data-value="${v}">${l}</button>`).join('')}</div>`)}`;
 let summaryString=c.targetId?`One specific PYQ selected from the library`:c.mode==='full'?'Original paper · answer review at the end':c.mode==='mixed'?'Interleaved topic mix':MODES[c.mode][0];
 let cap=avail.length;let totalSelected=full?22:Math.min(Math.max(1,c.count),cap);let limit=c.duration==='none'?'No overall limit':c.duration+' minutes';
-return `<div class="headerrow"><div><div class="eyebrow">YOUR WORKSPACE</div><h1 class="title">Build your practice session.</h1><p class="subtitle">Choose exactly what you want to practise. <strong>The timer and questions appear only after you press Start.</strong></p></div><div class="head-extra"><span class="badge">${icon('book')} 330 CAT PYQs</span><span class="badge">2021–2025</span></div></div>${resumer}
+return `<div class="headerrow"><div><div class="eyebrow">YOUR WORKSPACE</div><h1 class="title">Build your practice session.</h1><p class="subtitle">Choose exactly what you want to practise. <strong>The timer and questions appear only after you press Start.</strong></p></div><div class="head-extra"><span class="badge">${icon('book')} 330 CAT PYQs</span><span class="badge">2021–2025</span><button type="button" class="linkbtn history-launch setup-history-launch" data-action="open-history">Session history ${icon('arrow')}</button></div></div>${resumer}
 <div class="setupgrid"><div class="card configcard">
 ${c.targetId?`<div class="setupfocus"><strong>Selected from library:</strong> ${esc(c.targetId)} <button class="linkbtn" data-action="clear-target">Remove single-question selection</button></div>`:''}
 ${settingsRow('Session type',`<div class="modegrid">${modes}</div>`,'Select one')}
@@ -19188,7 +19193,7 @@ function confirmEnd(){let s=session();if(!s)return;flushClock();let a=sessStats(
 function finishSession(auto){let s=session();if(!s||s.state==='finished')return;
 s.state='finished';s.finishedAt=Date.now();if(isExam(s)){for(let id of s.ids){let val=String(s.drafts[id]??'').trim();if(val){let q=BY_ID.get(id),good=correct(q,val);s.submissions[id]={value:val,correct:good,at:s.finishedAt};recordHistory(q,val,good,s.times[id]||0,s.sessionId);}}}
 let stats=sessStats(s),attempted=s.ids.filter(id=>!!s.submissions[id]).length,good=s.ids.filter(id=>s.submissions[id]?.correct).length;
-if(!s.resultRecorded){P.sessions.unshift({id:s.sessionId,started:s.created,finished:s.finishedAt,mode:s.config.mode,questions:s.ids.length,attempted,correct:good,seconds:s.elapsed,yearLabels:s.config.years,slots:s.config.slots});P.sessions=P.sessions.slice(0,100);s.resultRecorded=true}
+if(!s.resultRecorded){P.sessions.unshift({id:s.sessionId,started:s.created,finished:s.finishedAt,mode:s.config.mode,questions:s.ids.length,attempted,correct:good,seconds:s.elapsed,yearLabels:s.config.years,slots:s.config.slots,items:snapshotHistory(s)});P.sessions=P.sessions.slice(0,100);s.resultRecorded=true}
 UI.page='result';UI.reviewAt=null;lastClock=performance.now();persist();render();if(auto)notify('Overall session time ended. Results are ready.');window.scrollTo({top:0,behavior:'instant'});
 }
 function openNavigator(){let s=session();if(!s)return;flushClock();UI.drawer=true;let count=sessStats(s),nav=s.ids.map((id,i)=>{let status=attemptStatus(s,id);return `<button class="navsquare ${status==='correct'||status==='answered'?'done':''} ${status==='wrong'?'bad':''} ${s.flagged[id]?'flag':''} ${i===s.index?'now':''}" data-action="jump" data-index="${i}" aria-label="Question ${i+1}, ${status}">${i+1}</button>`}).join('');
@@ -19206,20 +19211,138 @@ return `<div class="headerrow"><div><div class="eyebrow">SESSION COMPLETE</div><
 <div class="metricrow">${metric(m.attempts+'/'+total,'Answered')}${metric(m.correctCount,'Correct')}${metric(m.accuracy===null?'—':m.accuracy+'%','Accuracy on answered')}${metric(duration(secs),'Active session time')}</div>
 <div class="twocol" style="margin-top:17px"><div class="card data-card"><div class="rowhead"><div><h3 style="margin:0">Question-by-question review</h3><p class="sectiondesc">Select any number to inspect the answer and explanation.</p></div><span class="badge">${m.wrong} incorrect</span></div><div class="resultgrid">${grid}</div><div class="divider"></div><div class="navlegend"><span><i class="legenddot good"></i>Correct</span><span><i class="legenddot bad"></i>Incorrect</span><span><i class="legenddot"></i>Unanswered</span></div></div>
 <div class="card data-card"><div class="rowhead"><h3 style="margin:0">Topic breakdown</h3><span class="pill">Your session</span></div><div class="barchart">${topicStats.map(t=>`<div class="barrow"><span>${esc(t.topic)}</span><div class="track"><div class="fill" style="width:${t.attempted?100*t.correct/t.attempted:0}%"></div></div><strong>${t.correct}/${t.attempted}</strong></div>`).join('')}</div><div class="divider"></div><div class="ministat"><span>Left unanswered</span><strong>${total-m.attempts}</strong></div><div class="ministat"><span>Incorrect answers</span><strong>${m.wrong}</strong></div><div class="ministat"><span>Average time per question</span><strong>${pretty(secs/total)}</strong></div><button class="btn soft wide" style="margin-top:18px" data-action="revise-mistakes">${icon('target')} Build a mistake-revision session</button></div></div>`}
-function reviewHTML(){let s=session();if(!s||s.state!=='finished')return resultHTML();let i=Math.max(0,Math.min(s.ids.length-1,UI.reviewAt||0)),q=BY_ID.get(s.ids[i]),answer=s.submissions[q.id],raw=answer?.value??'',good=answer?.correct;
+function reviewHTML(s=session(),fromHistory=false){if(!s||s.state!=='finished')return resultHTML();let i=Math.max(0,Math.min(s.ids.length-1,UI.reviewAt||0)),q=BY_ID.get(s.ids[i]),answer=s.submissions[q.id],raw=answer?.value??'',good=answer?.correct;
 let opts=q.question_type==='MCQ'?`<div class="answergrid">${'ABCD'.split('').map(k=>`<div class="choice ${k===q.correct_option?'correct':raw===k?'wrong':''}" style="cursor:default"><span class="choice-key">${k}</span><span class="choice-value">${q.options_html?.[k]||esc(q.options?.[k])}</span>${k===q.correct_option?icon('check'):''}</div>`).join('')}</div>`:`<div class="feedback"><h3>Correct answer: ${esc(q.correct_answer)}</h3><p>Your response: ${esc(raw||'Not answered')}</p></div>`;
 let steps=(q.solution_steps||[]).map(st=>`<div class="step">${st}</div>`).join('');
-return `<div class="reviewnav"><button class="btn ghost" data-action="back-result">${icon('left')} Session report</button><span class="pill">Review ${i+1} of ${s.ids.length}</span></div><article class="questioncard narrowcard"><div class="qinner"><div class="qmeta"><div class="tags"><strong class="qnum">Q${i+1}</strong><span class="pill">${esc(sourceLabel(q))}</span><span class="pill">${esc(q.topic)} · ${esc(q.subtopic)}</span></div><button class="iconbtn ${P.bookmarks[q.id]?'active':''}" data-action="bookmark" data-id="${attr(q.id)}" title="Bookmark">${icon('bookmark')}</button></div><div class="qbody">${q.question_html}</div>${opts}<div class="feedback ${answer&&!good?'bad':''}"><h3>${!answer?'Not answered':good?'✓ Correct answer':'Incorrect answer'}</h3><p>Correct: ${esc(q.correct_answer)} · Your response: ${esc(raw||'—')} · Time: ${pretty(s.times[q.id]||0)}</p></div><div class="solution"><h3>Original bank solution</h3>${steps}${q.fig?`<div class="figure">${q.fig}</div>`:''}${q.source_solution_caveat?`<div class="helpernote">${esc(q.source_solution_caveat)}</div>`:''}</div><div class="qfooter"><button class="btn ghost" data-action="note" data-id="${attr(q.id)}">${icon('note')} Note</button><div class="qfooterright">${i>0?`<button class="btn" data-action="review-prev">Previous</button>`:''}${i+1<s.ids.length?`<button class="btn primary" data-action="review-next">Next ${icon('arrow')}</button>`:`<button class="btn primary" data-action="back-result">Report ${icon('arrow')}</button>`}</div></div></div></article><div class="helptext" style="text-align:center">Source references: Cracku PDF page ${esc(q.sources?.cracku_page??'—')} · Career Launcher / 2IIM PDF page ${esc(q.sources?.cl_page??q.sources?.iim_page??'—')}</div>`}
+const backControl = fromHistory ? 'data-action="nav" data-page="history-session"' : 'data-action="back-result"';
+const outcome = !answer ? (fromHistory && s.skipped[q.id] ? 'Skipped' : 'Not answered') : good ? '✓ Correct answer' : 'Incorrect answer';
+const response = fromHistory && !answer && s.drafts[q.id] ? `Draft: ${esc(s.drafts[q.id])}` : `Your response: ${esc(raw||'—')}`;
+return `<div class="reviewnav"><button class="btn ghost" ${backControl}>${icon('left')} ${fromHistory?'Session questions':'Session report'}</button><span class="pill">Review ${i+1} of ${s.ids.length}</span></div><article class="questioncard narrowcard"><div class="qinner"><div class="qmeta"><div class="tags"><strong class="qnum">Q${i+1}</strong><span class="pill">${esc(sourceLabel(q))}</span><span class="pill">${esc(q.topic)} · ${esc(q.subtopic)}</span></div><button class="iconbtn ${P.bookmarks[q.id]?'active':''}" data-action="bookmark" data-id="${attr(q.id)}" title="Bookmark">${icon('bookmark')}</button></div><div class="qbody">${q.question_html}</div>${opts}<div class="feedback ${answer&&!good?'bad':''}"><h3>${outcome}</h3><p>Correct: ${esc(q.correct_answer)} · ${response} · Time: ${pretty(s.times[q.id]||0)}</p></div><div class="solution"><h3>Original bank solution</h3>${steps}${q.fig?`<div class="figure">${q.fig}</div>`:''}${q.source_solution_caveat?`<div class="helpernote">${esc(q.source_solution_caveat)}</div>`:''}</div><div class="qfooter"><button class="btn ghost" data-action="note" data-id="${attr(q.id)}">${icon('note')} Note</button><div class="qfooterright">${i>0?`<button class="btn" data-action="review-prev">Previous</button>`:''}${i+1<s.ids.length?`<button class="btn primary" data-action="review-next">Next ${icon('arrow')}</button>`:`<button class="btn primary" ${backControl}>${fromHistory?'Session questions':'Report'} ${icon('arrow')}</button>`}</div></div></div></article><div class="helptext" style="text-align:center">Source references: Cracku PDF page ${esc(q.sources?.cracku_page??'—')} · Career Launcher / 2IIM PDF page ${esc(q.sources?.cl_page??q.sources?.iim_page??'—')}</div>`}
+function snapshotHistory(s) {
+  return s.ids.map(id => {
+    const answer = s.submissions[id];
+    const item = { id };
+    const response = answer?.value ?? s.drafts[id];
+    if (response != null && String(response).trim()) item.response = response;
+    if (answer) item.correct = answer.correct;
+    if (s.skipped[id]) item.skipped = true;
+    if (s.times[id]) item.seconds = Math.round(s.times[id]);
+    return item;
+  });
+}
+
+function restoreSessionHistory(active = null) {
+  for (const record of P.sessions) {
+    if (typeof record?.id !== 'string' || Array.isArray(record.items)) continue;
+    if (active?.state === 'finished' && active.sessionId === record.id) {
+      record.items = snapshotHistory(active);
+      continue;
+    }
+    // Older progress only stores each question's most recent submission.
+    record.partial = true;
+    record.items = Object.entries(P.progress)
+      .filter(([id, attempt]) => BY_ID.has(id) && attempt?.lastSession === record.id)
+      .sort(([, first], [, second]) => first.lastAt - second.lastAt)
+      .map(([id, attempt]) => ({
+        id, response: attempt.lastValue, correct: attempt.lastCorrect, seconds: attempt.lastSeconds
+      }));
+  }
+}
+
+function selectedHistory() {
+  return P.sessions.find(record => record?.id === UI.historyId);
+}
+
+function historyItems(record) {
+  return Array.isArray(record?.items) ? record.items.filter(item => BY_ID.has(item?.id)) : [];
+}
+
+function historyDate(record) {
+  const date = new Date(record.finished ?? record.started);
+  return Number.isFinite(date.getTime()) ? date.toLocaleString('en-IN', {
+    dateStyle: 'medium', timeStyle: 'short'
+  }) : 'Date unavailable';
+}
+
+function historySummary(record) {
+  return `${historyDate(record)} · ${esc(record.attempted)}/${esc(record.questions)} answered · ${duration(record.seconds)}`;
+}
+
+function historyMode(record) {
+  return esc(MODES[record.mode]?.[0] || record.mode || 'Practice');
+}
+
+function historyHTML() {
+  const records = P.sessions.filter(record => typeof record?.id === 'string')
+    .sort((a, b) => (b.finished ?? b.started) - (a.finished ?? a.started));
+  const rows = records.map(record => `
+    <button class="bankitem" data-action="history-session" data-id="${attr(record.id)}">
+      <span class="bankdetails"><strong>${historyMode(record)}</strong><span>${historySummary(record)}</span></span>
+      ${icon('arrow')}
+    </button>`).join('');
+
+  return `<div class="reviewnav"><button class="btn ghost" data-action="nav" data-page="${UI.historyFrom}">${icon('left')} ${UI.historyFrom === 'progress' ? 'Progress' : 'Session setup'}</button></div>
+    <section class="card listcard">
+      <div class="rowhead"><h2 class="title">Session history</h2><span class="pill">${records.length} total</span></div>
+      <div class="bankitems history-rows">${rows || '<div class="empty">Completed practice sessions will appear here.</div>'}</div>
+    </section>`;
+}
+
+function historySessionHTML() {
+  const record = selectedHistory();
+  if (!record) return historyHTML();
+  const complete = Array.isArray(record.items) && !record.partial;
+  const items = historyItems(record);
+  const rows = items.map((item, index) => {
+    const q = BY_ID.get(item.id);
+    const preview = q.statement.length > 155 ? q.statement.slice(0, 155).trimEnd() + '…' : q.statement;
+    const status = typeof item.correct === 'boolean' ? (item.correct ? 'Correct' : 'Incorrect')
+      : item.skipped ? 'Skipped' : item.response ? 'Draft' : 'Unanswered';
+    return `<button class="bankitem" data-action="history-question" data-index="${index}">
+      <span class="bankdetails">
+        <strong>${complete ? `Q${index + 1} · ` : ''}${esc(q.topic)} · ${esc(q.subtopic)}</strong>
+        <span>${esc(sourceLabel(q))} · ${esc(preview)}</span>
+      </span><span class="bankstat">${status}</span>${icon('arrow')}
+    </button>`;
+  }).join('');
+
+  return `<div class="reviewnav"><button class="btn ghost" data-action="nav" data-page="history">${icon('left')} Session history</button></div>
+    <section class="card listcard">
+      <h2 class="title">${historyMode(record)}</h2>
+      <p class="subtitle" style="margin-bottom:16px">${historySummary(record)}</p>
+      ${complete ? '' : '<p class="helpernote" style="margin-bottom:12px">This older session saved a summary. Any responses still linked to it are shown below.</p>'}
+      <div class="bankitems history-rows">${rows || '<div class="empty">No question details are available for this session.</div>'}</div>
+    </section>`;
+}
+
+function historyReviewHTML() {
+  const record = selectedHistory();
+  const items = record ? historyItems(record) : [];
+  if (!items.length) return historySessionHTML();
+
+  const sessionView = {state: 'finished', ids: [], submissions: {}, drafts: {}, times: {}, skipped: {}};
+  for (const item of items) {
+    sessionView.ids.push(item.id);
+    if (typeof item.correct === 'boolean') {
+      sessionView.submissions[item.id] = {value: item.response, correct: item.correct};
+    } else if (item.response) {
+      sessionView.drafts[item.id] = item.response;
+    }
+    if (item.skipped) sessionView.skipped[item.id] = true;
+    sessionView.times[item.id] = item.seconds || 0;
+  }
+  return reviewHTML(sessionView, true);
+}
 function progressHTML(){let stats=Object.values(P.progress),attemptedQuestions=stats.length,correctLast=stats.filter(x=>x.lastCorrect).length,allAttempts=stats.reduce((a,p)=>a+(p.attempts||0),0),bookmarked=Object.values(P.bookmarks).filter(Boolean).length;let totalTime=stats.reduce((a,p)=>a+(p.totalSeconds||0),0);let bars=TOPICS.map(topic=>{let qs=BANK.filter(q=>q.topic===topic&&P.progress[q.id]),correctQs=qs.filter(q=>P.progress[q.id].lastCorrect).length;return {topic,answered:qs.length,total:BANK.filter(q=>q.topic===topic).length,correct:correctQs}});let last=P.sessions.slice(0,8);
 return `<div class="headerrow"><div><div class="eyebrow">YOUR LEARNING</div><h1 class="title">Progress & review.</h1><p class="subtitle">Built only from questions you have attempted on this device. No sample performance data.</p></div><div class="head-extra"><button class="btn" data-action="export">${icon('download')} Export backup</button><button class="btn" data-action="trigger-import">${icon('upload')} Import backup</button></div></div>
 <div class="metricrow">${metric(attemptedQuestions,'Unique PYQs attempted')}${metric(allAttempts,'Answer submissions')}${metric(attemptedQuestions?Math.round(correctLast/attemptedQuestions*100)+'%':'—','Last-attempt accuracy')}${metric(bookmarked,'Bookmarks')}</div>
-<div class="twocol" style="margin-top:17px"><section class="card data-card"><div class="rowhead"><div><h3 style="margin:0">Topic coverage</h3><p class="sectiondesc">Number of questions attempted from each topic</p></div></div><div class="barchart">${bars.map(t=>`<div class="barrow"><span>${esc(t.topic)}</span><div class="track"><div class="fill" style="width:${t.total?100*t.answered/t.total:0}%"></div></div><strong>${t.answered}/${t.total}</strong></div>`).join('')}</div><div class="divider"></div><div class="ministat"><span>Total answering time</span><strong>${duration(totalTime)}</strong></div><div class="ministat"><span>Questions last answered incorrectly</span><strong>${stats.filter(t=>!t.lastCorrect).length}</strong></div><div class="ministat"><span>Saved notes</span><strong>${Object.values(P.notes).filter(Boolean).length}</strong></div></section><section class="card data-card"><div class="rowhead"><h3 style="margin:0">Recent sessions</h3><span class="pill">${P.sessions.length} total</span></div>${last.length?`<div class="lastsessions">${last.map(s=>`<div class="historyitem"><div><strong>${esc(MODES[s.mode]?.[0]||s.mode)}</strong><br><small>${new Date(s.finished).toLocaleDateString('en-IN')} · ${s.attempted}/${s.questions} answered · ${duration(s.seconds)}</small></div><div class="score">${s.attempted?Math.round(s.correct/s.attempted*100)+'%':'—'}</div></div>`).join('')}</div>`:`<div class="empty">Sessions will appear here after you finish your first practice.</div>`}<div class="divider"></div><button class="btn soft wide" data-action="revise-mistakes">${icon('target')} Practise previous mistakes</button></section></div>
+<div class="twocol" style="margin-top:17px"><section class="card data-card"><div class="rowhead"><div><h3 style="margin:0">Topic coverage</h3><p class="sectiondesc">Number of questions attempted from each topic</p></div></div><div class="barchart">${bars.map(t=>`<div class="barrow"><span>${esc(t.topic)}</span><div class="track"><div class="fill" style="width:${t.total?100*t.answered/t.total:0}%"></div></div><strong>${t.answered}/${t.total}</strong></div>`).join('')}</div><div class="divider"></div><div class="ministat"><span>Total answering time</span><strong>${duration(totalTime)}</strong></div><div class="ministat"><span>Questions last answered incorrectly</span><strong>${stats.filter(t=>!t.lastCorrect).length}</strong></div><div class="ministat"><span>Saved notes</span><strong>${Object.values(P.notes).filter(Boolean).length}</strong></div></section><section class="card data-card"><div class="rowhead"><h3 style="margin:0">Recent sessions</h3><div class="head-extra"><span class="pill">${P.sessions.length} total</span><button type="button" class="linkbtn history-launch" data-action="open-history" data-from="progress">Session history ${icon('arrow')}</button></div></div>${last.length?`<div class="lastsessions">${last.map(s=>`<div class="historyitem"><div><strong>${esc(MODES[s.mode]?.[0]||s.mode)}</strong><br><small>${new Date(s.finished).toLocaleDateString('en-IN')} · ${s.attempted}/${s.questions} answered · ${duration(s.seconds)}</small></div><div class="score">${s.attempted?Math.round(s.correct/s.attempted*100)+'%':'—'}</div></div>`).join('')}</div>`:`<div class="empty">Sessions will appear here after you finish your first practice.</div>`}<div class="divider"></div><button class="btn soft wide" data-action="revise-mistakes">${icon('target')} Practise previous mistakes</button></section></div>
 <div class="card data-card" style="margin-top:17px"><div class="sectiontitle">Your data stays yours</div><p class="sectiondesc" style="margin:10px 0 15px;max-width:760px">Progress and notes are stored in this browser. Export a backup before clearing browser data or moving to the ROAR integration. Importing replaces local progress, not the question bank.</p><div class="chiprow"><button class="btn" data-action="export">${icon('download')} Save progress JSON</button><button class="btn" data-action="trigger-import">${icon('upload')} Restore JSON</button><button class="btn danger" data-action="clear-progress">Clear local progress</button></div></div>`}
 function bankPool(){let term=UI.bankSearch.trim().toLowerCase();return BANK.filter(q=>(UI.bankYear==='all'||q.year===Number(UI.bankYear))&&(UI.bankSlot==='all'||q.slot===Number(UI.bankSlot))&&(UI.bankTopic==='all'||q.topic===UI.bankTopic)&&(!term||[q.id,q.statement,q.topic,q.subtopic,q.browse_group].join(' ').toLowerCase().includes(term)))}
 function bankRows(){let qs=bankPool(),start=UI.bankPage*24,part=qs.slice(start,start+24);let html=part.map(q=>{let p=P.progress[q.id],status=p?(p.lastCorrect?'Last correct':'Last incorrect'):'Not attempted';return `<button class="bankitem" data-action="practice-one" data-id="${attr(q.id)}"><span class="banknumber">${q.display_number}</span><span class="bankdetails"><strong>${esc(sourceLabel(q))} · ${esc(q.topic)} <span class="pill" style="display:inline-flex;margin-left:5px">${esc(q.question_type)}</span></strong><span>${esc(q.subtopic)} · ${esc(q.statement).slice(0,180)}</span></span><span class="bankstat">${P.bookmarks[q.id]?'★ ':' '}${status}</span>${icon('arrow')}</button>`}).join('');return `<div class="rowhead"><div class="sectiondesc">Showing ${qs.length?start+1:0}–${Math.min(start+24,qs.length)} of ${qs.length} questions</div><span class="pill">${qs.length} matched</span></div><div class="bankitems">${html||'<div class="empty">No matching questions. Try a broader search.</div>'}</div><div class="rowhead" style="margin:20px 0 0"><button class="btn" data-action="bank-prev" ${UI.bankPage<=0?'disabled':''}>${icon('left')} Previous</button><span class="small muted">Page ${UI.bankPage+1} of ${Math.max(1,Math.ceil(qs.length/24))}</span><button class="btn" data-action="bank-next" ${start+24>=qs.length?'disabled':''}>Next ${icon('arrow')}</button></div>`}
 function bankHTML(){return `<div class="headerrow"><div><div class="eyebrow">ALL FIVE YEARS</div><h1 class="title">Question library.</h1><p class="subtitle">Find an exact PYQ by year, slot or concept. Choosing one takes you to session setup—never starts the clock automatically.</p></div><div class="head-extra"><span class="badge">${icon('book')} 330 questions</span></div></div><section class="card listcard"><div class="banktools"><input id="bankSearch" class="fieldinput" placeholder="Find question ID, wording, or topic" aria-label="Search question library" value="${attr(UI.bankSearch)}"><select class="select" id="bankYear" aria-label="Year"><option value="all">Every year</option>${YEARS.map(y=>`<option value="${y}" ${String(y)===UI.bankYear?'selected':''}>CAT ${y}</option>`).join('')}</select><select class="select" id="bankSlot" aria-label="Slot"><option value="all">Every slot</option>${SLOTS.map(k=>`<option value="${k}" ${String(k)===UI.bankSlot?'selected':''}>Slot ${k}</option>`).join('')}</select><select class="select" id="bankTopic" aria-label="Topic"><option value="all">Every topic</option>${TOPICS.map(k=>`<option value="${attr(k)}" ${k===UI.bankTopic?'selected':''}>${esc(k)}</option>`).join('')}</select></div><div id="bankRows">${bankRows()}</div></section>`}
 function exportProgress(){let out={app:'ROAR Quant PYQ Studio',version:1,exported:new Date().toISOString(),data:{progress:P.progress,bookmarks:P.bookmarks,notes:P.notes,sessions:P.sessions}};let blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ROAR_Quant_Progress_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Progress backup downloaded')}
-async function importProgress(file){if(!file)return;try{let parsed=JSON.parse(await file.text());if(!parsed?.data||typeof parsed.data.progress!=='object')throw Error('Not a ROAR progress backup');if(!confirm('Replace existing progress, notes, bookmarks and session history with this backup?'))return;let data=parsed.data;P.progress=Object.fromEntries(Object.entries(data.progress||{}).filter(([id])=>BY_ID.has(id)));P.bookmarks=Object.fromEntries(Object.entries(data.bookmarks||{}).filter(([id])=>BY_ID.has(id)));P.notes=Object.fromEntries(Object.entries(data.notes||{}).filter(([id])=>BY_ID.has(id)));P.sessions=Array.isArray(data.sessions)?data.sessions.slice(0,100):[];persist();render();notify('Progress restored. Question content was not changed.')}catch(e){alert('Could not import this progress backup: '+e.message)}}
+async function importProgress(file){if(!file)return;try{let parsed=JSON.parse(await file.text());if(!parsed?.data||typeof parsed.data.progress!=='object')throw Error('Not a ROAR progress backup');if(!confirm('Replace existing progress, notes, bookmarks and session history with this backup?'))return;let data=parsed.data;P.progress=Object.fromEntries(Object.entries(data.progress||{}).filter(([id])=>BY_ID.has(id)));P.bookmarks=Object.fromEntries(Object.entries(data.bookmarks||{}).filter(([id])=>BY_ID.has(id)));P.notes=Object.fromEntries(Object.entries(data.notes||{}).filter(([id])=>BY_ID.has(id)));P.sessions=Array.isArray(data.sessions)?data.sessions.slice(0,100):[];restoreSessionHistory();persist();render();notify('Progress restored. Question content was not changed.')}catch(e){alert('Could not import this progress backup: '+e.message)}}
 function setMode(v){let c=P.config;c.mode=v;c.targetId=null;UI.subSearch='';if(v==='full'){c.years=[2025];c.slots=[1];c.topics=[];c.groups=[];c.qtype='all';c.count=22;c.duration='40';c.order='paper'}else{if(c.years.length===1&&c.years[0]===2025&&c.slots.length===1&&c.slots[0]===1){c.years=[];c.slots=[]}c.duration='none';c.order='random';c.count=10}persist();render()}
 function changeToggle(kind,value){let c=P.config;let v=kind==='years'||kind==='slots'?Number(value):String(value);if(modeFull()&&(kind==='years'||kind==='slots'))c[kind]=[v];else{let a=c[kind],idx=a.indexOf(v);if(idx<0)a.push(v);else a.splice(idx,1)}if(kind==='topics'){let allowed=new Set(groupNames().map(t=>t[0]));c.groups=c.groups.filter(x=>allowed.has(x))}c.targetId=null;persist();render()}
 function doAction(a,el){let c=P.config,s=session(),q=currentQ(),id=q?.id;
@@ -19255,9 +19378,12 @@ function doAction(a,el){let c=P.config,s=session(),q=currentQ(),id=q?.id;
  case 'save-note':{let target=UI.noteId;if(target&&BY_ID.has(target)){P.notes[target]=$('#noteTextarea')?.value||'';persist();closeModal();notify('Note saved');if(UI.page==='practice'||UI.page==='review')render()}}break;
  case 'end-session':closeNavigator();confirmEnd();break;
  case 'back-result':UI.page='result';UI.reviewAt=null;render();break;
+ case 'open-history':UI.historyFrom=el.dataset.from==='progress'?'progress':'setup';page('history');break;
+ case 'history-session':UI.historyId=el.dataset.id;page('history-session');break;
+ case 'history-question':UI.page='history-review';UI.reviewAt=Number(el.dataset.index);render();window.scrollTo({top:0,behavior:'instant'});break;
  case 'review-question':UI.reviewAt=Number(el.dataset.index);UI.page='review';render();window.scrollTo({top:0,behavior:'instant'});break;
  case 'review-prev':UI.reviewAt=Math.max(0,UI.reviewAt-1);render();window.scrollTo({top:0,behavior:'instant'});break;
- case 'review-next':UI.reviewAt=Math.min(s.ids.length-1,UI.reviewAt+1);render();window.scrollTo({top:0,behavior:'instant'});break;
+ case 'review-next':{const count=UI.page==='history-review'?historyItems(selectedHistory()).length:s.ids.length;UI.reviewAt=Math.min(count-1,UI.reviewAt+1);}render();window.scrollTo({top:0,behavior:'instant'});break;
  case 'revise-mistakes':c.mode='incorrect';c.targetId=null;c.years=[];c.slots=[];c.topics=[];c.groups=[];c.count=10;c.duration='none';P.active=null;persist();page('setup');break;
  case 'practice-one':{let target=el.dataset.id;c.mode='focused';c.targetId=target;c.years=[];c.slots=[];c.topics=[];c.groups=[];c.count=1;c.duration='none';P.active=null;persist();page('setup');break}
  case 'bank-prev':UI.bankPage=Math.max(0,UI.bankPage-1);$('#bankRows').innerHTML=bankRows();break;
@@ -19520,5 +19646,6 @@ window.addEventListener('pagehide',()=>{if(session()?.state==='running')session(
 window.addEventListener('beforeunload',()=>{if(session()?.state==='running')session().state='paused';persist()});
 setInterval(clockTick,220);
 // No time or question is shown until an explicit Start/Resume action.
+restoreSessionHistory(session());
 persist();render();
 </script></body></html>
